@@ -288,7 +288,7 @@
 
     function getFlag(code) {
         if (!code || code === 'unknown' || code.trim() === '') return '';
-        return `<img src="images/flags/${code.trim().toLowerCase()}.gif" class="w-6 h-4 shadow-sm inline-block object-cover hltv-border" alt="${code}" onerror="this.style.display='none'">`;
+        return `<img src="/images/flags/${code.trim().toLowerCase()}.gif" class="w-6 h-4 shadow-sm inline-block object-cover hltv-border" alt="${code}" onerror="this.style.display='none'">`;
     }
 
     function switchTab(tabId) {
@@ -518,7 +518,7 @@
 
             container.innerHTML = streamData.slice(0, 5).map(item => {
                 const isLive = item.status.trim().toUpperCase() === 'LIVE';
-                const flagSrc = item.country ? `images/flags/${item.country.trim().toLowerCase()}.gif` : 'images/flags/WORLD.gif';
+                const flagSrc = item.country ? `/images/flags/${item.country.trim().toLowerCase()}.gif` : '/images/flags/WORLD.gif';
                 
                 return `
                     <div class="stream-card mb-3 border border-gray-200 rounded-none overflow-hidden bg-white">
@@ -531,7 +531,7 @@
                             </div>
                             <div class="flex justify-between items-center mb-1">
                                 <div class="flex items-center gap-2">
-                                    <img src="${flagSrc}" class="w-6 h-4 border hltv-border object-cover flex-shrink-0" onerror="this.src='images/flags/WORLD.gif'">
+                                    <img src="${flagSrc}" class="w-6 h-4 border hltv-border object-cover flex-shrink-0" onerror="this.src='/images/flags/WORLD.gif'">
                                     <span class="text-sm font-bold text-gray-900 truncate max-w-[140px]">${item.streamer}</span>
                                 </div>
                                 <span class="text-xs font-bold text-orange-600 bg-orange-100 px-2 py-0.5 rounded">
@@ -572,7 +572,7 @@
                         <div class="flex items-center justify-between">
                             <div class="flex items-center gap-2">
                                 <span class="text-sm font-bold text-gray-500 w-5">#${place?.trim()}</span>
-                                <img src="images/flags/${country?.trim().toLowerCase()}.gif" class="w-5 h-3 hltv-border" onerror="this.src='images/flags/WORLD.gif'">
+                                <img src="/images/flags/${country?.trim().toLowerCase()}.gif" class="w-5 h-3 hltv-border" onerror="this.src='/images/flags/WORLD.gif'">
                                 <span class="text-sm font-bold text-gray-900">${player?.trim()}</span>
                             </div>
                         </div>

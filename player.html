@@ -112,7 +112,7 @@
                                 
                                 <!-- Аватар игрока -->
                                 <div class="w-full sm:w-36 h-36 bg-gray-300 flex-shrink-0 relative overflow-hidden border border-gray-200">
-                                    <img id="player-photo" src="" alt="" class="w-full h-full object-cover" onerror="this.src='images/flags/WORLD.gif'; this.className='w-full h-full object-contain bg-gray-200';">
+                                    <img id="player-photo" src="" alt="" class="w-full h-full object-cover" onerror="this.src='/images/flags/WORLD.gif'; this.className='w-full h-full object-contain bg-gray-200';">
                                 </div>
                                 
                                 <!-- Средний блок: Никнейм, Флаг, Описание -->
@@ -121,7 +121,7 @@
                                         <h1 id="player-name" class="text-xl md:text-2xl font-bold text-gray-950 uppercase tracking-tight truncate">
                                             Загрузка...
                                         </h1>
-                                        <img id="player-flag" src="images/flags/WORLD.gif" class="w-7 h-4.5 object-cover border hltv-border flex-shrink-0" onerror="this.src='images/flags/WORLD.gif'">
+                                        <img id="player-flag" src="/images/flags/WORLD.gif" class="w-7 h-4.5 object-cover border hltv-border flex-shrink-0" onerror="this.src='/images/flags/WORLD.gif'">
                                     </div>
                                     
                                     <!-- Описание / Инфо из таблицы (убран truncate, добавлен перенос слов) -->
@@ -293,8 +293,8 @@
                 
                 container.innerHTML = streamData.slice(0, 5).map(item => { 
                     const isLive = item.status.trim().toUpperCase() === 'LIVE'; 
-                    const flagSrc = item.country ? `images/flags/${item.country.trim().toLowerCase()}.gif` : 'images/flags/WORLD.gif'; 
-                    return `<div class="stream-card mb-3 border border-gray-200 bg-white"><div class="px-4 py-3 cursor-pointer select-none hover:bg-gray-50 transition-colors" onclick="toggleDropdown(this)"><div class="flex items-center mb-1.5"><span class="flex items-center text-[10px] font-bold uppercase ${isLive ? 'text-red-500' : 'text-gray-400'}"><span class="w-2 h-2 rounded-full mr-1.5 inline-block ${isLive ? 'bg-red-500 animate-pulse' : 'bg-gray-400'}"></span>${item.status}</span></div><div class="flex justify-between items-center mb-1"><div class="flex items-center gap-2"><img src="${flagSrc}" class="w-6 h-4 border hltv-border object-cover" onerror="this.src='images/flags/WORLD.gif'"><span class="text-sm font-bold text-gray-900 truncate max-w-[140px]">${item.streamer}</span></div><span class="text-xs font-bold text-orange-600 bg-orange-100 px-2 py-0.5 rounded">${item.position === '—' ? '—' : '#' + item.position}</span></div><div class="text-xs text-gray-600 font-medium truncate">${item.levelName} — <span class="font-bold text-gray-900">${item.percent}%</span></div></div><div class="dropdown-menu px-4 pb-3"><a href="${item.link}" target="_blank" class="block w-full bg-orange-600 text-white font-bold py-2 rounded text-[12px] uppercase text-center hover:bg-orange-700 transition-colors">СЛЕДИТЬ</a></div></div>`; 
+                    const flagSrc = item.country ? `/images/flags/${item.country.trim().toLowerCase()}.gif` : '/images/flags/WORLD.gif'; 
+                    return `<div class="stream-card mb-3 border border-gray-200 bg-white"><div class="px-4 py-3 cursor-pointer select-none hover:bg-gray-50 transition-colors" onclick="toggleDropdown(this)"><div class="flex items-center mb-1.5"><span class="flex items-center text-[10px] font-bold uppercase ${isLive ? 'text-red-500' : 'text-gray-400'}"><span class="w-2 h-2 rounded-full mr-1.5 inline-block ${isLive ? 'bg-red-500 animate-pulse' : 'bg-gray-400'}"></span>${item.status}</span></div><div class="flex justify-between items-center mb-1"><div class="flex items-center gap-2"><img src="${flagSrc}" class="w-6 h-4 border hltv-border object-cover" onerror="this.src='/images/flags/WORLD.gif'"><span class="text-sm font-bold text-gray-900 truncate max-w-[140px]">${item.streamer}</span></div><span class="text-xs font-bold text-orange-600 bg-orange-100 px-2 py-0.5 rounded">${item.position === '—' ? '—' : '#' + item.position}</span></div><div class="text-xs text-gray-600 font-medium truncate">${item.levelName} — <span class="font-bold text-gray-900">${item.percent}%</span></div></div><div class="dropdown-menu px-4 pb-3"><a href="${item.link}" target="_blank" class="block w-full bg-orange-600 text-white font-bold py-2 rounded text-[12px] uppercase text-center hover:bg-orange-700 transition-colors">СЛЕДИТЬ</a></div></div>`; 
                 }).join(''); 
                 container.classList.add('animate-list-fade');
                 document.getElementById('footer').style.opacity = '1'; 
@@ -318,7 +318,7 @@
                     if (!row.trim()) return '';
                     const cols = parseCSVLine(row);
                     const playerLink = cols[2] ? `player.html?id=${cols[2]}` : '#';
-                    return `<a href="${playerLink}" class="block stream-card mb-1.5 border border-gray-200 p-2.5 hover:border-gray-500 hover:bg-gray-50 transition-all"><div class="flex items-center justify-between"><div class="flex items-center gap-2"><span class="text-sm font-bold text-gray-500 w-5">#${cols[0]}</span><img src="images/flags/${cols[3]?.toLowerCase()}.gif" class="w-5 h-3 hltv-border" onerror="this.src='images/flags/WORLD.gif'"><span class="text-sm font-bold text-gray-900">${cols[1]}</span></div></div></a>`;
+                    return `<a href="${playerLink}" class="block stream-card mb-1.5 border border-gray-200 p-2.5 hover:border-gray-500 hover:bg-gray-50 transition-all"><div class="flex items-center justify-between"><div class="flex items-center gap-2"><span class="text-sm font-bold text-gray-500 w-5">#${cols[0]}</span><img src="/images/flags/${cols[3]?.toLowerCase()}.gif" class="w-5 h-3 hltv-border" onerror="this.src='/images/flags/WORLD.gif'"><span class="text-sm font-bold text-gray-900">${cols[1]}</span></div></div></a>`;
                 }).join('') + `<a href="leaderboard.html" class="block w-full text-center border border-gray-200 py-2 text-xs font-bold text-orange-600 hover:bg-orange-600 hover:text-white transition-all uppercase">Полный Список</a>`;
                 sidebarContainer.classList.add('animate-list-fade');
 
@@ -358,7 +358,7 @@
 
                 document.getElementById('player-name').innerText = finalDisplayName;
                 document.getElementById('player-photo').src = photo;
-                document.getElementById('player-flag').src = `images/flags/${country.toLowerCase()}.gif`;
+                document.getElementById('player-flag').src = `/images/flags/${country.toLowerCase()}.gif`;
                 document.getElementById('player-place').innerText = `#${place}`;
                 document.getElementById('player-info').innerText = infoText;
 
