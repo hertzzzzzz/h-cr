@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <link rel="icon" type="image/x-icon" href="images/favicon.ico">
+    <meta name="description" content="Глобальная таблица лидеров Geometry Dash, лучшие игроки и стримы.">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>H&CR | TOP-100</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Montserrat', sans-serif !important;
+        }
+        html, body {
+            background-color: #000 !important;
+            margin: 0;
+            padding: 0;
+        }
+        #mini-logo {
+            transition: opacity 0.3s ease-in-out;
+            opacity: 0;
+            pointer-events: none;
+        }
+        #mini-logo.is-visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        
+        /* Идеально плавная анимация увеличения карточки */
+        .card-hover { 
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease; 
+        }
+        .card-hover:hover { 
+            transform: scale(1.015); 
+        }
+        
+        .hltv-border { border: 1px solid #000; box-sizing: border-box; }
+        .extra-info { overflow: hidden; transition: height 0.3s ease-in-out; }
+        
+        /* Увеличение ника игрока */
+        .grow-text { 
+            transition: transform 0.2s ease-in-out; 
+            display: inline-block; 
+        }
+        .grow-text:hover { 
+            transform: scale(1.08); 
+        }
+
+        #levels-list-tab1, #levels-list-tab2 { 
+            transition: opacity 0.8s ease-in-out; 
+        }
+        #loader { 
+            transition: opacity 0.5s ease; 
+        }
+
+        .banner-container img {
+            position: static !important; 
+            margin: 0 auto !important;   
+            display: block !important;
+        }
+        .banner-container, .banner-container a, .banner-container img {
+            position: static !important; 
+            display: block !important;
+            margin: 0 auto !important;
+        }
+        .banner-container {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+        }
+        img[alt="Left Banner"], 
+        img[alt="Right Banner"] {
+            filter: brightness(1.5) contrast(1.0) !important;
+        }
+    </style>
+</head>
+<body class="bg-black min-h-screen">
+
+    <!-- Верхняя навигация -->
+    <div id="top-nav" class="w-full bg-white border-b border-gray-200 sticky top-0 z-50 h-20">
+        <div class="h-full flex items-stretch justify-center max-w-[1350px] mx-auto w-full px-2 sm:px-4">
+            
+            <div id="mini-logo-container" class="w-0 overflow-hidden opacity-0 transition-all duration-500 ease-in-out flex-none">
+                <a href="top.html" class="h-full flex items-center justify-center px-2 sm:px-4" onclick="window.scrollTo({top: 0, behavior: 'smooth'}); return false;">
+                    <img src="images/logo.png" alt="Logo" class="h-12 sm:h-16 w-auto block">
+                </a>
+            </div>
+
+            <nav class="flex h-full font-bold uppercase text-xs sm:text-sm text-gray-800 items-stretch overflow-x-auto whitespace-nowrap">
+                <a href="top.html" class="nav-item px-4 sm:px-8 flex items-center border-l border-r border-gray-200 transition-colors hover:text-orange-500 hover:bg-orange-100">TOP-100</a>
+                <a href="leaderboard.html" class="nav-item px-4 sm:px-8 flex items-center border-r border-gray-200 transition-colors hover:text-orange-500 hover:bg-orange-100">leaderboard</a>
+                <a href="news.html" class="nav-item px-4 sm:px-8 flex items-center border-r border-gray-200 transition-colors hover:text-orange-500 hover:bg-orange-100">NEWS</a>
+                <a href="streams.html" class="nav-item px-4 sm:px-8 flex items-center border-r border-gray-200 transition-colors hover:text-orange-500 hover:bg-orange-100">STREAMS</a>
+            </nav>
+        </div>
+    </div>
+
+    <!-- ГЛАВНАЯ ОБЕРТКА ДЛЯ БАННЕРОВ И КОНТЕНТА -->
+    <div class="flex justify-center w-full gap-x-4 xl:gap-x-20"> 
+        
+        <!-- ЛЕВАЯ КОЛОНКА (ЛЕВЫЙ БАННЕР) -->
+        <div class="hidden xl:flex flex-col w-[200px] flex-shrink-0 bg-black animate-banner-left">
+            <div class="mt-6 flex flex-col items-center w-full">
+                <a href="https://www.youtube.com/@hertzogen" class="block w-full">
+                    <img src="images/left-banner.png" alt="Left Banner" class="max-w-full h-auto block mx-auto">
+                </a>
+            </div>
+        </div>
+
+        <!-- ТРЕХКОЛОНОЧНЫЙ КОНТЕНТ -->
+        <div class="w-full max-w-[1350px] bg-gray-100">
+            <div class="flex flex-col lg:flex-row items-stretch lg:items-start justify-center gap-4 pt-4 lg:pt-0 px-2 sm:px-4">
+
+                <!-- ЛЕВАЯ КОЛОНКА (ТОП ИГРОКОВ) -->
+                <aside class="w-full lg:w-52 flex-shrink-0 space-y-4 pt-0 order-2 lg:order-1">
+                    <div class="bg-white border border-gray-200 shadow-sm overflow-hidden mb-2 lg:mb-6">
+                        <a href='leaderboard.html'>
+                            <h3 class="font-bold text-gray-800 uppercase p-4 border-b border-orange-200 flex justify-between">
+                                ТОП ИГРОКОВ
+                            </h3>
+                        </a>
+                        <div id="leaderboard-list" class="flex flex-col"></div>
+                    </div>
+                </aside>
+
+                <!-- ЦЕНТРАЛЬНАЯ ЧАСТЬ (ОСНОВНОЙ КОНТЕНТ) -->
+                <main class="w-full lg:flex-1 min-w-0 lg:min-w-[650px] max-w-4xl bg-white min-h-screen border-l border-r border-gray-200 shadow-xl order-1 lg:order-2">
+                    <div class="py-4 px-4 sm:py-6 sm:px-6 border-b border-gray-200 flex flex-col sm:flex-row gap-4 items-center justify-between text-center sm:text-left">
+                        <a href="index.html" id="main-logo" class="block flex-shrink-0">
+                            <img src="images/logo2.png" alt="Logo" class="h-12 sm:h-16 w-auto">
+                        </a>
+                        <div class="flex uppercase font-medium text-xs sm:text-sm text-gray-700">
+                            <a href="https://www.pointercrate.com" target="_blank" class="hover:text-orange-500 transition-colors"><b>PointerCrate.com</b></a>
+                        </div>
+                    </div>
+
+                    <!-- Переключатели вкладок -->
+                    <div class="flex flex-col sm:flex-row border-b border-gray-300 bg-gray-50 justify-center">
+                        <button onclick="switchTab('tab1')" 
+                                id="btn-tab1" 
+                                class="px-4 py-3 font-bold uppercase text-[11px] sm:text-xs md:text-sm border-b-2 border-orange-500 text-orange-600 bg-white flex-1 text-center">
+                            POINTERCRATE.COM RATING
+                        </button>
+                        
+                        <button onclick="switchTab('tab2')" 
+                                id="btn-tab2" 
+                                class="px-4 py-3 font-bold uppercase text-[11px] sm:text-xs md:text-sm border-b-2 border-transparent text-gray-500 hover:text-gray-800 flex-1 text-center">
+                            HERTZOGEN AND COMMUNITY RATING
+                        </button>
+                    </div>
+
+                    <!-- Общий лоадер -->
+                    <div id="loader" class="text-center py-20 flex flex-col items-center">
+                        <div class="w-16 h-16 border-[8px] border-gray-200 border-t-orange-600 rounded-full animate-spin mb-4"></div>
+                        <div class="text-xl font-bold text-gray-400">Загружаем топ...</div>
+                    </div>
+
+                    <!-- Вкладка 1 -->
+                    <div id="tab1" class="tab-content">
+                        <div id="levels-list-tab1" class="max-w-4xl mx-auto py-6 space-y-4 px-2 sm:px-4 opacity-0"></div>
+                    </div>
+
+                    <!-- Вкладка 2 -->
+                    <div id="tab2" class="tab-content hidden">
+                        <div id="levels-list-tab2" class="max-w-4xl mx-auto py-6 space-y-4 px-2 sm:px-4 opacity-0"></div>
+                    </div>
+                </main>
+
+                <!-- ПРАВАЯ КОЛОНКА (СТРИМЫ И ПРОГРЕССЫ И НОВОСТИ) -->
+                <aside class="w-full lg:w-52 flex-shrink-0 space-y-4 pt-0 order-3 lg:order-3">
+                    <div class="bg-white border border-gray-200 shadow-sm overflow-hidden">
+                        <a href='streams.html'>
+                            <h3 class="font-bold text-gray-800 uppercase p-4 border-b border-orange-200">
+                                СТРИМЫ И ПРОГРЕССЫ
+                            </h3>
+                        </a>
+                        <div id="streams-list" class="flex flex-col"></div>
+                    </div>
+
+                    <div class="bg-white border border-gray-200 shadow-sm overflow-hidden">
+                        <a href='news.html'>
+                            <h3 class="font-bold text-gray-800 uppercase p-4 border-b border-orange-200">
+                                Новости
+                            </h3>
+                        </a>
+                        <div id="news-list" class="flex flex-col"></div>
+                    </div>
+                </aside>
+
+            </div>
+        </div>
+
+        <!-- ПРАВАЯ КОЛОНКА (ПРАВЫЙ БАННЕР) -->
+        <div class="hidden xl:flex flex-col w-[200px] flex-shrink-0 bg-black animate-banner-right">
+            <div class="mt-6 banner-container"> 
+                <a href="https://www.youtube.com/@hertzogen" target="_blank" class="block">
+                    <img src="images/right-banner.png" alt="Right Banner" class="max-w-full h-auto mx-auto" onerror="this.style.display='none'">
+                </a>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ПОДВАЛ (FOOTER) -->
+    <footer id="footer" class="bg-[#1a1a1a] text-white py-12 border-t-2 border-black opacity-0 transition-opacity duration-500 mt-0">
+        <div class="max-w-6xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-8">
+            <div class="flex flex-wrap justify-center md:justify-start items-center gap-4">
+                <a href='https://www.youtube.com/@hertzogen'><img src="images/logo3.png" alt="Logo" class="h-12 sm:h-16 w-auto opacity-60 hover:opacity-100 transition-opacity"></a>
+                <a href='https://t.me/hertzogen2007'><img src="images/logo4.png" alt="Logo" class="h-12 sm:h-16 w-auto opacity-60 hover:opacity-100 transition-opacity"></a>
+                <a href='https://www.pointercrate.com' target="_blank"><img src="images/logo5.png" alt="Logo" class="h-16 w-auto opacity-60 hover:opacity-100 transition-opacity"></a>
+            </div>
+            <div class="flex flex-wrap justify-center gap-6">
+                <a href="https://t.me/hertzogen2007" class="text-gray-400 hover:text-orange-500 transition-colors text-base sm:text-lg font-bold uppercase">Telegram</a>
+                <a href="https://www.youtube.com/@hertzogen" class="text-gray-400 hover:text-orange-500 transition-colors text-base sm:text-lg font-bold uppercase">YouTube</a>
+                <a href="https://www.pointercrate.com" target="_blank" class="text-gray-400 hover:text-orange-500 transition-colors text-base sm:text-lg font-bold uppercase">Pointercrate</a>
+            </div>
+            <div class="text-center md:text-right">
+                <a href="privacy-policy.html" class="text-gray-500 hover:text-white transition-colors text-sm underline">Privacy Policy</a>
+            </div>
+        </div>
+        <p class="py-3 px-6 sm:px-12 text-gray-500 text-sm text-center md:text-left">© 2026 H&CR hertzogen</p>
+    </footer>
+
+<!-- ВСЕ СКРИПТЫ ЛОГИКИ -->
+<script>
+    const LEVELS_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTCNytbZ_R5TV-BfA1M2m0HiEe_C5FwfMlOCWWIu7gK9iOB48uKOnohrv6xTMqVmmjtB3d5XrISE4p9/pub?gid=164268489&single=true&output=csv';
+    const NEWS_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTCNytbZ_R5TV-BfA1M2m0HiEe_C5FwfMlOCWWIu7gK9iOB48uKOnohrv6xTMqVmmjtB3d5XrISE4p9/pub?gid=30512158&single=true&output=csv';
+    const STREAMS_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTCNytbZ_R5TV-BfA1M2m0HiEe_C5FwfMlOCWWIu7gK9iOB48uKOnohrv6xTMqVmmjtB3d5XrISE4p9/pub?gid=781157227&single=true&output=csv';
+    const LEADERBOARD_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTCNytbZ_R5TV-BfA1M2m0HiEe_C5FwfMlOCWWIu7gK9iOB48uKOnohrv6xTMqVmmjtB3d5XrISE4p9/pub?gid=299902186&single=true&output=csv';
+    
+    const SHEET_URL_1 = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTCNytbZ_R5TV-BfA1M2m0HiEe_C5FwfMlOCWWIu7gK9iOB48uKOnohrv6xTMqVmmjtB3d5XrISE4p9/pub?gid=164268489&single=true&output=csv';
+    const SHEET_URL_2 = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTCNytbZ_R5TV-BfA1M2m0HiEe_C5FwfMlOCWWIu7gK9iOB48uKOnohrv6xTMqVmmjtB3d5XrISE4p9/pub?gid=306922452&single=true&output=csv';
+
+    let allLevels = [];
+
+    const officialScores = [350, 331.71, 313.42, 291.7, 271.78, 252.88, 235.0, 218.14, 202.3, 187.49, 173.69, 160.91, 149.15, 138.41, 128.69, 119.99, 112.31, 105.65, 99.01, 93.39, 87.79, 83.21, 78.65, 75.11, 71.59, 68.09, 65.61, 63.15, 60.71, 58.29, 56.89, 55.51, 54.15, 52.81, 51.49, 50.19, 48.91, 47.65, 46.41, 45.19, 44.99, 43.81, 42.65, 41.51, 40.39, 39.29, 38.21, 37.15, 36.11, 35.09, 34.09, 33.11, 32.15, 31.21, 30.29, 29.39, 28.51, 27.65, 26.81, 25.99, 25.19, 24.41, 23.65, 22.91, 22.19, 21.49, 20.81, 20.15, 19.51, 18.89, 18.29, 17.71, 17.15, 16.61, 16.09, 15.59, 15.11, 14.65, 14.21, 13.79, 13.39, 13.01, 12.65, 12.31, 11.99, 11.69, 11.41, 11.15, 10.91, 10.69, 10.49, 10.31, 10.15, 10.01, 9.89, 9.79, 9.71, 9.65, 9.61, 9.59, 9.59, 9.61, 9.65, 9.71, 9.79, 9.89, 10.01, 10.15, 10.31, 10.49, 10.69, 10.91, 11.15, 11.41, 11.69, 11.99, 12.31, 12.65, 13.01, 13.39, 13.79, 14.21, 14.65, 15.11, 15.59, 16.09, 16.61, 17.15, 17.71, 18.29, 18.89, 19.51, 20.15, 20.81, 21.49, 22.19, 22.91, 23.65, 24.41, 25.19, 25.99, 26.81, 27.65, 28.51, 29.39, 30.29, 31.21, 32.15, 33.11, 34.09];
+    
+    function calculateHertzogenScore(pos) {
+        const e = Math.E;
+        return 1000 / Math.log(pos + e - 1);
+    }
+
+    const RATING_SYSTEMS = {
+        pointercrate: {
+            calculate: (pos) => (pos <= officialScores.length ? (officialScores[pos - 1] || 0) : 0),
+            name: "Pointercrate Rating"
+        },
+        hertzogen: {
+            calculate: (pos) => calculateHertzogenScore(pos),
+            name: "Hertzogen Rating"
+        }
+    };
+
+    // --- ИНЪЕКЦИЯ АНИМАЦИЙ (Использование translate вместо transform) ---
+    (function injectAnimationStyles() {
+        if (document.getElementById('runtime-animation-styles')) return;
+        const style = document.createElement('style');
+        style.id = 'runtime-animation-styles';
+        style.innerHTML = `
+            @keyframes levelCardAppear {
+                from { opacity: 0; translate: 0 20px; }
+                to { opacity: 1; translate: 0 0; }
+            }
+            @keyframes listContentFadeIn {
+                from { opacity: 0; translate: 0 8px; }
+                to { opacity: 1; translate: 0 0; }
+            }
+            .animate-card-entry {
+                animation: levelCardAppear 0.45s cubic-bezier(0.215, 0.610, 0.355, 1) both;
+            }
+            #news-list, #streams-list, #leaderboard-list {
+                opacity: 0;
+            }
+            .animate-list-fade {
+                animation: listContentFadeIn 0.5s ease-out forwards;
+            }
+            .hidden.xl\\:flex {
+                opacity: 0;
+            }
+            .animate-banner-entry {
+                opacity: 1 !important;
+                transition: opacity 0.6s ease-in-out;
+            }
+        `;
+        document.head.appendChild(style);
+    })();
+
+    function getFlag(code) {
+        if (!code || code === 'unknown' || code.trim() === '') return '';
+        return `<img src="images/flags/${code.trim().toLowerCase()}.gif" class="w-6 h-4 shadow-sm inline-block object-cover hltv-border" alt="${code}" onerror="this.style.display='none'">`;
+    }
+
+    function switchTab(tabId) {
+        document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
+        document.querySelectorAll('button[id^="btn-"]').forEach(btn => {
+            btn.classList.remove('border-orange-500', 'text-orange-600', 'bg-white');
+            btn.classList.add('border-transparent', 'text-gray-500');
+        });
+        
+        document.getElementById(tabId).classList.remove('hidden');
+        const activeBtn = document.getElementById('btn-' + tabId);
+        activeBtn.classList.add('border-orange-500', 'text-orange-600', 'bg-white');
+        activeBtn.classList.remove('border-transparent', 'text-gray-500');
+    }
+
+    function toggleDropdown(element) {
+        const card = element.closest('.stream-card');
+        if (card) {
+            const menu = card.querySelector('.dropdown-menu');
+            if (menu) {
+                if (menu.classList.contains('hidden') || menu.style.display === 'none') {
+                    menu.classList.remove('hidden');
+                    menu.style.display = 'block';
+                } else {
+                    menu.classList.add('hidden');
+                    menu.style.display = 'none';
+                }
+            }
+        }
+    }
+
+    async function initLevelsData() {
+        try {
+            const response = await fetch(SHEET_URL_1);
+            const csvText = await response.text();
+            const rows = csvText.split('\n').slice(1);
+            
+            allLevels = rows.map((row, index) => {
+                const cols = row.split(',');
+                return { name: cols[2]?.trim(), position: index + 1 };
+            });
+
+            document.querySelectorAll('.hidden.xl\\:flex').forEach((banner, idx) => {
+                setTimeout(() => { banner.classList.add('animate-banner-entry'); }, idx * 150); 
+            });
+
+            loadStreams();
+        } catch (e) { console.error(e); }
+    }
+
+    async function loadLevels(csvUrl, containerId, mode = 'pointercrate') {
+        const container = document.getElementById(containerId);
+        try {
+            const response = await fetch(csvUrl);
+            const csvText = await response.text();
+            const rows = csvText.split('\n').slice(1);
+            
+            container.innerHTML = ''; 
+            container.style.opacity = '1';
+
+            let cardIndex = 0;
+
+            rows.forEach(row => {
+                if (!row.trim()) return;
+                const cols = row.split(',');
+                const position = parseInt(cols[1]) || 1;
+                
+                const calculator = RATING_SYSTEMS[mode].calculate;
+                const basePoints = calculator(position);
+                
+                const displayPointsOpen = mode === 'hertzogen' ? Math.round(basePoints) : basePoints.toFixed(2);
+                const displayPointsClosed = Math.round(basePoints);
+                const displaySmallPoints = mode === 'hertzogen' ? Math.round(basePoints * 0.10) : (basePoints * 0.10).toFixed(2);
+                
+                const name = cols[2] || "Unknown";
+                const req = parseFloat(cols[3]) || 0;
+                const video = cols[4] || "#";
+                const thumb = cols[5] || "";
+                const pubName = cols[7] || "Unknown";
+                const verid = cols[9] || "N/A";
+                const verName = cols[10] || "Unknown";
+                const levelId = cols[12] || "N/A";
+                const creatorCountry = cols[13] || "";
+                const veriferCountry = cols[14] || "";
+
+                const playerLink = (verid && verid.trim() !== 'N/A' && verid.trim() !== '') ? `player.html?id=${verid.trim()}` : '#';
+                const isOpen = position === 1;
+
+                const div = document.createElement('div');
+                div.className = "level-card card-hover bg-white border border-gray-200 shadow-sm cursor-pointer hover:shadow-xl overflow-hidden animate-card-entry mb-4";
+                div.style.animationDelay = `${cardIndex * 35}ms`;
+                cardIndex++;
+
+                div.innerHTML = `
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between p-4 gap-3 sm:gap-4 min-h-[5rem]">
+        <div class="flex items-center gap-3 sm:gap-4">
+            <span class="text-xl sm:text-2xl font-bold text-black w-8 sm:w-12 text-center">#${position}</span>
+            <img src="${thumb}" class="h-12 w-20 sm:h-16 sm:w-28 object-cover rounded bg-gray-100 flex-shrink-0" onerror="this.src='https://via.placeholder.com/128x64'">
+            <div class="min-w-0">
+                <h3 class="font-bold text-base sm:text-xl text-gray-900 truncate">${name}</h3>
+                <p class="text-xs sm:text-sm mt-0.5 truncate">
+                    <span class="text-gray-400">от </span> 
+                    <span class="font-bold text-sm sm:text-base text-gray-800">${pubName}</span>
+                    ${getFlag(creatorCountry)}
+                </p>
+            </div>
+        </div>
+        <div class="text-left sm:text-right flex-shrink-0 pl-11 sm:pl-0">
+            <div class="text-orange-600 font-bold text-xl sm:text-2xl base-points-text" style="transition: all 0.3s ease;">${isOpen ? displayPointsOpen : displayPointsClosed} pts</div>
+        </div>
+    </div>
+
+    <div class="extra-info" style="height: ${isOpen ? 'auto' : '0px'};">
+        <div class="border-t border-gray-100 p-4 bg-gray-50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="text-center sm:flex-1">
+                <p class="text-[10px] text-gray-400 uppercase font-bold mb-1">Верифицировано:</p>
+                <a href="${playerLink}"><div class="font-bold text-base sm:text-lg text-gray-800 hover:opacity-70 grow-text cursor-pointer">${verName} ${getFlag(veriferCountry)}</div></a>
+            </div>
+            <div class="sm:flex-1 flex flex-row sm:flex-col items-center gap-2 w-full sm:w-auto">
+                <a href="${video}" target="_blank" class="bg-black text-white px-4 py-2 rounded font-bold hover:bg-gray-800 transition-colors text-xs sm:text-sm flex-1 sm:w-full text-center">Смотреть</a>
+                <a href="level.html?id=${levelId}" class="bg-gray-200 text-black px-4 py-2 rounded font-bold hover:bg-gray-300 transition-colors text-xs sm:text-sm flex-1 sm:w-full text-center">Подробнее</a>
+            </div>
+            <div class="text-center sm:flex-1">
+                <p class="text-[10px] text-gray-400 uppercase font-bold mb-1 flex items-center justify-center gap-1">
+                    POINTS
+                    <a href="rating-info.html" 
+                    class="w-4 h-4 bg-gray-300 rounded-full flex items-center justify-center text-[10px] text-white hover:bg-orange-600 transition-colors cursor-help" 
+                    title="Как считается рейтинг?">?</a>
+                </p>
+                <div class="text-xl sm:text-2xl font-bold text-gray-800">${req}%</div>
+                <div class="text-sm sm:text-base font-bold text-gray-500">${position <= 75 ? displaySmallPoints + " pts" : "EL"}</div>
+            </div>
+        </div>
+    </div>
+    `;
+
+                div.addEventListener('click', (e) => {
+                    if(e.target.closest('a')) return;
+                    const info = div.querySelector('.extra-info');
+                    const pointsElement = div.querySelector('.base-points-text');
+                    
+                    const isExpanding = info.style.height === '0px' || info.style.height === '';
+                    
+                    if (isExpanding) {
+                        info.style.height = 'auto';
+                        const targetHeight = info.scrollHeight + 'px';
+                        info.style.height = '0px';
+                        info.offsetHeight; 
+                        info.style.height = targetHeight;
+                    } else {
+                        if (info.style.height === 'auto' || !info.style.height) {
+                            info.style.height = info.scrollHeight + 'px';
+                            info.offsetHeight;
+                        }
+                        info.style.height = '0px';
+                    }
+                    
+                    pointsElement.style.opacity = 0;
+                    pointsElement.style.transform = "scale(0.95)";
+                    setTimeout(() => {
+                        pointsElement.textContent = (isExpanding ? displayPointsOpen : displayPointsClosed) + " pts";
+                        pointsElement.style.opacity = 1;
+                        pointsElement.style.transform = "scale(1)";
+                    }, 200);
+                });
+                container.appendChild(div);
+            });
+
+            document.getElementById('loader').style.display = 'none';
+            document.getElementById('footer').style.opacity = '1';
+
+        } catch (error) { 
+            console.error("Ошибка загрузки уровней:", error); 
+        }
+    }
+
+    async function loadNews() { 
+        const container = document.getElementById('news-list'); 
+        try { 
+            const response = await fetch(NEWS_URL); 
+            const csvText = await response.text();
+            const rows = csvText.split('\n').slice(1); 
+            
+            const allNewsData = rows.map((row, index) => {
+                if (!row.trim()) return null;
+                const [date, title, link] = row.split(','); 
+                return {
+                    id: `news-${index}`, 
+                    date: date ? date.trim() : '',
+                    title: title ? title.trim() : ''
+                };
+            }).filter(item => item !== null);
+
+            const top10News = allNewsData.reverse().slice(0, 10);
+
+            container.innerHTML = top10News.map(item => { 
+                return `
+                    <a href="news.html#${item.id}" class="stream-card block mb-3 border border-gray-200 p-4 hover:border-gray-400 hover:bg-gray-50 transition-all">
+                        <div class="text-[12px] font-bold text-orange-500 uppercase tracking-wider mb-1">${item.date}</div>
+                        <div class="text-sm font-bold text-gray-900 leading-tight">${item.title}</div>
+                    </a>`; 
+            }).join(''); 
+            
+            container.classList.add('animate-list-fade');
+        } catch (err) { console.error("Ошибка новостей в сайдбаре:", err); } 
+    }
+
+    async function loadStreams() {
+        const container = document.getElementById('streams-list');
+        try {
+            const response = await fetch(STREAMS_URL);
+            const csvText = await response.text();
+            const rows = csvText.split('\n').slice(1);
+
+            let streamData = rows.map(row => {
+                if (!row.trim()) return null;
+                const [status, levelName, streamer, country, percent, link] = row.split(',');
+                const levelData = allLevels.find(l => l.name === levelName.trim());
+                return { status, levelName, streamer, country, percent, link, position: levelData ? levelData.position : '—' };
+            }).filter(item => item !== null);
+
+            streamData.sort((a, b) => {
+                const posA = a.position === '—' ? 9999 : a.position;
+                const posB = b.position === '—' ? 9999 : b.position;
+                return posA - posB;
+            });
+
+            container.innerHTML = streamData.slice(0, 5).map(item => {
+                const isLive = item.status.trim().toUpperCase() === 'LIVE';
+                const flagSrc = item.country ? `images/flags/${item.country.trim().toLowerCase()}.gif` : 'images/flags/WORLD.gif';
+                
+                return `
+                    <div class="stream-card mb-3 border border-gray-200 rounded-none overflow-hidden bg-white">
+                        <div class="px-4 py-3 cursor-pointer select-none hover:bg-gray-50 transition-colors" onclick="toggleDropdown(this)">
+                            <div class="flex items-center mb-1.5">
+                                <span class="flex items-center text-[10px] font-bold uppercase ${isLive ? 'text-red-500' : 'text-gray-400'}">
+                                    <span class="w-2 h-2 rounded-full mr-1.5 inline-block ${isLive ? 'bg-red-500 animate-pulse' : 'bg-red-500'}"></span>
+                                    ${item.status}
+                                </span>
+                            </div>
+                            <div class="flex justify-between items-center mb-1">
+                                <div class="flex items-center gap-2">
+                                    <img src="${flagSrc}" class="w-6 h-4 border hltv-border object-cover flex-shrink-0" onerror="this.src='images/flags/WORLD.gif'">
+                                    <span class="text-sm font-bold text-gray-900 truncate max-w-[140px]">${item.streamer}</span>
+                                </div>
+                                <span class="text-xs font-bold text-orange-600 bg-orange-100 px-2 py-0.5 rounded">
+                                    ${item.position === '—' ? '—' : '#' + item.position}
+                                </span>
+                            </div>
+                            <div class="text-xs text-gray-600 font-medium truncate">
+                                ${item.levelName} — <span class="font-bold text-gray-900">${item.percent}%</span>
+                            </div>
+                        </div>
+                        
+                        <div class="dropdown-menu px-4 pb-3" style="display: none !important; background: transparent !important; border: none !important; height: auto !important; min-height: 45px !important; overflow: visible !important; visibility: visible !important; opacity: 1 !important;">
+                            <a href="${item.link}" target="_blank" style="display: block !important; visibility: visible !important; opacity: 1 !important; width: 100% !important; box-sizing: border-box !important; text-align: center !important; background-color: #ea580c !important; color: #ffffff !important; font-size: 12px !important; font-weight: 700 !important; padding-top: 8px !important; padding-bottom: 8px !important; text-transform: uppercase !important; text-decoration: none !important; border-radius: 4px !important; border: none !important; box-shadow: none !important; transition: background-color 0.2s ease;" onmouseover="this.style.setProperty('background-color', '#c2410c', 'important')" onmouseout="this.style.setProperty('background-color', '#ea580c', 'important')">
+                                 СЛЕДИТЬ
+                            </a>
+                        </div>
+                    </div>`;
+            }).join('');
+
+            container.classList.add('animate-list-fade');
+            loadNews();
+        } catch (err) { console.error("Ошибка стримов:", err); }
+    }
+
+    async function loadLeaderboard() {
+        const container = document.getElementById('leaderboard-list');
+        try {
+            const res = await fetch(LEADERBOARD_URL);
+            const rows = (await res.text()).split('\n').slice(1);
+            
+            container.innerHTML = rows.slice(0, 5).map(row => {
+                if (!row.trim()) return '';
+                const [place, player, id, country, pts, diff] = row.split(',');
+                const playerLink = id ? `player.html?id=${id.trim()}` : '#';
+
+                return `
+                    <a href="${playerLink}" class="block stream-card mb-1.5 border border-gray-200 p-2.5 hover:border-gray-500 hover:bg-gray-50 transition-all">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <span class="text-sm font-bold text-gray-500 w-5">#${place?.trim()}</span>
+                                <img src="images/flags/${country?.trim().toLowerCase()}.gif" class="w-5 h-3 hltv-border" onerror="this.src='images/flags/WORLD.gif'">
+                                <span class="text-sm font-bold text-gray-900">${player?.trim()}</span>
+                            </div>
+                        </div>
+                    </a>`;
+            }).join('') + `
+                <a href="leaderboard.html" class="block w-full text-center border border-gray-200 py-2 text-xs font-bold text-orange-600 hover:bg-orange-600 hover:text-white transition-all uppercase">
+                    Полный Список
+                </a>`;
+
+            container.classList.add('animate-list-fade');
+        } catch (e) { console.error(e); }
+    }
+
+    window.addEventListener('scroll', () => {
+        const miniLogo = document.getElementById('mini-logo-container');
+        if (window.scrollY > 100) {
+            miniLogo.classList.remove('w-0', 'opacity-0');
+            miniLogo.classList.add('w-16', 'sm:w-24', 'opacity-100');
+        } else {
+            miniLogo.classList.add('w-0', 'opacity-0');
+            miniLogo.classList.remove('w-16', 'sm:w-24', 'opacity-100');
+        }
+    });
+
+    initLevelsData();
+    loadLeaderboard();
+    
+    loadLevels(SHEET_URL_1, 'levels-list-tab1', 'pointercrate'); 
+    loadLevels(SHEET_URL_2, 'levels-list-tab2', 'hertzogen');    
+</script>
+</body>
+</html>

@@ -1,0 +1,267 @@
+/* style.css */
+/* style.css */
+body {
+    background-color: #000000 !important; /* МЕНЯЕМ С #e3e3e3 НА ЧИСТЫЙ ЧЁРНЫЙ */
+    font-family: 'Inter', sans-serif;
+    color: #333 !important;
+    min-height: 100%;
+}
+.nav-link {
+        font-size: 5rem; /* Увеличиваем размер текста */
+        font-weight: 100;  /* Делаем чуть жирнее */
+        letter-spacing: 0.025em; /* Добавляем расстояние между буквами */
+        transition: color 0.2s;
+    }
+
+
+/* Основной контейнер */
+#list-container {
+    background: transparent !important; /* Убираем белый фон контейнера */
+    padding: 20px 0 !important;
+    border: none !important;
+}
+
+/* Настройка карточек */
+.demon-card {
+    background: #ffffff !important;
+    border: 2px solid #ccc !important;
+    border-radius: 10px !important; /* Легкое скругление */
+    padding: 10px !important;       /* Меньше пустоты внутри */
+    margin-bottom: 12px !important; /* Пространство между карточками */
+    width: 90%;                     /* Карточки чуть уже, чем 100% */
+    max-width: 1000px;               /* Максимальная ширина */
+    margin-left: auto;              /* Центрирование */
+    margin-right: auto;             /* Центрирование */
+    display: flex;
+    flex-direction: row;            /* Картинка слева, текст справа */
+    align-items: center;            /* Выравнивание по центру */
+}
+
+/* Оранжевый акцент при наведении */
+.demon-card:hover {
+    border-color: #ff8c00 !important;
+}
+
+/* Картинка (делаем её маленькой) */
+.demon-card img {
+    width: 192px !important;
+    height: 108px !important;
+    object-fit: cover;
+    margin-right: 10px;
+}
+
+/* Настройка текста */
+.demon-card h3 {
+    font-size: 25px !important;
+    font-weight: bold;
+    margin: 0 !important;
+}
+
+/* Убираем лишние элементы, чтобы не было "каши" */
+.demon-card .grid {
+    display: flex !important;
+    gap: 15px !important;
+    margin-top: 5px !important;
+}
+
+/* Настройка навигации */
+nav a {
+    transition: color 0.2s;
+}
+
+/* Заголовок страницы внутри белого блока */
+h1 {
+    letter-spacing: 1px;
+}
+
+/* Стилизация футера для аккуратности */
+footer {
+    border-top: 1px solid #000000;
+}
+#mini-logo {
+        /* Начинаем слева от текущей позиции (сдвиг на -50px по X) */
+        transform: translateX(-100px);
+        opacity: 1;
+        /* Важно: скрываем то, что вылезает за границы, чтобы при выезде не было видно полосы прокрутки */
+        visibility: hidden; 
+        /* Плавный переход для всех свойств (transform и opacity) длительностью 0.5 сек */
+        transition: all 0.5s ease-out;
+        /* Чтобы курсор не кликал по скрытому элементу */
+        pointer-events: none; 
+    }
+
+    /* Стили, когда добавляется класс .is-visible (элемент ПОЯВЛЯЕТСЯ) */
+    #mini-logo.is-visible {
+        /* Возвращаем на место (сдвиг 0) */
+        transform: translateX(0);
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto; /* Включаем клики, когда видно */
+    }
+#levels-list {
+        margin-top: 40px; /* Увеличили отступ от заголовка */
+    }
+
+    /* Анимация через Grid (самый плавный способ) */
+    .extra-info {
+        display: grid;
+        grid-template-rows: 0fr;
+        transition: grid-template-rows 0.4s ease-out;
+        overflow: hidden; /* Скрывает контент, пока он свернут */
+    }
+
+    .extra-info.is-open {
+        grid-template-rows: 1fr; /* Плавное открытие на всю высоту */
+    }
+
+    .content-wrapper {
+        min-height: 0; /* Нужно для правильной работы анимации */
+    }
+    .hltv-border {
+        border: 1px solid #000; /* Тонкая черная обводка */
+        box-sizing: border-box; /* Чтобы размер оставался прежним */
+    }
+    .play-btn {
+        display: inline-block;
+        background-color: #ff5e00;
+        color: #fff;
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-weight: bold;
+        text-decoration: none;
+        transition: background 0.2s;
+    }
+    .play-btn:hover {
+        background-color: #333;
+    }
+    .level-id-badge {
+        font-size: 0.75rem;
+        color: #6b7280;
+        background: #f3f4f6;
+        padding: 2px 6px;
+        border-radius: 4px;
+    }
+  #levels-list {
+        margin-top: 40px; /* Увеличили отступ от заголовка */
+    }
+
+    .level-card {
+        margin-bottom: 16px; /* Отступ между карточками */
+    }
+
+    /* Анимация плавного раскрытия */
+    .extra-info {
+        height: 0;
+        overflow: hidden;
+        transition: height 0.3s ease-out; /* Плавность */
+    }
+
+    /* Состояние, когда блок открыт */
+    .extra-info.is-open {
+        max-height: 200px; /* Достаточная высота для всего контента */
+    }
+
+    .content-wrapper {
+        min-height: 0; /* Нужно для правильной работы анимации */
+    }
+.points-transition { transition: all 0.3s ease; opacity: 1; }
+#levels-list { 
+        opacity: 0; 
+        transition: opacity 0.3s ease-in-out; 
+    }
+    #loader { 
+        transition: opacity 0.3s ease; 
+    }
+
+    .card-hover { transition: transform 0.3s ease; }
+    .card-hover:hover { transform: scale(1.02); }
+    .hltv-border { border: 1px solid #000; box-sizing: border-box; }
+    .extra-info { overflow: hidden; transition: height 0.4s ease; }
+    #levels-list { opacity: 0; transition: opacity 0.8s ease-in-out; }
+    #loader { transition: opacity 0.5s ease; }
+.grow-text {
+    transition: font-size 0.3s ease;
+}
+.grow-text:hover {
+    font-size: 1.3rem; /* увеличиваем до нужного размера */
+}
+html {
+    scroll-behavior: smooth;
+    min-height: 100%;
+}
+@keyframes pulse-animation {
+  0% { opacity: 1; }
+  20% { opacity: 0.3; }
+  100% { opacity: 1; }
+}
+.animate-pulse-fast {
+  animation: pulse-animation 1.5s infinite;
+}
+.dropdown-menu {
+    display: none; /* Или max-height: 0; для плавности */
+}
+.dropdown-menu.show {
+    display: block;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+.text-gray-400 { color: #9ca3af; }
+.bg-gray-400 { background-color: #9ca3af; }
+/* Убираем округления, добавляем рамку */
+.stream-card { 
+    border: 1px solid #e5e7eb; 
+    border-radius: 0; 
+}
+
+
+/* Базовые стили для боковых панелей */
+.ad-sidebar {
+    position: fixed; /* Это делает их неподвижными при скролле */
+    top: 100px;      /* Отступ от верхнего края */
+    width: 300px;    /* Ширина баннера */
+    height: 600px;   /* Высота баннера */
+    background-color: #000000 !important; /* Чистый черный фон */
+    z-index: 5;      
+    display: none;   /* По умолчанию скрыты на маленьких экранах */
+    border: none !important; /* Убираем серую рамку */
+}
+
+/* Показываем только на больших экранах (от 1600px), чтобы контент не перекрывался */
+@media (min-width: 1600px) {
+    .ad-sidebar {
+        display: block !important; /* Возвращаем баннеры на экраны */
+    }
+}
+
+.left-ad { left: 20px; }
+.right-ad { right: 20px; }
+
+
+
+/* Анимация аккордеона */
+
+
+/* Мигающая точка */
+.pulse-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 4px; }
+.bg-red-500 { background-color: #ef4444; }
+.animate-pulse { animation: pulse 1.5s infinite; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+/* Если нужно сделать новости чуть менее "тяжелыми" */
+.news-card { border-width: 1px; }
+.stream-card { border-radius: 0; }
+
+.hidden { display: none; }
+.nav-item {
+    display: flex;
+    align-items: center;
+    height: 100%; /* Растягивает область наведения на всю высоту навбара */
+}
+
+.nav-item:hover {
+    background-color: #fff3e3;
+    color: #ea580c;
+}
