@@ -315,7 +315,7 @@
 
             container.innerHTML = streamData.map(item => {
                 const isLive = item.status.toUpperCase() === 'LIVE';
-                const flagSrc = item.country ? `/images/flags/${item.country.toLowerCase()}.gif` : '/images/flags/WORLD.gif';
+                const flagSrc = item.country ? `images/flags/${item.country.toLowerCase()}.gif` : 'images/flags/WORLD.gif';
                 
                 return `
                     <div class="card-hover bg-white border border-gray-200 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
@@ -331,7 +331,7 @@
                             </div>
                             <div class="min-w-0 flex-1">
                                 <div class="flex items-center gap-2 mb-1">
-                                    <img src="${flagSrc}" class="w-6 h-4 border hltv-border object-cover flex-shrink-0" onerror="this.src='/images/flags/WORLD.gif'">
+                                    <img src="${flagSrc}" class="w-6 h-4 border hltv-border object-cover flex-shrink-0" onerror="this.src='images/flags/WORLD.gif'">
                                     <span class="text-base font-bold text-gray-900 truncate">${item.streamer}</span>
                                 </div>
                                 <div class="text-xs sm:text-sm text-gray-600 font-medium truncate">
@@ -386,7 +386,7 @@
 
             container.innerHTML = streamData.slice(0, 5).map(item => {
                 const isLive = item.status.toUpperCase() === 'LIVE';
-                const flagSrc = item.country ? `/images/flags/${item.country.toLowerCase()}.gif` : '/images/flags/WORLD.gif';
+                const flagSrc = item.country ? `images/flags/${item.country.toLowerCase()}.gif` : 'images/flags/WORLD.gif';
                 
                 return `
                     <div class="stream-card mb-3 border border-gray-200 rounded-none overflow-hidden bg-white">
@@ -399,7 +399,7 @@
                             </div>
                             <div class="flex justify-between items-center mb-1">
                                 <div class="flex items-center gap-2">
-                                    <img src="${flagSrc}" class="w-6 h-4 border hltv-border object-cover flex-shrink-0" onerror="this.src='/images/flags/WORLD.gif'">
+                                    <img src="${flagSrc}" class="w-6 h-4 border hltv-border object-cover flex-shrink-0" onerror="this.src='images/flags/WORLD.gif'">
                                     <span class="text-sm font-bold text-gray-900 truncate max-w-[140px]">${item.streamer}</span>
                                 </div>
                                 <span class="text-xs font-bold text-orange-600 bg-orange-100 px-2 py-0.5 rounded">
@@ -469,7 +469,7 @@
                         <div class="flex items-center justify-between">
                             <div class="flex items-center gap-2">
                                 <span class="text-sm font-bold text-gray-500 w-5">#${place}</span>
-                                <img src="/images/flags/${country.toLowerCase()}.gif" class="w-5 h-3 hltv-border" onerror="this.src='/images/flags/WORLD.gif'">
+                                <img src="images/flags/${country.toLowerCase()}.gif" class="w-5 h-3 hltv-border" onerror="this.src='images/flags/WORLD.gif'">
                                 <span class="text-sm font-bold text-gray-900">${player}</span>
                             </div>
                         </div>
