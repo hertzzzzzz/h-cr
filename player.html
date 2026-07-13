@@ -208,208 +208,178 @@
         <p class="py-3 px-6 sm:px-12 text-gray-500 text-sm text-center md:text-left">© 2026 H&CR hertzogen</p>
     </footer>
 
-    <script>
-        const NEWS_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTCNytbZ_R5TV-BfA1M2m0HiEe_C5FwfMlOCWWIu7gK9iOB48uKOnohrv6xTMqVmmjtB3d5XrISE4p9/pub?gid=30512158&single=true&output=csv';
-        const STREAMS_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTCNytbZ_R5TV-BfA1M2m0HiEe_C5FwfMlOCWWIu7gK9iOB48uKOnohrv6xTMqVmmjtB3d5XrISE4p9/pub?gid=781157227&single=true&output=csv';
-        const LEADERBOARD_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTCNytbZ_R5TV-BfA1M2m0HiEe_C5FwfMlOCWWIu7gK9iOB48uKOnohrv6xTMqVmmjtB3d5XrISE4p9/pub?gid=299902186&single=true&output=csv';
-        const LEVELS_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTCNytbZ_R5TV-BfA1M2m0HiEe_C5FwfMlOCWWIu7gK9iOB48uKOnohrv6xTMqVmmjtB3d5XrISE4p9/pub?gid=164268489&single=true&output=csv';
+   <script>
+    const URLS = { 
+        players: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTCNytbZ_R5TV-BfA1M2m0HiEe_C5FwfMlOCWWIu7gK9iOB48uKOnohrv6xTMqVmmjtB3d5XrISE4p9/pub?gid=93759483&single=true&output=csv', 
+        levels: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTCNytbZ_R5TV-BfA1M2m0HiEe_C5FwfMlOCWWIu7gK9iOB48uKOnohrv6xTMqVmmjtB3d5XrISE4p9/pub?gid=1437425318&single=true&output=csv', 
+        rankings: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTCNytbZ_R5TV-BfA1M2m0HiEe_C5FwfMlOCWWIu7gK9iOB48uKOnohrv6xTMqVmmjtB3d5XrISE4p9/pub?gid=2093715526&single=true&output=csv', 
+        streams: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTCNytbZ_R5TV-BfA1M2m0HiEe_C5FwfMlOCWWIu7gK9iOB48uKOnohrv6xTMqVmmjtB3d5XrISE4p9/pub?gid=1466784286&single=true&output=csv', 
+        news: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTCNytbZ_R5TV-BfA1M2m0HiEe_C5FwfMlOCWWIu7gK9iOB48uKOnohrv6xTMqVmmjtB3d5XrISE4p9/pub?gid=30512158&single=true&output=csv',
+        records: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTCNytbZ_R5TV-BfA1M2m0HiEe_C5FwfMlOCWWIu7gK9iOB48uKOnohrv6xTMqVmmjtB3d5XrISE4p9/pub?gid=596486031&single=true&output=csv'
+    };
+    const DB = { players: {}, levels: {}, rankings: {}, streams: [], news: [], playersArr: [], records: [] };
 
-        let allLevels = [];
+    // Функция для очистки данных
+    function clean(val) { return String(val || '').trim(); }
 
-        function parseCSVLine(line) {
-            const result = [];
-            let current = '';
-            let inQuotes = false;
-            for (let i = 0; i < line.length; i++) {
-                const char = line[i];
-                if (char === '"') {
-                    inQuotes = !inQuotes;
-                } else if (char === ',' && !inQuotes) {
-                    result.push(current.trim());
-                    current = '';
-                } else {
-                    current += char;
-                }
-            }
-            result.push(current.trim());
-            return result;
-        }
-        
-        function toggleDropdown(element) { 
-            const card = element.closest('.stream-card'); 
-            if (card) { 
-                const menu = card.querySelector('.dropdown-menu'); 
-                if (menu) { menu.classList.toggle('show'); } 
-            } 
-        }
-
-        async function initLevelsData() { 
-            try { 
-                const response = await fetch(LEVELS_URL); 
-                const csvText = await response.text(); 
-                const rows = csvText.split('\n').slice(1); 
-                allLevels = rows.map((row, index) => { 
-                    const cols = row.split(','); 
-                    return { name: cols[2]?.trim(), position: index + 1 }; 
-                }); 
-                loadStreams(); 
-            } catch (e) { console.error(e); } 
-        }
-
-        async function loadNews() { 
-            const container = document.getElementById('news-list'); 
-            try { 
-                const response = await fetch(NEWS_URL); 
-                const csvText = await response.text(); 
-                const rows = csvText.split('\n').slice(1); 
-                const allNewsData = rows.map((row, index) => {
-                    if (!row.trim()) return null;
-                    const [date, title] = row.split(','); 
-                    return { id: `news-${index}`, date: date?.trim(), title: title?.trim() };
-                }).filter(item => item !== null);
-                container.innerHTML = allNewsData.reverse().slice(0, 10).map(item => `
-                    <a href="news.html#${item.id}" class="stream-card block mb-3 border border-gray-200 p-4 hover:border-gray-400 hover:bg-gray-50 transition-all">
-                        <div class="text-[12px] font-bold text-orange-500 uppercase tracking-wider mb-1">${item.date}</div>
-                        <div class="text-sm font-bold text-gray-900 leading-tight">${item.title}</div>
-                    </a>`).join(''); 
-                container.classList.add('animate-list-fade');
-            } catch (err) { console.error(err); } 
-        }
-
-        async function loadStreams() { 
-            const container = document.getElementById('streams-list'); 
-            try { 
-                const response = await fetch(STREAMS_URL); 
-                const csvText = await response.text(); 
-                const rows = csvText.split('\n').slice(1); 
-                let streamData = rows.map(row => { 
-                    if (!row.trim()) return null; 
-                    const [status, levelName, streamer, country, percent, link] = row.split(','); 
-                    const levelData = allLevels.find(l => l.name === levelName.trim()); 
-                    return { status, levelName, streamer, country, percent, link, position: levelData ? levelData.position : '—' }; 
-                }).filter(item => item !== null); 
-                
-                streamData.sort((a, b) => (a.position === '—' ? 9999 : a.position) - (b.position === '—' ? 9999 : b.position)); 
-                
-                container.innerHTML = streamData.slice(0, 5).map(item => { 
-                    const isLive = item.status.trim().toUpperCase() === 'LIVE'; 
-                    const flagSrc = item.country ? `images/flags/${item.country.trim().toLowerCase()}.gif` : 'images/flags/WORLD.gif'; 
-                    return `<div class="stream-card mb-3 border border-gray-200 bg-white"><div class="px-4 py-3 cursor-pointer select-none hover:bg-gray-50 transition-colors" onclick="toggleDropdown(this)"><div class="flex items-center mb-1.5"><span class="flex items-center text-[10px] font-bold uppercase ${isLive ? 'text-red-500' : 'text-gray-400'}"><span class="w-2 h-2 rounded-full mr-1.5 inline-block ${isLive ? 'bg-red-500 animate-pulse' : 'bg-gray-400'}"></span>${item.status}</span></div><div class="flex justify-between items-center mb-1"><div class="flex items-center gap-2"><img src="${flagSrc}" class="w-6 h-4 border hltv-border object-cover" onerror="this.src='images/flags/WORLD.gif'"><span class="text-sm font-bold text-gray-900 truncate max-w-[140px]">${item.streamer}</span></div><span class="text-xs font-bold text-orange-600 bg-orange-100 px-2 py-0.5 rounded">${item.position === '—' ? '—' : '#' + item.position}</span></div><div class="text-xs text-gray-600 font-medium truncate">${item.levelName} — <span class="font-bold text-gray-900">${item.percent}%</span></div></div><div class="dropdown-menu px-4 pb-3"><a href="${item.link}" target="_blank" class="block w-full bg-orange-600 text-white font-bold py-2 rounded text-[12px] uppercase text-center hover:bg-orange-700 transition-colors">СЛЕДИТЬ</a></div></div>`; 
-                }).join(''); 
-                container.classList.add('animate-list-fade');
-                document.getElementById('footer').style.opacity = '1'; 
-            } catch (err) { console.error(err); } 
-        }
-
-        async function loadPlayerData() {
-            const sidebarContainer = document.getElementById('leaderboard-list');
-            const profileWrapper = document.getElementById('player-profile-wrapper');
-            const levelsGrid = document.getElementById('player-levels-grid');
-            
-            const urlParams = new URLSearchParams(window.location.search);
-            const playerId = urlParams.get('id')?.trim();
-
-            try {
-                const res = await fetch(LEADERBOARD_URL);
-                const csvText = await res.text();
-                const rows = csvText.split('\n').slice(1);
-
-                sidebarContainer.innerHTML = rows.slice(0, 5).map(row => {
-                    if (!row.trim()) return '';
-                    const cols = parseCSVLine(row);
-                    const playerLink = cols[2] ? `player.html?id=${cols[2]}` : '#';
-                    return `<a href="${playerLink}" class="block stream-card mb-1.5 border border-gray-200 p-2.5 hover:border-gray-500 hover:bg-gray-50 transition-all"><div class="flex items-center justify-between"><div class="flex items-center gap-2"><span class="text-sm font-bold text-gray-500 w-5">#${cols[0]}</span><img src="images/flags/${cols[3]?.toLowerCase()}.gif" class="w-5 h-3 hltv-border" onerror="this.src='images/flags/WORLD.gif'"><span class="text-sm font-bold text-gray-900">${cols[1]}</span></div></div></a>`;
-                }).join('') + `<a href="leaderboard.html" class="block w-full text-center border border-gray-200 py-2 text-xs font-bold text-orange-600 hover:bg-orange-600 hover:text-white transition-all uppercase">Полный Список</a>`;
-                sidebarContainer.classList.add('animate-list-fade');
-
-                let playerRow = rows.find(row => {
-                    if (!row.trim()) return false;
-                    const cols = parseCSVLine(row);
-                    return cols[2] === playerId;
-                });
-
-                if (!playerRow) {
-                    document.getElementById('player-name').innerText = "Игрок не найден";
-                    profileWrapper.classList.add('animate-list-fade');
-                    return;
-                }
-
-                const cols = parseCSVLine(playerRow);
-                const place = cols[0] || '—';
-                const nickname = cols[1] || '';
-                const country = cols[3] || 'WORLD';
-                const pts = cols[4] || '0';
-                const photo = cols[6] || '';
-                const infoText = cols[7] || '';
-                const levelsListRaw = cols[8] || '';
-                const ytLink = cols[9] || '';
-                const twitchLink = cols[10] || '';
-                const realName = cols[11] || '';
-
-                let finalDisplayName = nickname;
-                if (realName) {
-                    const nameParts = realName.split(' ');
-                    if (nameParts.length >= 2) {
-                        finalDisplayName = `${nameParts[0]} "${nickname}" ${nameParts.slice(1).join(' ')}`;
-                    } else {
-                        finalDisplayName = `${realName} "${nickname}"`;
-                    }
-                }
-
-                document.getElementById('player-name').innerText = finalDisplayName;
-                document.getElementById('player-photo').src = photo;
-                document.getElementById('player-flag').src = `images/flags/${country.toLowerCase()}.gif`;
-                document.getElementById('player-place').innerText = `#${place}`;
-                document.getElementById('player-info').innerText = infoText;
-
-                if (ytLink) {
-                    const btn = document.getElementById('link-yt');
-                    btn.href = ytLink;
-                    btn.classList.remove('hidden');
-                    btn.classList.add('flex');
-                }
-                if (twitchLink) {
-                    const btn = document.getElementById('link-twitch');
-                    btn.href = twitchLink;
-                    btn.classList.remove('hidden');
-                    btn.classList.add('flex');
-                }
-
-                if (levelsListRaw) {
-                    const cleanList = levelsListRaw.replace(/^"|"$/g, '');
-                    const levelsArray = cleanList.split(',').map(l => l.trim()).filter(l => l.length > 0);
-
-                    levelsGrid.innerHTML = levelsArray.map(level => `
-                        <div class="bg-gray-50 border border-gray-200 p-3 flex items-center justify-between select-none">
-                            <span class="font-bold text-gray-800 text-sm uppercase">${level}</span>
-                            <span class="text-[10px] bg-green-100 text-green-700 font-bold px-2 py-0.5 rounded uppercase tracking-wider">Пройдено</span>
-                        </div>
-                    `).join('');
-                } else {
-                    levelsGrid.innerHTML = `<div class="text-gray-400 text-sm italic text-center col-span-2 py-4">Нет пройденных уровней</div>`;
-                }
-
-                profileWrapper.classList.add('animate-list-fade');
-
-            } catch (err) {
-                console.error("Ошибка при сборке профиля:", err);
-            }
-        }
-
-        window.addEventListener('scroll', () => { 
-            const miniLogo = document.getElementById('mini-logo-container'); 
-            if (window.scrollY > 100) { 
-                miniLogo.classList.remove('w-0', 'opacity-0'); 
-                miniLogo.classList.add('w-16', 'sm:w-24', 'opacity-100'); 
-            } else { 
-                miniLogo.classList.add('w-0', 'opacity-0'); 
-                miniLogo.classList.remove('w-16', 'sm:w-24', 'opacity-100'); 
-            } 
+    function parseCSV(csvText) {
+        const rows = csvText.split('\n').filter(r => r.trim());
+        if(rows.length < 2) return [];
+        const headers = rows[0].split(',').map(h => h.trim().toLowerCase());
+        return rows.slice(1).map(row => { 
+            const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/); 
+            let obj = {}; 
+            headers.forEach((h, i) => { 
+                let val = cols[i] ? cols[i].trim() : ''; 
+                if (val.startsWith('"') && val.endsWith('"')) val = val.slice(1, -1); 
+                obj[h] = val; 
+            }); 
+            return obj; 
         });
+    }
 
-        initLevelsData(); 
-        loadNews(); 
-        loadPlayerData();
-    </script>
+    // ЛОГИКА СТРИМОВ (из рабочих файлов)
+    function getParsedStreams() {
+        return DB.streams.filter(stream => {
+            const parts = String(stream.stream_id || '').split(',');
+            return (stream.player_id || parts[2]) && (stream.level_id || parts[3]);
+        }).map(stream => {
+            const parts = String(stream.stream_id || '').split(',');
+            const pId = clean(stream.player_id || parts[2]); 
+            const lId = clean(stream.level_id || parts[3]);
+            
+            const player = DB.players[pId] || { nickname: 'Unknown', country: 'WORLD' };
+            const level = DB.levels[lId] || { name: 'Unknown Level' };
+            
+            return { 
+                status: stream.is_live || parts[1] || 'OFFLINE', 
+                progress: stream.progress || parts[4] || '0', 
+                link: stream.link, 
+                player, 
+                level, 
+                rank: DB.rankings[lId] || 9999 
+            };
+        });
+    }
+
+    async function initApp() {
+        try {
+            const responses = await Promise.all(Object.values(URLS).map(url => fetch(url)));
+            const texts = await Promise.all(responses.map(res => res.text()));
+            
+            const pArr = parseCSV(texts[0]);
+            pArr.forEach(p => DB.players[clean(p.player_id)] = p);
+            DB.playersArr = pArr;
+            
+            
+            parseCSV(texts[1]).forEach(l => DB.levels[clean(l.level_id)] = l);
+            parseCSV(texts[2]).forEach(r => {
+                const lId = clean(r.level_id);
+                const pos = parseInt(r.position) || 9999;
+                if (!DB.rankings[lId] || pos < DB.rankings[lId]) DB.rankings[lId] = pos;
+            });
+            
+            DB.streams = parseCSV(texts[3]);
+            DB.news = parseCSV(texts[4]);
+            DB.records = parseCSV(texts[5]);
+
+            renderMainContent();
+            renderSidebars();
+        if(document.getElementById('footer')) document.getElementById('footer').style.opacity = '1';
+    } catch (err) { console.error("Ошибка:", err); }
+}
+
+    function renderMainContent() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const pId = clean(urlParams.get('id'));
+    const player = DB.players[pId];
+    const wrapper = document.getElementById('player-profile-wrapper');
+
+    if (!player) return;
+
+    // 1. Формируем HTML для флага (вынесли его в переменную)
+    const flagHtml = `<img src="images/flags/${clean(player.country).toLowerCase()}.gif" 
+                           class="w-8 h-5 mr-3 inline-block border border-black hltv-border" 
+                           onerror="this.style.display='none'">`;
+
+    // 2. Вставляем Флаг + Ник + Очки (всё в одну строку)
+    document.getElementById('player-name').innerHTML = 
+        `${flagHtml} ${player.nickname} <span class="text-lg text-gray-500 font-normal">(${player.points || 0} PTS)</span>`;
+    
+    // 3. Скрываем старый элемент флага, чтобы он не отображался второй раз
+    const oldFlag = document.getElementById('player-flag');
+    if (oldFlag) oldFlag.style.display = 'none';
+
+    // ... остальной код (фото, инфо и т.д.)
+    document.getElementById('player-photo').src = player.photo;
+    document.getElementById('player-info').innerText = player.info;
+    
+    // Ранг
+    const sorted = [...DB.playersArr].sort((a,b) => parseInt(b.points) - parseInt(a.points));
+    const rank = sorted.findIndex(p => clean(p.player_id) === pId) + 1;
+    document.getElementById('player-place').innerText = `#${rank}`;
+
+    // Ссылки
+    if (player.social_yt) { const b = document.getElementById('link-yt'); b.href = player.social_yt; b.classList.remove('hidden'); b.classList.add('flex'); }
+    if (player.social_tiwtch) { const b = document.getElementById('link-twitch'); b.href = player.social_tiwtch; b.classList.remove('hidden'); b.classList.add('flex'); }
+
+    // Уровни
+    const grid = document.getElementById('player-levels-grid');
+    const pRecs = DB.records.filter(r => clean(r.player_id) === pId && clean(r.progress) === '100');
+    grid.innerHTML = pRecs.map(r => {
+        const lvl = DB.levels[clean(r.level_id)] || { name: 'Unknown' };
+        return `<a href="level.html?id=${clean(r.level_id)}" class="bg-gray-50 border border-gray-200 p-3 flex items-center justify-between hover:border-orange-500 transition-all"><span class="font-bold text-gray-800 text-sm uppercase">${lvl.name}</span><span class="text-[10px] bg-green-100 text-green-700 font-bold px-2 py-0.5 rounded">100%</span></a>`;
+    }).join('');
+    
+    if (wrapper) wrapper.classList.add('animate-list-fade');
+}
+
+    function renderSidebars() {
+        const leadList = [...DB.playersArr].sort((a,b) => parseInt(b.points) - parseInt(a.points)).slice(0, 5);
+        const lContainer = document.getElementById('leaderboard-list');
+        if (lContainer) {
+            lContainer.innerHTML = leadList.map((p, i) => `<a href="player.html?id=${clean(p.player_id)}" class="block stream-card mb-1.5 border border-gray-200 p-2.5 hover:border-gray-500 hover:bg-gray-50 transition-all"><div class="flex items-center gap-2"><span class="text-sm font-bold text-gray-500 w-5">#${i+1}</span><img src="images/flags/${clean(p.country).toLowerCase()}.gif" class="w-5 h-3 hltv-border" onerror="this.src='images/flags/WORLD.gif'"><span class="text-sm font-bold text-gray-900">${p.nickname}</span></div></a>`).join('') + `<a href="leaderboard.html" class="block w-full text-center border border-gray-200 py-2 text-xs font-bold text-orange-600 hover:bg-orange-600 hover:text-white transition-all uppercase">Полный Список</a>`;
+            lContainer.classList.add('animate-list-fade');
+        }
+
+        const sContainer = document.getElementById('streams-list');
+        if (sContainer) {
+            sContainer.innerHTML = getParsedStreams().slice(0, 5).map(s => {
+                const isLive = clean(s.status).toUpperCase() === 'LIVE';
+                return `<div class="stream-card mb-3 border border-gray-200 bg-white">
+                    <div class="px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors" onclick="toggleDropdown(this)">
+                        <div class="flex items-center mb-1.5">
+                            <span class="flex items-center text-[10px] font-bold uppercase ${isLive ? 'text-red-500' : 'text-gray-400'}">
+                                <span class="w-2 h-2 rounded-full mr-1.5 inline-block ${isLive ? 'bg-red-500 animate-pulse' : 'bg-gray-400'}"></span>
+                                ${isLive ? 'LIVE' : 'OFFLINE'}
+                            </span>
+                        </div>
+                        <div class="flex justify-between items-center mb-1">
+                            <div class="flex items-center gap-2">
+                                <img src="images/flags/${clean(s.player.country).toLowerCase()}.gif" class="w-6 h-4 border hltv-border object-cover" onerror="this.src='images/flags/WORLD.gif'">
+                                <span class="text-sm font-bold text-gray-900 truncate max-w-[140px]">${s.player.nickname}</span>
+                            </div>
+                            <span class="text-xs font-bold text-orange-600 bg-orange-100 px-2 py-0.5 rounded">#${s.rank === 9999 ? '—' : s.rank}</span>
+                        </div>
+                        <div class="text-xs text-gray-600 font-medium truncate">${s.level.name} — <span class="font-bold text-gray-900">${s.progress}%</span></div>
+                    </div>
+                    <div class="dropdown-menu px-4 pb-3" style="display: none;">
+                        <a href="${s.link}" target="_blank" class="block w-full bg-orange-600 text-white font-bold py-2 rounded text-[12px] uppercase text-center hover:bg-orange-700">СЛЕДИТЬ</a>
+                    </div>
+                </div>`;
+            }).join('');
+            sContainer.classList.add('animate-list-fade');
+        }
+
+        const nContainer = document.getElementById('news-list');
+        if (nContainer) {
+            nContainer.innerHTML = DB.news.slice(-5).reverse().map((n, i) => `<a href="news.html#news-${DB.news.length - 1 - i}" class="stream-card block mb-3 border border-gray-200 p-4 hover:border-gray-400 hover:bg-gray-50 transition-all"><div class="text-[12px] font-bold text-orange-500 uppercase tracking-wider mb-1">${n.хедлайнер || n.headliner || 'NEWS'}</div><div class="text-sm font-bold text-gray-900 leading-tight">${n.заголовок || n.title || 'Новость'}</div></a>`).join('');
+            nContainer.classList.add('animate-list-fade');
+        }
+    }
+
+    function toggleDropdown(el) { const menu = el.closest('.stream-card').querySelector('.dropdown-menu'); menu.style.display = menu.style.display === 'block' ? 'none' : 'block'; }
+    initApp();
+</script>
 </body>
 </html>
