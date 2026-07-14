@@ -1,0 +1,42 @@
+name: Update Demonlist Data
+
+# Настройка расписания
+on:
+  schedule:
+    # Запускается каждый день в 03:00 ночи (по UTC)
+    - cron: '0 3 * * *'
+  # Эта строчка позволяет запускать скрипт вручную прямо с сайта GitHub по кнопке
+  workflow_dispatch: 
+
+jobs:
+  update-csv:
+    # Сервер, на котором будет запускаться скрипт (бесплатный Ubuntu от GitHub)
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Скачиваем твой репозиторий на виртуальный сервер
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # 2. Устанавливаем Python
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      # 3. Устанавливаем библиотеку requests
+      - name: Install dependencies
+        run: pip install requests
+
+      # 4. Запускаем твой скрипт (убедись, что файл называется update.py)
+      - name: Run script
+        run: python update.py
+
+      # 5. Сохраняем новые CSV файлы и пушим их обратно в твой репозиторий
+      - name: Commit and push changes
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add *.csv
+          git commit -m "🤖 Автоматическое обновление базы данных" || exit 0
+          git push
