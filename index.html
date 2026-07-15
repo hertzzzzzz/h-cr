@@ -45,8 +45,8 @@
                 </a>
             </div>
             <nav class="flex h-full font-bold uppercase text-xs sm:text-sm text-gray-800 items-stretch overflow-x-auto whitespace-nowrap">
-                <a href="top.html" class="nav-item px-4 sm:px-8 flex items-center border-l border-r border-gray-200 transition-colors hover:text-orange-500 hover:bg-orange-100">TOP-100</a>
-                <a href="leaderboard.html" class="nav-item px-4 sm:px-8 flex items-center border-r border-gray-200 transition-colors hover:text-orange-500 hover:bg-orange-100">leaderboard</a>
+                <a href="top.html" class="nav-item px-4 sm:px-8 flex items-center border-l border-r border-gray-200 transition-colors hover:text-orange-500 hover:bg-orange-100">LEVELS</a>
+                <a href="leaderboard.html" class="nav-item px-4 sm:px-8 flex items-center border-r border-gray-200 transition-colors hover:text-orange-500 hover:bg-orange-100">PLAYERS</a>
                 <a href="news.html" class="nav-item px-4 sm:px-8 flex items-center border-r border-gray-200 transition-colors hover:text-orange-500 hover:bg-orange-100">NEWS</a>
                 <a href="streams.html" class="nav-item px-4 sm:px-8 flex items-center border-r border-gray-200 transition-colors hover:text-orange-500 hover:bg-orange-100">STREAMS</a>
             </nav>
@@ -79,7 +79,7 @@
                             <img src="images/logo2.png" alt="Logo" class="h-12 sm:h-16 w-auto">
                         </a>
                         <div class="flex gap-8 uppercase font-medium text-sm text-gray-700">
-                            <a href="https://www.pointercrate.com" class="hover:text-orange-500 transition-colors"><b>PointerCrate.com</b></a>
+                            <a href="https://demonlist.org/" class="hover:text-orange-500 transition-colors"><b>demonlist.org</b></a>
                         </div>
                     </div>
                     
@@ -115,15 +115,15 @@
             <div class="flex flex-wrap justify-center items-center gap-4">
                 <a href='index.html'><img src="images/logo3.png" alt="Logo" class="h-12 sm:h-16 w-auto opacity-60 hover:opacity-100 transition-opacity"></a>
                 <a href='https://www.youtube.com/@hertzogen'><img src="images/logo4.png" alt="Logo" class="h-16 w-auto opacity-60 hover:opacity-100 transition-opacity"></a>
-                <a href='https://www.pointercrate.com'><img src="images/logo5.png" alt="Logo" class="h-16 w-auto opacity-60 hover:opacity-100 transition-opacity"></a>
+                <a href='https://demonlist.org/'><img src="images/logo5.png" alt="Logo" class="h-16 w-auto opacity-60 hover:opacity-100 transition-opacity"></a>
             </div>
             <div class="flex flex-wrap justify-center gap-6">
                 <a href="https://t.me/hertzogen2007" class="text-gray-400 hover:text-orange-500 transition-colors text-base sm:text-lg font-bold uppercase">Telegram</a>
                 <a href="https://www.youtube.com/@hertzogen" class="text-gray-400 hover:text-orange-500 transition-colors text-base sm:text-lg font-bold uppercase">YouTube</a>
-                <a href="https://www.pointercrate.com" class="text-gray-400 hover:text-orange-500 transition-colors text-base sm:text-lg font-bold uppercase">Pointercrate</a>
+                <a href="https://demonlist.org/" class="text-gray-400 hover:text-orange-500 transition-colors text-base sm:text-lg font-bold uppercase">demonlist</a>
             </div>
             <div class="text-center md:text-right">
-                <a href="#" class="text-gray-500 hover:text-white transition-colors text-sm underline">Privacy Policy</a>
+                <a href="privacy-policy.html" class="text-gray-500 hover:text-white transition-colors text-sm underline">Privacy Policy</a>
             </div>
         </div>
         <p class="py-3 px-6 sm:px-12 text-gray-500 text-sm text-center md:text-left">© 2026 H&CR hertzogen</p>
@@ -131,7 +131,13 @@
 
     <!-- ТВОЙ СКРИПТ -->
     <script>
-        const URLS = { players: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTCNytbZ_R5TV-BfA1M2m0HiEe_C5FwfMlOCWWIu7gK9iOB48uKOnohrv6xTMqVmmjtB3d5XrISE4p9/pub?gid=93759483&single=true&output=csv', levels: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTCNytbZ_R5TV-BfA1M2m0HiEe_C5FwfMlOCWWIu7gK9iOB48uKOnohrv6xTMqVmmjtB3d5XrISE4p9/pub?gid=1437425318&single=true&output=csv', rankings: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTCNytbZ_R5TV-BfA1M2m0HiEe_C5FwfMlOCWWIu7gK9iOB48uKOnohrv6xTMqVmmjtB3d5XrISE4p9/pub?gid=2093715526&single=true&output=csv', streams: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTCNytbZ_R5TV-BfA1M2m0HiEe_C5FwfMlOCWWIu7gK9iOB48uKOnohrv6xTMqVmmjtB3d5XrISE4p9/pub?gid=1466784286&single=true&output=csv', news: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTCNytbZ_R5TV-BfA1M2m0HiEe_C5FwfMlOCWWIu7gK9iOB48uKOnohrv6xTMqVmmjtB3d5XrISE4p9/pub?gid=30512158&single=true&output=csv' };
+        const URLS = { 
+    players: './Players.csv', 
+    levels: './Levels.csv', 
+    rankings: './Rankings.csv', 
+    streams: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTCNytbZ_R5TV-BfA1M2m0HiEe_C5FwfMlOCWWIu7gK9iOB48uKOnohrv6xTMqVmmjtB3d5XrISE4p9/pub?gid=1466784286&single=true&output=csv', 
+    news: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTCNytbZ_R5TV-BfA1M2m0HiEe_C5FwfMlOCWWIu7gK9iOB48uKOnohrv6xTMqVmmjtB3d5XrISE4p9/pub?gid=30512158&single=true&output=csv' 
+};
         const DB = { players: {}, levels: {}, rankings: {}, streams: [], news: [], playersArr: [] };
 
         function parseCSV(csvText) {

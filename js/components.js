@@ -1,8 +1,8 @@
 // components.js
 const headerHTML = `
   <nav class="bg-white border-b ...">
-     <a href="index.html">TOP-100</a>
-     <a href="leaderboard.html">leaderboard</a>
+     <a href="index.html">LEVELS</a>
+     <a href="leaderboard.html">PLAYERS</a>
   </nav>
 `;
 

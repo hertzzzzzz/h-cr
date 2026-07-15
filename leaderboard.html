@@ -53,7 +53,7 @@
             to { opacity: 1; }
         }
 
-        #news-list, #streams-list, #leaderboard-list, #main-leaderboard-grid {
+        #news-list, #streams-list, #leaderboard-list {
             opacity: 0;
         }
 
@@ -71,6 +71,12 @@
             animation: bannerFadeIn 0.6s ease-in-out forwards;
             animation-delay: 300ms;
         }
+        #main-profile-card {
+            background-image: url('https://i.postimg.cc/wB24crD6/Bez-nazvania170-20260713223113.png') !important;
+            background-size: cover !important;
+            background-position: center !important;
+            background-repeat: no-repeat !important;
+        }
     </style>
 </head>
 <body class="bg-black min-h-screen">
@@ -86,8 +92,8 @@
             </div>
 
             <nav class="flex h-full font-bold uppercase text-xs sm:text-sm text-gray-800 items-stretch overflow-x-auto whitespace-nowrap">
-                <a href="top.html" class="nav-item px-4 sm:px-8 flex items-center border-l border-r border-gray-200 transition-colors hover:text-orange-500 hover:bg-orange-100">TOP-100</a>
-                <a href="leaderboard.html" class="nav-item px-4 sm:px-8 flex items-center border-r border-gray-200 transition-colors hover:text-orange-500 hover:bg-orange-100">LEADERBOARD</a>
+                <a href="top.html" class="nav-item px-4 sm:px-8 flex items-center border-l border-r border-gray-200 transition-colors hover:text-orange-500 hover:bg-orange-100">LEVELS</a>
+                <a href="leaderboard.html" class="nav-item px-4 sm:px-8 flex items-center border-r border-gray-200 transition-colors hover:text-orange-500 hover:bg-orange-100">PLAYERS</a>
                 <a href="news.html" class="nav-item px-4 sm:px-8 flex items-center border-r border-gray-200 transition-colors hover:text-orange-500 hover:bg-orange-100">NEWS</a>
                 <a href="streams.html" class="nav-item px-4 sm:px-8 flex items-center border-r border-gray-200 transition-colors hover:text-orange-500 hover:bg-orange-100">STREAMS</a>
             </nav>
@@ -126,7 +132,7 @@
                             <img src="images/logo2.png" alt="Logo" class="h-12 sm:h-16 w-auto">
                         </a>
                         <div class="flex gap-8 uppercase font-medium text-sm text-gray-700">
-                            <a href="https://www.pointercrate.com" class="hover:text-orange-500 transition-colors"><b>PointerCrate.com</b></a>
+                            <a href="https://demonlist.org/" class="hover:text-orange-500 transition-colors"><b>demonlist.org</b></a>
                         </div>
                     </div>
 
@@ -137,13 +143,20 @@
                                 Глобальная таблица лидеров
                             </h2>
                             <h2 class="text-m  text-gray-500 uppercase tracking-tight flex items-center gap-4 justify-center">
-                                Рейтинг лучших игроков по очкам взятых из pointercrate.com
+                                Рейтинг лучших игроков по очкам взятых из demonlist.org
                             </h2>
                         </div>
 
                         <!-- СЕТКА КАРТОЧЕК ИГРОКОВ -->
                         <div id="main-leaderboard-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                             <!-- Карточки вставляются динамически -->
+                        </div>
+
+                        <!-- КНОПКА ПОКАЗАТЬ ЕЩЕ -->
+                        <div id="load-more-container" class="text-center py-8 hidden">
+                            <button id="load-more-btn" onclick="loadMorePlayers()" class="bg-gray-800 hover:bg-orange-600 text-white font-bold py-3 px-8 rounded transition-all uppercase text-sm cursor-pointer shadow-md hover:shadow-lg">
+                                Показать еще
+                            </button>
                         </div>
                     </div>
                 </main>
@@ -180,15 +193,15 @@
             <div class="flex flex-wrap justify-center items-center gap-4">
                 <a href='index.html'><img src="images/logo3.png" alt="Logo" class="h-12 sm:h-16 w-auto opacity-60 hover:opacity-100 transition-opacity"></a>
                 <a href='https://www.youtube.com/@hertzogen'><img src="images/logo4.png" alt="Logo" class="h-16 w-auto opacity-60 hover:opacity-100 transition-opacity"></a>
-                <a href='https://www.pointercrate.com'><img src="images/logo5.png" alt="Logo" class="h-16 w-auto opacity-60 hover:opacity-100 transition-opacity"></a>
+                <a href='https://demonlist.org/'><img src="images/logo5.png" alt="Logo" class="h-16 w-auto opacity-60 hover:opacity-100 transition-opacity"></a>
             </div>
             <div class="flex flex-wrap justify-center gap-6">
                 <a href="https://t.me/hertzogen2007" class="text-gray-400 hover:text-orange-500 transition-colors text-base sm:text-lg font-bold uppercase">Telegram</a>
                 <a href="https://www.youtube.com/@hertzogen" class="text-gray-400 hover:text-orange-500 transition-colors text-base sm:text-lg font-bold uppercase">YouTube</a>
-                <a href="https://www.pointercrate.com" class="text-gray-400 hover:text-orange-500 transition-colors text-base sm:text-lg font-bold uppercase">Pointercrate</a>
+                <a href="https://demonlist.org/" class="text-gray-400 hover:text-orange-500 transition-colors text-base sm:text-lg font-bold uppercase">demonlist</a>
             </div>
             <div class="text-center md:text-right">
-                <a href="#" class="text-gray-500 hover:text-white transition-colors text-sm underline">Privacy Policy</a>
+                <a href="privacy-policy.html" class="text-gray-500 hover:text-white transition-colors text-sm underline">Privacy Policy</a>
             </div>
         </div>
         <p class="py-3 px-6 sm:px-12 text-gray-500 text-sm text-center md:text-left">© 2026 H&CR hertzogen</p>
@@ -196,26 +209,27 @@
 
     <script>
         // === 1. ССЫЛКИ НА НОВЫЕ ТАБЛИЦЫ ===
-        // Вставь сюда ссылки на CSV твоих новых листов
-        const URLS = {
-            players: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTCNytbZ_R5TV-BfA1M2m0HiEe_C5FwfMlOCWWIu7gK9iOB48uKOnohrv6xTMqVmmjtB3d5XrISE4p9/pub?gid=93759483&single=true&output=csv',
-            levels: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTCNytbZ_R5TV-BfA1M2m0HiEe_C5FwfMlOCWWIu7gK9iOB48uKOnohrv6xTMqVmmjtB3d5XrISE4p9/pub?gid=1437425318&single=true&output=csv',
-            rankings: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTCNytbZ_R5TV-BfA1M2m0HiEe_C5FwfMlOCWWIu7gK9iOB48uKOnohrv6xTMqVmmjtB3d5XrISE4p9/pub?gid=2093715526&single=true&output=csv',
-            streams: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTCNytbZ_R5TV-BfA1M2m0HiEe_C5FwfMlOCWWIu7gK9iOB48uKOnohrv6xTMqVmmjtB3d5XrISE4p9/pub?gid=1466784286&single=true&output=csv',
-            news: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTCNytbZ_R5TV-BfA1M2m0HiEe_C5FwfMlOCWWIu7gK9iOB48uKOnohrv6xTMqVmmjtB3d5XrISE4p9/pub?gid=30512158&single=true&output=csv'
+        const URLS = { 
+            players: './Players.csv', 
+            levels: './Levels.csv', 
+            rankings: './Rankings.csv', 
+            streams: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTCNytbZ_R5TV-BfA1M2m0HiEe_C5FwfMlOCWWIu7gK9iOB48uKOnohrv6xTMqVmmjtB3d5XrISE4p9/pub?gid=1466784286&single=true&output=csv', 
+            news: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTCNytbZ_R5TV-BfA1M2m0HiEe_C5FwfMlOCWWIu7gK9iOB48uKOnohrv6xTMqVmmjtB3d5XrISE4p9/pub?gid=30512158&single=true&output=csv' 
         };
 
-        // Глобальный объект (Словари) для быстрого поиска данных по ID
         const DB = {
-            players: {},   // player_id -> объект игрока
-            levels: {},    // level_id -> объект уровня
-            rankings: {},  // level_id -> лучшая позиция
+            players: {}, 
+            levels: {}, 
+            rankings: {}, 
             streams: [],
-            news: []
+            news: [],
+            sortedPlayers: [] // Добавлено для хранения игроков
         };
+
+        let currentLoaded = 0; // Счетчик показанных игроков
+        const CHUNK_SIZE = 50; // Сколько игроков грузить за один раз
 
         // === 2. УМНЫЙ ПАРСЕР CSV ===
-        // Читает первую строку как ключи, а остальные как значения
         function parseCSV(csvText) {
             const rows = csvText.split('\n').filter(r => r.trim());
             if(rows.length < 2) return [];
@@ -223,7 +237,6 @@
             const headers = rows[0].split(',').map(h => h.trim().toLowerCase());
             
             return rows.slice(1).map(row => {
-                // Разбиваем по запятым, игнорируя те, что внутри кавычек
                 const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
                 let obj = {};
                 headers.forEach((h, i) => {
@@ -235,33 +248,33 @@
             });
         }
 
+        function getCacheSafeUrl(url) {
+            const separator = url.includes('?') ? '&' : '?';
+            return url + separator + 't=' + new Date().getTime();
+        }
+
         // === 3. ГЛАВНАЯ ФУНКЦИЯ ЗАГРУЗКИ ===
         async function initApp() {
             try {
-                // Скачиваем все таблицы одновременно (работает в 5 раз быстрее!)
                 const responses = await Promise.all([
-                    fetch(URLS.players), fetch(URLS.levels),
-                    fetch(URLS.rankings), fetch(URLS.streams),
-                    fetch(URLS.news)
+                    fetch(getCacheSafeUrl(URLS.players)), 
+                    fetch(getCacheSafeUrl(URLS.levels)),
+                    fetch(getCacheSafeUrl(URLS.rankings)), 
+                    fetch(getCacheSafeUrl(URLS.streams)),
+                    fetch(getCacheSafeUrl(URLS.news))
                 ]);
                 
                 const texts = await Promise.all(responses.map(res => res.text()));
 
-                // Парсим все таблицы
                 const playersArray = parseCSV(texts[0]);
                 const levelsArray = parseCSV(texts[1]);
                 const rankingsArray = parseCSV(texts[2]);
                 DB.streams = parseCSV(texts[3]);
                 DB.news = parseCSV(texts[4]);
 
-                // Внутри initApp, после того как данные распарсились
-                    console.log("DB Content:", DB);
-
-                // --- ЗАПОЛНЯЕМ СЛОВАРИ ---
                 playersArray.forEach(p => DB.players[p.player_id] = p);
                 levelsArray.forEach(l => DB.levels[l.level_id] = l);
                 
-                // Для Rankings сохраняем самую высокую (минимальную) позицию уровня
                 rankingsArray.forEach(r => {
                     const lId = r.level_id;
                     const pos = parseInt(r.position) || 9999;
@@ -270,12 +283,10 @@
                     }
                 });
 
-                // Рендерим интерфейс
                 renderLeaderboard(playersArray);
                 renderStreams();
                 renderNews();
 
-                // Показываем футер
                 document.getElementById('footer').style.opacity = '1';
 
             } catch (err) {
@@ -283,43 +294,65 @@
             }
         }
 
-        // === 4. РЕНДЕР ЛИДЕРБОРДА ===
+        // === 4. РЕНДЕР ЛИДЕРБОРДА И ЛЕНИВАЯ ЗАГРУЗКА ===
         function renderLeaderboard(playersArray) {
             const sidebarContainer = document.getElementById('leaderboard-list'); 
             const mainGridContainer = document.getElementById('main-leaderboard-grid');
 
-            // Фильтруем забаненных и сортируем по очкам
-            const sortedPlayers = playersArray
+            // Сортируем и сохраняем глобально ОДИН РАЗ
+            DB.sortedPlayers = playersArray
                 .filter(p => p.is_banned !== 'TRUE' && p.is_banned !== 'true')
                 .sort((a, b) => (parseInt(b.points) || 0) - (parseInt(a.points) || 0));
 
-            // Рендер сайдбара (Топ 5)
-            sidebarContainer.innerHTML = sortedPlayers.slice(0, 5).map((p, index) => {
+            // Рендер сайдбара (топ 5)
+            sidebarContainer.innerHTML = DB.sortedPlayers.slice(0, 5).map((p, index) => {
                 const countryCode = (p.country || 'WORLD').toLowerCase();
                 return `<a href="player.html?id=${p.player_id}" class="block stream-card mb-1.5 border border-gray-200 p-2.5 hover:border-gray-500 hover:bg-gray-50 transition-all"><div class="flex items-center justify-between"><div class="flex items-center gap-2"><span class="text-sm font-bold text-gray-500 w-5">#${index + 1}</span><img src="images/flags/${countryCode}.gif" class="w-5 h-3 hltv-border" onerror="this.src='images/flags/WORLD.gif'"><span class="text-sm font-bold text-gray-900">${p.nickname}</span></div></div></a>`;
             }).join('') + `<a href="leaderboard.html" class="block w-full text-center border border-gray-200 py-2 text-xs font-bold text-orange-600 hover:bg-orange-600 hover:text-white transition-all uppercase">Полный Список</a>`;
             sidebarContainer.classList.add('animate-list-fade');
 
-            // Рендер основной сетки
-            mainGridContainer.innerHTML = sortedPlayers.map((p, index) => {
+            // Очищаем сетку перед стартом
+            mainGridContainer.innerHTML = '';
+            currentLoaded = 0;
+            
+            // Загружаем первую порцию (50 карточек)
+            loadMorePlayers();
+        }
+
+        function loadMorePlayers() {
+            const grid = document.getElementById('main-leaderboard-grid');
+            const btnContainer = document.getElementById('load-more-container');
+            
+            // Берем следующую порцию (по умолчанию 50 штук)
+            const nextChunk = DB.sortedPlayers.slice(currentLoaded, currentLoaded + CHUNK_SIZE);
+            
+            nextChunk.forEach((p, index) => {
+                const globalIndex = currentLoaded + index;
                 const diffValue = parseInt(p.diff) || 0;
                 let diffHtml = diffValue > 0 ? `<span class="text-green-400 font-bold ml-1 text-xs sm:text-sm">+${diffValue}</span>` : 
                                diffValue < 0 ? `<span class="text-red-400 font-bold ml-1 text-xs sm:text-sm">-${Math.abs(diffValue)}</span>` : 
                                `<span class="text-gray-400 font-bold ml-1 text-xs sm:text-sm">-</span>`;
                 
                 const countryCode = (p.country || 'WORLD').toLowerCase();
+                const photoSrc = p.photo || 'images/default-profile.png';
 
-                return `
-                <a href="player.html?id=${p.player_id}" class="bg-white border border-gray-200 flex flex-col overflow-hidden card-hover relative group block opacity-0 animate-list-fade" style="animation-delay: ${index * 0.05}s">
+                // Создаем элемент карточки
+                const card = document.createElement('a');
+                card.href = `player.html?id=${p.player_id}`;
+                card.className = "bg-white border border-gray-200 flex flex-col overflow-hidden card-hover relative group block opacity-0 animate-list-fade";
+                card.style.animationDelay = `${(index % CHUNK_SIZE) * 0.04}s`; // Плавное появление порции
+
+                card.innerHTML = `
                     <div class="w-full aspect-[4/3] bg-gray-300 relative overflow-hidden">
                         <div class="absolute top-0 left-0 bg-black/85 text-white font-bold text-sm sm:text-base px-2.5 py-1 z-10 flex items-center gap-1 rounded-br">
-                            <span>#${index + 1}</span>
+                            <span>#${globalIndex + 1}</span>
                             ${diffHtml}
                         </div>
                         <div class="absolute top-0 right-0 bg-orange-600 text-white font-bold text-[11px] sm:text-xs px-2.5 py-1 z-10 rounded-bl tracking-wide">
                             ${p.points || 0} PTS
                         </div>
-                        <img src="${p.photo}" alt="${p.nickname}" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" onerror="this.src='images/flags/WORLD.gif'; this.className='w-full h-full object-contain opacity-10 bg-gray-200';">
+                        <img src="${photoSrc}" alt="${p.nickname}" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" 
+                             onerror="this.src='images/default-profile.png';">
                     </div>
                     <div class="p-2.5 bg-white border-t border-gray-100 flex items-center min-w-0">
                         <div class="flex items-center gap-1.5 min-w-0 w-full">
@@ -329,83 +362,84 @@
                             </span>
                         </div>
                     </div>
-                </a>`;
-            }).join('');
-            
-            mainGridContainer.classList.add('animate-list-fade');
+                `;
+                
+                grid.appendChild(card);
+            });
+
+            currentLoaded += nextChunk.length;
+
+            // Если загрузили всех игроков из базы — скрываем кнопку
+            if (currentLoaded >= DB.sortedPlayers.length) {
+                btnContainer.classList.add('hidden');
+                btnContainer.classList.remove('block');
+            } else {
+                btnContainer.classList.remove('hidden');
+                btnContainer.classList.add('block');
+            }
         }
 
-        // === 5. РЕНДЕР СТРИМОВ (СО СКЛЕЙКОЙ) ===
+        // === 5. РЕНДЕР СТРИМОВ ===
         function renderStreams() {
-    const container = document.getElementById('streams-list');
+            const container = document.getElementById('streams-list');
+            const streamData = DB.streams.map(stream => {
+                const parts = String(stream.stream_id || '').split(',');
+                const pId = stream.player_id || parts[2]; 
+                const lId = stream.level_id || parts[3];
+                const status = stream.is_live || parts[1];
+                const progress = stream.progress || parts[4];
 
-    const streamData = DB.streams.map(stream => {
-            // ЗАПЛАТКА: Разбиваем строку '1,LIVE,10020,127323087,66' по запятым
-            // Если stream.player_id пустой, берем данные из stream.stream_id
-            const parts = String(stream.stream_id).split(',');
-            
-            // Предполагаем, что формат: [id, status, player_id, level_id, progress]
-            // Проверяем, есть ли данные в частях
-            const pId = stream.player_id || parts[2]; 
-            const lId = stream.level_id || parts[3];
-            const status = stream.is_live || parts[1];
-            const progress = stream.progress || parts[4];
+                const player = DB.players[pId] || {};
+                const level = DB.levels[lId] || {};
 
-            const player = DB.players[pId] || {};
-            const level = DB.levels[lId] || {};
+                return {
+                    status: status, percent: progress, link: stream.link,
+                    streamer: player.nickname || 'Unknown', country: player.country || 'WORLD',
+                    levelName: level.name || 'Unknown Level', position: DB.rankings[lId] || 9999
+                };
+            });
 
-            return {
-                status: status,
-                percent: progress,
-                link: stream.link,
-                streamer: player.nickname || 'Unknown',
-                country: player.country || 'WORLD',
-                levelName: level.name || 'Unknown Level',
-                position: DB.rankings[lId] || 9999
-            };
-        });
+            streamData.sort((a, b) => a.position - b.position);
 
-        streamData.sort((a, b) => a.position - b.position);
+            container.innerHTML = streamData.slice(0, 5).map(item => {
+                const isLive = String(item.status).trim().toUpperCase() === 'LIVE';
+                const posText = item.position === 9999 ? '—' : '#' + item.position;
+                const flagSrc = `images/flags/${String(item.country).toLowerCase()}.gif`;
 
-        container.innerHTML = streamData.slice(0, 5).map(item => {
-            const isLive = String(item.status).trim().toUpperCase() === 'LIVE';
-            const posText = item.position === 9999 ? '—' : '#' + item.position;
-            const flagSrc = `images/flags/${String(item.country).toLowerCase()}.gif`;
-
-            return `<div class="stream-card mb-3 border border-gray-200 rounded-none bg-white">
-                <div class="px-4 py-3 cursor-pointer select-none hover:bg-gray-50 transition-colors" onclick="toggleDropdown(this)">
-                    <div class="flex items-center mb-1.5">
-                        <span class="flex items-center text-[10px] font-bold uppercase ${isLive ? 'text-red-500' : 'text-gray-400'}">
-                            <span class="w-2 h-2 rounded-full mr-1.5 inline-block ${isLive ? 'bg-red-500 animate-pulse' : 'bg-gray-400'}"></span>
-                            ${isLive ? 'LIVE' : 'OFFLINE'}
-                        </span>
-                    </div>
-                    <div class="flex justify-between items-center mb-1">
-                        <div class="flex items-center gap-2">
-                            <img src="${flagSrc}" class="w-6 h-4 border hltv-border object-cover flex-shrink-0" onerror="this.src='images/flags/WORLD.gif'">
-                            <span class="text-sm font-bold text-gray-900 truncate max-w-[140px]">${item.streamer}</span>
+                return `<div class="stream-card mb-3 border border-gray-200 rounded-none bg-white">
+                    <div class="px-4 py-3 cursor-pointer select-none hover:bg-gray-50 transition-colors" onclick="toggleDropdown(this)">
+                        <div class="flex items-center mb-1.5">
+                            <span class="flex items-center text-[10px] font-bold uppercase ${isLive ? 'text-red-500' : 'text-gray-400'}">
+                                <span class="w-2 h-2 rounded-full mr-1.5 inline-block ${isLive ? 'bg-red-500 animate-pulse' : 'bg-gray-400'}"></span>
+                                ${isLive ? 'LIVE' : 'OFFLINE'}
+                            </span>
                         </div>
-                        <span class="text-xs font-bold text-orange-600 bg-orange-100 px-2 py-0.5 rounded">${posText}</span>
+                        <div class="flex justify-between items-center mb-1">
+                            <div class="flex items-center gap-2">
+                                <img src="${flagSrc}" class="w-6 h-4 border hltv-border object-cover flex-shrink-0" onerror="this.src='images/flags/WORLD.gif'">
+                                <span class="text-sm font-bold text-gray-900 truncate max-w-[140px]">${item.streamer}</span>
+                            </div>
+                            <span class="text-xs font-bold text-orange-600 bg-orange-100 px-2 py-0.5 rounded">${posText}</span>
+                        </div>
+                        <div class="text-xs text-gray-600 font-medium truncate mt-1">
+                            ${item.levelName} — <span class="font-bold text-gray-900">${item.percent}%</span>
+                        </div>
                     </div>
-                    <div class="text-xs text-gray-600 font-medium truncate">${item.levelName} — <span class="font-bold text-gray-900">${item.percent}%</span></div>
-                </div>
-                <div class="dropdown-menu px-4 pb-3">
-                    <a href="${item.link}" target="_blank" class="block w-full bg-orange-600 text-white font-bold py-2 rounded text-[12px] uppercase text-center hover:bg-orange-700 transition-colors">СЛЕДИТЬ</a>
-                </div>
-            </div>`;
-        }).join('');
+                    <div class="dropdown-menu px-4 pb-3">
+                        <a href="${item.link}" target="_blank" class="block w-full bg-orange-600 text-white font-bold py-2 rounded text-[12px] uppercase text-center hover:bg-orange-700 transition-colors">СЛЕДИТЬ</a>
+                    </div>
+                </div>`;
+            }).join('');
 
-        container.classList.add('animate-list-fade');
-    }
+            container.classList.add('animate-list-fade');
+        }
 
-        // === 6. РЕНДЕР НОВОСТЕЙ ===
         // === 6. РЕНДЕР НОВОСТЕЙ ===
         function renderNews() {
             const container = document.getElementById('news-list');
             const top10News = DB.news.reverse().slice(0, 10);
 
             container.innerHTML = top10News.map((item, index) => {
-                // Берем данные из твоих колонок (скрипт автоматически делает их с маленькой буквы)
                 const date = item['хедлайнер'] || '';
                 const title = item['заголовок'] || '';
                 

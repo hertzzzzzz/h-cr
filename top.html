@@ -5,7 +5,7 @@
     <meta name="description" content="Глобальная таблица лидеров Geometry Dash, лучшие игроки и стримы.">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>H&CR | TOP-100</title>
+    <title>H&CR | LEVELS</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
@@ -88,8 +88,8 @@
             </div>
 
             <nav class="flex h-full font-bold uppercase text-xs sm:text-sm text-gray-800 items-stretch overflow-x-auto whitespace-nowrap">
-                <a href="top.html" class="nav-item px-4 sm:px-8 flex items-center border-l border-r border-gray-200 transition-colors hover:text-orange-500 hover:bg-orange-100">TOP-100</a>
-                <a href="leaderboard.html" class="nav-item px-4 sm:px-8 flex items-center border-r border-gray-200 transition-colors hover:text-orange-500 hover:bg-orange-100">leaderboard</a>
+                <a href="top.html" class="nav-item px-4 sm:px-8 flex items-center border-l border-r border-gray-200 transition-colors hover:text-orange-500 hover:bg-orange-100">LEVELS</a>
+                <a href="leaderboard.html" class="nav-item px-4 sm:px-8 flex items-center border-r border-gray-200 transition-colors hover:text-orange-500 hover:bg-orange-100">PLAYERS</a>
                 <a href="news.html" class="nav-item px-4 sm:px-8 flex items-center border-r border-gray-200 transition-colors hover:text-orange-500 hover:bg-orange-100">NEWS</a>
                 <a href="streams.html" class="nav-item px-4 sm:px-8 flex items-center border-r border-gray-200 transition-colors hover:text-orange-500 hover:bg-orange-100">STREAMS</a>
             </nav>
@@ -131,7 +131,7 @@
                             <img src="images/logo2.png" alt="Logo" class="h-12 sm:h-16 w-auto">
                         </a>
                         <div class="flex uppercase font-medium text-xs sm:text-sm text-gray-700">
-                            <a href="https://www.pointercrate.com" target="_blank" class="hover:text-orange-500 transition-colors"><b>PointerCrate.com</b></a>
+                            <a href="https://demonlist.org/" target="_blank" class="hover:text-orange-500 transition-colors"><b>demonlist.org</b></a>
                         </div>
                     </div>
 
@@ -140,7 +140,7 @@
                         <button onclick="switchTab('tab1')" 
                                 id="btn-tab1" 
                                 class="px-4 py-3 font-bold uppercase text-[11px] sm:text-xs md:text-sm border-b-2 border-orange-500 text-orange-600 bg-white flex-1 text-center">
-                            POINTERCRATE.COM RATING
+                            demonlist.org RATING
                         </button>
                         
                         <button onclick="switchTab('tab2')" 
@@ -208,12 +208,12 @@
             <div class="flex flex-wrap justify-center md:justify-start items-center gap-4">
                 <a href='https://www.youtube.com/@hertzogen'><img src="images/logo3.png" alt="Logo" class="h-12 sm:h-16 w-auto opacity-60 hover:opacity-100 transition-opacity"></a>
                 <a href='https://t.me/hertzogen2007'><img src="images/logo4.png" alt="Logo" class="h-12 sm:h-16 w-auto opacity-60 hover:opacity-100 transition-opacity"></a>
-                <a href='https://www.pointercrate.com' target="_blank"><img src="images/logo5.png" alt="Logo" class="h-16 w-auto opacity-60 hover:opacity-100 transition-opacity"></a>
+                <a href='https://demonlist.org/' target="_blank"><img src="images/logo5.png" alt="Logo" class="h-16 w-auto opacity-60 hover:opacity-100 transition-opacity"></a>
             </div>
             <div class="flex flex-wrap justify-center gap-6">
                 <a href="https://t.me/hertzogen2007" class="text-gray-400 hover:text-orange-500 transition-colors text-base sm:text-lg font-bold uppercase">Telegram</a>
                 <a href="https://www.youtube.com/@hertzogen" class="text-gray-400 hover:text-orange-500 transition-colors text-base sm:text-lg font-bold uppercase">YouTube</a>
-                <a href="https://www.pointercrate.com" target="_blank" class="text-gray-400 hover:text-orange-500 transition-colors text-base sm:text-lg font-bold uppercase">Pointercrate</a>
+                <a href="https://demonlist.org/" target="_blank" class="text-gray-400 hover:text-orange-500 transition-colors text-base sm:text-lg font-bold uppercase">demonlist</a>
             </div>
             <div class="text-center md:text-right">
                 <a href="privacy-policy.html" class="text-gray-500 hover:text-white transition-colors text-sm underline">Privacy Policy</a>
@@ -225,210 +225,212 @@
 <!-- ВСЕ СКРИПТЫ ЛОГИКИ -->
 <script>
     const URLS = { 
-        players: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTCNytbZ_R5TV-BfA1M2m0HiEe_C5FwfMlOCWWIu7gK9iOB48uKOnohrv6xTMqVmmjtB3d5XrISE4p9/pub?gid=93759483&single=true&output=csv', 
-        levels: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTCNytbZ_R5TV-BfA1M2m0HiEe_C5FwfMlOCWWIu7gK9iOB48uKOnohrv6xTMqVmmjtB3d5XrISE4p9/pub?gid=1437425318&single=true&output=csv', 
-        rankings: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTCNytbZ_R5TV-BfA1M2m0HiEe_C5FwfMlOCWWIu7gK9iOB48uKOnohrv6xTMqVmmjtB3d5XrISE4p9/pub?gid=2093715526&single=true&output=csv', 
+        players: './Players.csv', 
+        levels: './Levels.csv', 
+        rankings: './Rankings.csv', 
         streams: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTCNytbZ_R5TV-BfA1M2m0HiEe_C5FwfMlOCWWIu7gK9iOB48uKOnohrv6xTMqVmmjtB3d5XrISE4p9/pub?gid=1466784286&single=true&output=csv', 
         news: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTCNytbZ_R5TV-BfA1M2m0HiEe_C5FwfMlOCWWIu7gK9iOB48uKOnohrv6xTMqVmmjtB3d5XrISE4p9/pub?gid=30512158&single=true&output=csv' 
     };
     const DB = { players: {}, levels: {}, rankings: { PCR: {}, HCR: {} }, streams: [], news: [], playersArr: [] };
     const officialScores = [350, 331.71, 313.42, 291.7, 271.78, 252.88, 235.0, 218.14, 202.3, 187.49, 173.69, 160.91, 149.15, 138.41, 128.69, 119.99, 112.31, 105.65, 99.01, 93.39, 87.79, 83.21, 78.65, 75.11, 71.59, 68.09, 65.61, 63.15, 60.71, 58.29, 56.89, 55.51, 54.15, 52.81, 51.49, 50.19, 48.91, 47.65, 46.41, 45.19, 44.99, 43.81, 42.65, 41.51, 40.39, 39.29, 38.21, 37.15, 36.11, 35.09, 34.09, 33.11, 32.15, 31.21, 30.29, 29.39, 28.51, 27.65, 26.81, 25.99, 25.19, 24.41, 23.65, 22.91, 22.19, 21.49, 20.81, 20.15, 19.51, 18.89, 18.29, 17.71, 17.15, 16.61, 16.09, 15.59, 15.11, 14.65, 14.21, 13.79, 13.39, 13.01, 12.65, 12.31, 11.99, 11.69, 11.41, 11.15, 10.91, 10.69, 10.49, 10.31, 10.15, 10.01, 9.89, 9.79, 9.71, 9.65, 9.61, 9.59, 9.59, 9.61, 9.65, 9.71, 9.79, 9.89, 10.01, 10.15, 10.31, 10.49, 10.69, 10.91, 11.15, 11.41, 11.69, 11.99, 12.31, 12.65, 13.01, 13.39, 13.79, 14.21, 14.65, 15.11, 15.59, 16.09, 16.61, 17.15, 17.71, 18.29, 18.89, 19.51, 20.15, 20.81, 21.49, 22.19, 22.91, 23.65, 24.41, 25.19, 25.99, 26.81, 27.65, 28.51, 29.39, 30.29, 31.21, 32.15, 33.11, 34.09];
-        const RATING_SYSTEMS = { pointercrate: { calculate: pos => pos <= officialScores.length ? officialScores[pos - 1] || 0 : 0 }, hertzogen: { calculate: pos => 1000 / Math.log(pos + Math.E - 1) } };
+    const RATING_SYSTEMS = { demonlist: { calculate: pos => pos <= officialScores.length ? officialScores[pos - 1] || 0 : 0 }, hertzogen: { calculate: pos => 1000 / Math.log(pos + Math.E - 1) } };
 
-        // Универсальная функция поиска значения по возможным названиям колонок
-        function getField(obj, possibleNames) {
-            for (let key in obj) {
-                for (let name of possibleNames) {
-                    if (key.includes(name)) return obj[key];
-                }
+    function getField(obj, possibleNames) {
+        for (let key in obj) {
+            for (let name of possibleNames) {
+                if (key.includes(name)) return obj[key];
             }
-            return '';
         }
+        return '';
+    }
 
-        // НЕПРОБИВАЕМЫЙ ПАРСЕР CSV
-        function parseCSV(str) {
-            const result = [];
-            const lines = str.split(/\r?\n/).filter(l => l.trim());
-            if (!lines.length) return result;
-            
-            let delim = ',';
-            if (lines[0].indexOf(',') === -1 && lines[0].indexOf(';') !== -1) delim = ';';
-            
-            const headers = lines[0].split(delim).map(h => h.replace(/["\r\n\s\ufeff]/g, '').toLowerCase());
-            
-            for (let i = 1; i < lines.length; i++) {
-                const row = lines[i];
-                const cols = [];
-                let curr = '';
-                let inQuotes = false;
-                for (let j = 0; j < row.length; j++) {
-                    const char = row[j];
-                    if (char === '"') { inQuotes = !inQuotes; }
-                    else if (char === delim && !inQuotes) { cols.push(curr); curr = ''; }
-                    else { curr += char; }
-                }
-                cols.push(curr);
-                
-                let obj = {};
-                headers.forEach((h, idx) => {
-                    let val = cols[idx] ? cols[idx].trim() : '';
-                    if (val.startsWith('"') && val.endsWith('"')) val = val.slice(1, -1);
-                    obj[h] = val;
-                });
-                result.push(obj);
+    function parseCSV(str) {
+        const result = [];
+        const lines = str.split(/\r?\n/).filter(l => l.trim());
+        if (!lines.length) return result;
+        
+        let delim = ',';
+        if (lines[0].indexOf(',') === -1 && lines[0].indexOf(';') !== -1) delim = ';';
+        const headers = lines[0].split(delim).map(h => h.replace(/["\r\n\s\ufeff]/g, '').toLowerCase());
+        
+        for (let i = 1; i < lines.length; i++) {
+            const row = lines[i];
+            const cols = [];
+            let curr = '';
+            let inQuotes = false;
+            for (let j = 0; j < row.length; j++) {
+                const char = row[j];
+                if (char === '"') { inQuotes = !inQuotes; }
+                else if (char === delim && !inQuotes) { cols.push(curr); curr = ''; }
+                else { curr += char; }
             }
-            return result;
-        }
-
-        function getParsedStreams() {
-            return DB.streams.filter(s => String(getField(s, ['stream_id', 'streamid'])).trim() !== '')
-            .map(s => { 
-                const pId = String(getField(s, ['player_id', 'playerid'])).trim(); 
-                const lId = String(getField(s, ['level_id', 'levelid'])).trim(); 
-                const status = String(getField(s, ['is_live', 'islive', 'status'])).trim(); 
-                const progress = String(getField(s, ['progress'])).trim(); 
-                const link = String(getField(s, ['link', 'url'])).trim(); 
-                
-                const player = DB.players[pId] || { nickname: pId ? `ID:${pId}` : 'Unknown', country: 'WORLD' };
-                const level = DB.levels[lId] || { name: 'Unknown Level' };
-                
-                let rank = 9999;
-                if (DB.rankings['PCR'] && DB.rankings['PCR'][lId]) rank = DB.rankings['PCR'][lId].pos;
-                else if (DB.rankings['HCR'] && DB.rankings['HCR'][lId]) rank = DB.rankings['HCR'][lId].pos;
-                
-                return { status, progress, link: link, player, level, rank, pId, lId }; 
+            cols.push(curr);
+            
+            let obj = {};
+            headers.forEach((h, idx) => {
+                let val = cols[idx] ? cols[idx].trim() : '';
+                if (val.startsWith('"') && val.endsWith('"')) val = val.slice(1, -1);
+                obj[h] = val;
             });
+            result.push(obj);
         }
+        return result;
+    }
 
-        async function initApp() {
-            try {
-                const responses = await Promise.all(Object.values(URLS).map(url => fetch(url)));
-                const texts = await Promise.all(responses.map(res => res.text()));
-                
-                const pArr = parseCSV(texts[0]); 
-                const lArr = parseCSV(texts[1]); 
-                const rArr = parseCSV(texts[2]); 
-                DB.streams = parseCSV(texts[3]); 
-                DB.news = parseCSV(texts[4]);
-                
-                pArr.forEach(p => {
-                    const id = String(getField(p, ['player_id', 'playerid'])).trim();
-                    if(id) DB.players[id] = p;
-                });
-                DB.playersArr = Object.values(DB.players);
-                
-                lArr.forEach(l => {
-                    const id = String(getField(l, ['level_id', 'levelid'])).trim();
-                    if(id) DB.levels[id] = l;
-                });
-                
-                rArr.forEach(r => { 
-                    const lId = String(getField(r, ['level_id', 'levelid'])).trim(); 
-                    const pos = parseInt(getField(r, ['position', 'pos'])); 
-                    const req = getField(r, ['requirement', 'req']) || "100";
-                    const topName = String(getField(r, ['top_name', 'topname']) || 'PCR').trim().toUpperCase(); 
-                    
-                    if (!isNaN(pos) && lId) {
-                        if (!DB.rankings[topName]) DB.rankings[topName] = {};
-                        DB.rankings[topName][lId] = { pos: pos, req: req };
-                    }
-                });
-                
-                renderSidebars(); 
-                document.querySelectorAll('.hidden.xl\\:flex').forEach((b, i) => setTimeout(() => b.classList.add('animate-banner-entry'), i * 150));
-                
-                renderTopLevels('levels-list-tab1', 'PCR', 'pointercrate'); 
-                renderTopLevels('levels-list-tab2', 'HCR', 'hertzogen');
-            } catch (err) { console.error("Ошибка инициализации:", err); }
-        }
+    // ИСПОЛЬЗУЕМ ФУНКЦИЮ ИЗ ТВОЕГО news.html (Она точно находит стримы без ошибок)
+    function getParsedStreams() {
+        return DB.streams.map(stream => {
+            const parts = String(stream.stream_id || '').split(',');
+            const pId = stream.player_id || parts[2]; 
+            const lId = stream.level_id || parts[3];
+            const status = stream.is_live || parts[1];
+            const progress = stream.progress || parts[4];
+            const link = stream.link || stream.url || '';
+            const player = DB.players[pId] || { nickname: pId ? `ID:${pId}` : 'Unknown', country: 'WORLD' };
+            const level = DB.levels[lId] || { name: 'Unknown Level' };
+            const builderName = String(getField(level, ['builder'])).trim() || 'Unknown';
+            let rank = 9999;
+            if (DB.rankings['PCR'] && DB.rankings['PCR'][lId]) rank = DB.rankings['PCR'][lId].pos;
+            else if (DB.rankings['HCR'] && DB.rankings['HCR'][lId]) rank = DB.rankings['HCR'][lId].pos;
+            return { status, progress, link, player, level, builderName, rank, pId, lId }; 
+        }).filter(s => s.pId !== undefined && s.pId !== '');
+    }
 
-        function getFlag(code) { 
-            return (!code || code === 'unknown' || code.trim() === '') ? '' : `<img src="images/flags/${code.trim().toLowerCase()}.gif" class="w-6 h-4 shadow-sm inline-block object-cover hltv-border" onerror="this.style.display='none'">`; 
-        }
-        function switchTab(tabId) { document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden')); document.querySelectorAll('button[id^="btn-"]').forEach(b => b.classList.remove('border-orange-500', 'text-orange-600', 'bg-white')); document.querySelectorAll('button[id^="btn-"]').forEach(b => b.classList.add('border-transparent', 'text-gray-500')); document.getElementById(tabId).classList.remove('hidden'); document.getElementById('btn-' + tabId).classList.add('border-orange-500', 'text-orange-600', 'bg-white'); document.getElementById('btn-' + tabId).classList.remove('border-transparent', 'text-gray-500'); }
-
-        function renderTopLevels(containerId, topListId, ratingMode) {
-            const container = document.getElementById(containerId);
-            if (!container) return;
+    async function initApp() {
+        try {
+            // ИСПРАВЛЕНИЕ ОШИБКИ 400: Правильное добавление кэш-параметра к Google-ссылке
+            const responses = await Promise.all(Object.values(URLS).map(url => {
+                const separator = url.includes('?') ? '&' : '?';
+                return fetch(url + separator + 't=' + new Date().getTime());
+            }));
+            const texts = await Promise.all(responses.map(res => res.text()));
             
-            const currentRankings = DB.rankings[topListId] || {};
-            const rankedLevels = Object.keys(currentRankings).map(lId => {
-                return { lId: lId, pos: currentRankings[lId].pos, req: currentRankings[lId].req, level: DB.levels[lId] || {} };
-            }).sort((a, b) => a.pos - b.pos);
-
-            container.innerHTML = ''; 
-            container.style.opacity = '1'; 
-            let cardIndex = 0;
-
-            rankedLevels.forEach(item => {
-                const pos = item.pos; const level = item.level;
-                const basePoints = RATING_SYSTEMS[ratingMode].calculate(pos);
-                const isH = ratingMode === 'hertzogen'; const isOpen = pos === 1;
-                const dpOpen = isH ? Math.round(basePoints) : basePoints.toFixed(2);
-                const dpClosed = Math.round(basePoints);
-                const dpSmall = isH ? Math.round(basePoints * 0.10) : (basePoints * 0.10).toFixed(2);
-                
-                const lvlName = getField(level, ['name', 'levelname']) || 'Unknown';
-                const thumb = getField(level, ['thumbnail', 'thumb']) || 'https://via.placeholder.com/128x64';
-                const ytLink = getField(level, ['video_url', 'videourl', 'link']) || '#';
-                const detailLink = `level.html?id=${item.lId}`;
-                
-                const publisherId = String(getField(level, ['publisher_id', 'publisherid', 'publisher', 'pub'])).trim();
-                const verifierId = String(getField(level, ['verifier_id', 'verifierid', 'verifier', 'verif'])).trim();
-                
-                const publisherObj = DB.players[publisherId] || { nickname: publisherId ? `ID:${publisherId}` : 'Unknown', country: 'WORLD' };
-                const verifierObj = DB.players[verifierId] || { nickname: verifierId ? `ID:${verifierId}` : 'Unknown', country: 'WORLD' };
-                
-                const authorName = publisherObj.nickname; const authorFlag = getFlag(publisherObj.country);
-                const verifierName = verifierObj.nickname; const verifierFlag = getFlag(verifierObj.country);
-                
-                const pLink = (verifierId && verifierId !== '') ? `player.html?id=${verifierId}` : '#';
-                
-                const div = document.createElement('div');
-                div.className = "level-card card-hover bg-white border border-gray-200 shadow-sm cursor-pointer hover:shadow-xl overflow-hidden animate-card-entry mb-4";
-                div.style.animationDelay = `${cardIndex++ * 35}ms`;
-                div.innerHTML = `<div class="flex flex-col sm:flex-row sm:items-center justify-between p-4 gap-3 sm:gap-4 min-h-[5rem]"><div class="flex items-center gap-3 sm:gap-4"><span class="text-xl sm:text-2xl font-bold text-black w-8 sm:w-12 text-center">#${pos}</span><img src="${thumb}" class="h-12 w-20 sm:h-16 sm:w-28 object-cover rounded bg-gray-100 flex-shrink-0" onerror="this.src='https://via.placeholder.com/128x64'"><div class="min-w-0"><h3 class="font-bold text-base sm:text-xl text-gray-900 truncate">${lvlName}</h3><p class="text-xs sm:text-sm mt-0.5 truncate"><span class="text-gray-400">от </span><span class="font-bold text-sm sm:text-base text-gray-800">${authorName}</span> ${authorFlag}</p></div></div><div class="text-left sm:text-right flex-shrink-0 pl-11 sm:pl-0"><div class="text-orange-600 font-bold text-xl sm:text-2xl base-points-text" style="transition: all 0.3s ease;">${isOpen ? dpOpen : dpClosed} pts</div></div></div><div class="extra-info" style="height: ${isOpen ? 'auto' : '0px'};"><div class="border-t border-gray-100 p-4 bg-gray-50 flex flex-col sm:flex-row sm:items-center justify-between gap-4"><div class="text-center sm:flex-1"><p class="text-[10px] text-gray-400 uppercase font-bold mb-1">Верифицировано:</p><a href="${pLink}"><div class="font-bold text-base sm:text-lg text-gray-800 hover:opacity-70 grow-text cursor-pointer">${verifierName} ${verifierFlag}</div></a></div><div class="sm:flex-1 flex flex-row sm:flex-col items-center gap-2 w-full sm:w-auto"><a href="${ytLink}" target="_blank" class="bg-black text-white px-4 py-2 rounded font-bold hover:bg-gray-800 transition-colors text-xs sm:text-sm flex-1 sm:w-full text-center">Смотреть</a><a href="${detailLink}" class="bg-gray-200 text-black px-4 py-2 rounded font-bold hover:bg-gray-300 transition-colors text-xs sm:text-sm flex-1 sm:w-full text-center">Подробнее</a></div><div class="text-center sm:flex-1"><p class="text-[10px] text-gray-400 uppercase font-bold mb-1 flex items-center justify-center gap-1">POINTS<a href="rating-info.html" class="w-4 h-4 bg-gray-300 rounded-full flex items-center justify-center text-[10px] text-white hover:bg-orange-600 transition-colors cursor-help" title="Как считается рейтинг?">?</a></p><div class="text-xl sm:text-2xl font-bold text-gray-800">${item.req}%</div><div class="text-sm sm:text-base font-bold text-gray-500">${pos <= 75 ? dpSmall + " pts" : "EL"}</div></div></div></div>`;
-                div.addEventListener('click', (e) => { if(e.target.closest('a')) return; const info = div.querySelector('.extra-info'); const ptEl = div.querySelector('.base-points-text'); const isExp = info.style.height === '0px' || info.style.height === ''; if (isExp) { info.style.height = 'auto'; const targetHeight = info.scrollHeight + 'px'; info.style.height = '0px'; info.offsetHeight; info.style.height = targetHeight; } else { if (info.style.height === 'auto' || !info.style.height) { info.style.height = info.scrollHeight + 'px'; info.offsetHeight; } info.style.height = '0px'; } ptEl.style.opacity = 0; ptEl.style.transform = "scale(0.95)"; setTimeout(() => { ptEl.textContent = (isExp ? dpOpen : dpClosed) + " pts"; ptEl.style.opacity = 1; ptEl.style.transform = "scale(1)"; }, 200); });
-                container.appendChild(div);
+            const pArr = parseCSV(texts[0]); 
+            const lArr = parseCSV(texts[1]); 
+            const rArr = parseCSV(texts[2]); 
+            DB.streams = parseCSV(texts[3]); 
+            DB.news = parseCSV(texts[4]);
+            
+            pArr.forEach(p => {
+                const id = String(getField(p, ['player_id', 'playerid'])).trim();
+                if(id) DB.players[id] = p;
+            });
+            DB.playersArr = Object.values(DB.players);
+            
+            lArr.forEach(l => {
+                const id = String(getField(l, ['level_id', 'levelid'])).trim();
+                if(id) DB.levels[id] = l;
             });
             
-            const loader = document.getElementById('loader');
-            if(loader) loader.style.display = 'none';
+            rArr.forEach(r => { 
+                const lId = String(getField(r, ['level_id', 'levelid'])).trim(); 
+                const pos = parseInt(getField(r, ['position', 'pos'])); 
+                const req = getField(r, ['requirement', 'req']) || "100";
+                const topName = String(getField(r, ['top_name', 'topname']) || 'PCR').trim().toUpperCase(); 
+                
+                if (!isNaN(pos) && lId) {
+                    if (!DB.rankings[topName]) DB.rankings[topName] = {};
+                    DB.rankings[topName][lId] = { pos: pos, req: req };
+                }
+            });
+            
+            renderSidebars(); 
+            document.querySelectorAll('.hidden.xl\\:flex').forEach((b, i) => setTimeout(() => b.classList.add('animate-banner-entry'), i * 150));
+            
+            renderTopLevels('levels-list-tab1', 'PCR', 'demonlist'); 
+            renderTopLevels('levels-list-tab2', 'HCR', 'hertzogen');
+        } catch (err) { console.error("Ошибка инициализации:", err); }
+    }
+
+    function getFlag(code) { 
+        return (!code || code === 'unknown' || code.trim() === '') ? '' : `<img src="images/flags/${code.trim().toLowerCase()}.gif" class="w-6 h-4 shadow-sm inline-block object-cover hltv-border" onerror="this.style.display='none'">`; 
+    }
+    
+    function switchTab(tabId) { document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden')); document.querySelectorAll('button[id^="btn-"]').forEach(b => b.classList.remove('border-orange-500', 'text-orange-600', 'bg-white')); document.querySelectorAll('button[id^="btn-"]').forEach(b => b.classList.add('border-transparent', 'text-gray-500')); document.getElementById(tabId).classList.remove('hidden'); document.getElementById('btn-' + tabId).classList.add('border-orange-500', 'text-orange-600', 'bg-white'); document.getElementById('btn-' + tabId).classList.remove('border-transparent', 'text-gray-500'); }
+
+    // ТВЕЙ ИСХОДНЫЙ КОД ТОПА
+    function renderTopLevels(containerId, topListId, ratingMode) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        
+        const currentRankings = DB.rankings[topListId] || {};
+        const rankedLevels = Object.keys(currentRankings).map(lId => {
+            return { lId: lId, pos: currentRankings[lId].pos, req: currentRankings[lId].req, level: DB.levels[lId] || {} };
+        }).sort((a, b) => a.pos - b.pos);
+
+        container.innerHTML = ''; 
+        container.style.opacity = '1'; 
+        let cardIndex = 0;
+
+        rankedLevels.slice(0, 200).forEach(item => {
+            const pos = item.pos; const level = item.level;
+            // Пытаемся получить очки из колонки points (или score) уровня
+// Если их там нет, ставим 0
+            const basePoints = parseFloat(getField(level, ['points', 'score'])) || 0;
+            const isH = ratingMode === 'hertzogen'; const isOpen = pos === 1;
+            const dpOpen = isH ? Math.round(basePoints) : basePoints.toFixed(2);
+            const dpClosed = Math.round(basePoints);
+            const dpSmall = isH ? Math.round(basePoints * 0.25) : (basePoints * 0.25).toFixed(2);
+            
+            const lvlName = getField(level, ['name', 'levelname']) || 'Unknown';
+            const thumb = getField(level, ['thumbnail', 'thumb']) || 'images/default.jpg';
+            const ytLink = getField(level, ['video_url', 'videourl', 'link']) || '#';
+            const detailLink = `level.html?id=${item.lId}`;
+            
+            const verifierId = String(getField(level, ['verifier_id', 'verifierid', 'verifier', 'verif'])).trim();
+            const verifierObj = DB.players[verifierId] || { nickname: verifierId ? `ID:${verifierId}` : 'Unknown', country: 'WORLD' };
+            
+            const authorName = getField(level, ['builder']) || 'Unknown';
+            const verifierName = verifierObj.nickname; const verifierFlag = getFlag(verifierObj.country);
+            const pLink = (verifierId && verifierId !== '') ? `player.html?id=${verifierId}` : '#';
+            
+            const div = document.createElement('div');
+            div.className = "level-card card-hover bg-white border border-gray-200 shadow-sm cursor-pointer hover:shadow-xl overflow-hidden animate-card-entry mb-4";
+            div.style.animationDelay = `${cardIndex++ * 35}ms`;
+            
+            div.innerHTML = `<div class="flex flex-col sm:flex-row sm:items-center justify-between p-4 gap-3 sm:gap-4 min-h-[5rem]"><div class="flex items-center gap-3 sm:gap-4"><span class="text-xl sm:text-2xl font-bold text-black w-8 sm:w-12 text-center">#${pos}</span><img src="${thumb}" class="h-12 w-20 sm:h-16 sm:w-28 object-cover rounded bg-gray-100 flex-shrink-0" onerror="this.src='images/default.jpg'"><div class="min-w-0"><h3 class="font-bold text-base sm:text-xl text-gray-900 truncate">${lvlName}</h3><p class="text-xs sm:text-sm mt-0.5 truncate"><span class="text-gray-400">by </span><span class="font-bold text-sm sm:text-base text-gray-800">${authorName}</span></p></div></div><div class="text-left sm:text-right flex-shrink-0 pl-11 sm:pl-0"><div class="text-orange-600 font-bold text-xl sm:text-2xl base-points-text" style="transition: all 0.3s ease;">${isOpen ? dpOpen : dpClosed} pts</div></div></div><div class="extra-info" style="height: ${isOpen ? 'auto' : '0px'};"><div class="border-t border-gray-100 p-4 bg-gray-50 flex flex-col sm:flex-row sm:items-center justify-between gap-4"><div class="text-center sm:flex-1"><p class="text-[10px] text-gray-400 uppercase font-bold mb-1">Верифицировано:</p><a href="${pLink}"><div class="font-bold text-base sm:text-lg text-gray-800 hover:opacity-70 grow-text cursor-pointer">${verifierName} ${verifierFlag}</div></a></div><div class="sm:flex-1 flex flex-row sm:flex-col items-center gap-2 w-full sm:w-auto"><a href="${ytLink}" target="_blank" class="bg-black text-white px-4 py-2 rounded font-bold hover:bg-gray-800 transition-colors text-xs sm:text-sm flex-1 sm:w-full text-center">Смотреть</a><a href="${detailLink}" class="bg-gray-200 text-black px-4 py-2 rounded font-bold hover:bg-gray-300 transition-colors text-xs sm:text-sm flex-1 sm:w-full text-center">Подробнее</a></div><div class="text-center sm:flex-1"><p class="text-[10px] text-gray-400 uppercase font-bold mb-1 flex items-center justify-center gap-1">POINTS<a href="rating-info.html" class="w-4 h-4 bg-gray-300 rounded-full flex items-center justify-center text-[10px] text-white hover:bg-orange-600 transition-colors cursor-help" title="Как считается рейтинг?">?</a></p><div class="text-xl sm:text-2xl font-bold text-gray-800">${item.req}%</div><div class="text-sm sm:text-base font-bold text-gray-500">${pos <= 150 ? dpSmall + " pts" : "EL"}</div></div></div></div>`;
+            div.addEventListener('click', (e) => { if(e.target.closest('a')) return; const info = div.querySelector('.extra-info'); const ptEl = div.querySelector('.base-points-text'); const isExp = info.style.height === '0px' || info.style.height === ''; if (isExp) { info.style.height = 'auto'; const targetHeight = info.scrollHeight + 'px'; info.style.height = '0px'; info.offsetHeight; info.style.height = targetHeight; } else { if (info.style.height === 'auto' || !info.style.height) { info.style.height = info.scrollHeight + 'px'; info.offsetHeight; } info.style.height = '0px'; } ptEl.style.opacity = 0; ptEl.style.transform = "scale(0.95)"; setTimeout(() => { ptEl.textContent = (isExp ? dpOpen : dpClosed) + " pts"; ptEl.style.opacity = 1; ptEl.style.transform = "scale(1)"; }, 200); });
+            container.appendChild(div);
+        });
+        
+        const loader = document.getElementById('loader');
+        if(loader) loader.style.display = 'none';
+    }
+
+    // ТВОЙ ИСХОДНЫЙ КОД САЙДБАРОВ
+    function renderSidebars() { 
+        const leadList = DB.playersArr.filter(p => p.is_banned !== 'TRUE' && p.is_banned !== 'true').sort((a,b) => (parseInt(b.points)||0) - (parseInt(a.points)||0)).slice(0, 5);
+        const lContainer = document.getElementById('leaderboard-list');
+        if (lContainer) lContainer.innerHTML = leadList.map((p, i) => `<a href="player.html?id=${p.player_id}" class="block stream-card mb-1.5 border border-gray-200 p-2.5 hover:border-gray-500 hover:bg-gray-50 transition-all"><div class="flex items-center gap-2"><span class="text-sm font-bold text-gray-500 w-5">#${i+1}</span><img src="images/flags/${(p.country||'WORLD').toLowerCase()}.gif" class="w-5 h-3 hltv-border" onerror="this.src='images/flags/WORLD.gif'"><span class="text-sm font-bold text-gray-900">${p.nickname}</span></div></a>`).join('') + `<a href="leaderboard.html" class="block w-full text-center border border-gray-200 py-2 text-xs font-bold text-orange-600 hover:bg-orange-600 hover:text-white transition-all uppercase">Полный Список</a>`, lContainer.classList.add('animate-list-fade');
+
+        const streamsContainer = document.getElementById('streams-list');
+        if (streamsContainer) {
+            const streams = getParsedStreams().sort((a, b) => a.rank - b.rank).slice(0, 5);
+            streamsContainer.innerHTML = streams.map(s => { const isLive = String(s.status).trim().toUpperCase() === 'LIVE'; return `<div class="stream-card mb-3 border border-gray-200 bg-white"><div class="px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors" onclick="toggleDropdown(this)"><div class="flex items-center mb-1.5"><span class="flex items-center text-[10px] font-bold uppercase ${isLive ? 'text-red-500' : 'text-gray-400'}"><span class="w-2 h-2 rounded-full mr-1.5 inline-block ${isLive ? 'bg-red-500 animate-pulse' : 'bg-gray-400'}"></span>${isLive ? 'LIVE' : 'OFFLINE'}</span></div><div class="flex justify-between items-center mb-1"><div class="flex items-center gap-2"><img src="images/flags/${(s.player.country||'WORLD').toLowerCase()}.gif" class="w-6 h-4 border hltv-border object-cover" onerror="this.src='images/flags/WORLD.gif'"><span class="text-sm font-bold text-gray-900 truncate max-w-[140px]">${s.player.nickname}</span></div><span class="text-xs font-bold text-orange-600 bg-orange-100 px-2 py-0.5 rounded">#${s.rank === 9999 ? '—' : s.rank}</span></div><div class="text-xs text-gray-600 font-medium truncate">${s.level.name}  — <span class="font-bold text-gray-900">${s.progress}%</span></div></div><div class="dropdown-menu px-4 pb-3" style="display: none;"><a href="${s.link}" target="_blank" class="block w-full bg-orange-600 text-white font-bold py-2 rounded text-[12px] uppercase text-center hover:bg-orange-700">СЛЕДИТЬ</a></div></div>`; }).join(''), streamsContainer.classList.add('animate-list-fade');
         }
 
-        function renderSidebars() { 
-            const leadList = DB.playersArr.filter(p => p.is_banned !== 'TRUE' && p.is_banned !== 'true').sort((a,b) => (parseInt(b.points)||0) - (parseInt(a.points)||0)).slice(0, 5);
-            const lContainer = document.getElementById('leaderboard-list');
-            if (lContainer) lContainer.innerHTML = leadList.map((p, i) => `<a href="player.html?id=${p.player_id}" class="block stream-card mb-1.5 border border-gray-200 p-2.5 hover:border-gray-500 hover:bg-gray-50 transition-all"><div class="flex items-center gap-2"><span class="text-sm font-bold text-gray-500 w-5">#${i+1}</span><img src="images/flags/${(p.country||'WORLD').toLowerCase()}.gif" class="w-5 h-3 hltv-border" onerror="this.src='images/flags/WORLD.gif'"><span class="text-sm font-bold text-gray-900">${p.nickname}</span></div></a>`).join('') + `<a href="leaderboard.html" class="block w-full text-center border border-gray-200 py-2 text-xs font-bold text-orange-600 hover:bg-orange-600 hover:text-white transition-all uppercase">Полный Список</a>`, lContainer.classList.add('animate-list-fade');
+        const newsContainer = document.getElementById('news-list');
+        if (newsContainer) newsContainer.innerHTML = DB.news.slice(-5).reverse().map((n, i) => {
+            const headliner = getField(n, ['хедлайнер', 'headliner', 'date']);
+            const title = getField(n, ['заголовок', 'title']);
+            return `<a href="news.html#news-${DB.news.length - 1 - i}" class="stream-card block mb-3 border border-gray-200 p-4 hover:border-gray-400 hover:bg-gray-50 transition-all"><div class="text-[12px] font-bold text-orange-500 uppercase tracking-wider mb-1">${headliner}</div><div class="text-sm font-bold text-gray-900 leading-tight">${title}</div></a>`;
+        }).join('');
+        if (newsContainer) newsContainer.classList.add('animate-list-fade');
+        if(document.getElementById('footer')) document.getElementById('footer').style.opacity = '1';
+    }
 
-            const streamsContainer = document.getElementById('streams-list');
-            if (streamsContainer) {
-                const streams = getParsedStreams().sort((a, b) => a.rank - b.rank).slice(0, 5);
-                streamsContainer.innerHTML = streams.map(s => { const isLive = String(s.status).trim().toUpperCase() === 'LIVE'; return `<div class="stream-card mb-3 border border-gray-200 bg-white"><div class="px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors" onclick="toggleDropdown(this)"><div class="flex items-center mb-1.5"><span class="flex items-center text-[10px] font-bold uppercase ${isLive ? 'text-red-500' : 'text-gray-400'}"><span class="w-2 h-2 rounded-full mr-1.5 inline-block ${isLive ? 'bg-red-500 animate-pulse' : 'bg-gray-400'}"></span>${isLive ? 'LIVE' : 'OFFLINE'}</span></div><div class="flex justify-between items-center mb-1"><div class="flex items-center gap-2"><img src="images/flags/${(s.player.country||'WORLD').toLowerCase()}.gif" class="w-6 h-4 border hltv-border object-cover" onerror="this.src='images/flags/WORLD.gif'"><span class="text-sm font-bold text-gray-900 truncate max-w-[140px]">${s.player.nickname}</span></div><span class="text-xs font-bold text-orange-600 bg-orange-100 px-2 py-0.5 rounded">#${s.rank === 9999 ? '—' : s.rank}</span></div><div class="text-xs text-gray-600 font-medium truncate">${s.level.name} — <span class="font-bold text-gray-900">${s.progress}%</span></div></div><div class="dropdown-menu px-4 pb-3" style="display: none;"><a href="${s.link}" target="_blank" class="block w-full bg-orange-600 text-white font-bold py-2 rounded text-[12px] uppercase text-center hover:bg-orange-700">СЛЕДИТЬ</a></div></div>`; }).join(''), streamsContainer.classList.add('animate-list-fade');
-            }
+    function toggleDropdown(el) { const menu = el.closest('.stream-card').querySelector('.dropdown-menu'); menu.style.display = menu.style.display === 'block' ? 'none' : 'block'; }
+    document.getElementById('scroll-to-top-btn')?.addEventListener('click', (e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); });
+    window.addEventListener('scroll', () => { const miniLogo = document.getElementById('mini-logo-container'); if (miniLogo) { if (window.scrollY > 100) { miniLogo.classList.remove('w-0', 'opacity-0'); miniLogo.classList.add('w-16', 'sm:w-24', 'opacity-100'); } else { miniLogo.classList.add('w-0', 'opacity-0'); miniLogo.classList.remove('w-16', 'sm:w-24', 'opacity-100'); } } });
 
-            const newsContainer = document.getElementById('news-list');
-            if (newsContainer) newsContainer.innerHTML = DB.news.slice(-5).reverse().map((n, i) => {
-                const headliner = getField(n, ['хедлайнер', 'headliner', 'date']);
-                const title = getField(n, ['заголовок', 'title']);
-                return `<a href="news.html#news-${DB.news.length - 1 - i}" class="stream-card block mb-3 border border-gray-200 p-4 hover:border-gray-400 hover:bg-gray-50 transition-all"><div class="text-[12px] font-bold text-orange-500 uppercase tracking-wider mb-1">${headliner}</div><div class="text-sm font-bold text-gray-900 leading-tight">${title}</div></a>`;
-            }).join('');
-            if (newsContainer) newsContainer.classList.add('animate-list-fade');
-            if(document.getElementById('footer')) document.getElementById('footer').style.opacity = '1';
-        }
+    (function injectAnimationStyles() {
+        if (document.getElementById('runtime-animation-styles')) return;
+        const style = document.createElement('style'); style.id = 'runtime-animation-styles';
+        style.innerHTML = `@keyframes levelCardAppear { from { opacity: 0; translate: 0 20px; } to { opacity: 1; translate: 0 0; } } @keyframes listContentFadeIn { from { opacity: 0; translate: 0 8px; } to { opacity: 1; translate: 0 0; } } .animate-card-entry { animation: levelCardAppear 0.45s cubic-bezier(0.215, 0.610, 0.355, 1) both; } #news-list, #streams-list, #leaderboard-list { opacity: 0; } .animate-list-fade { animation: listContentFadeIn 0.5s ease-out forwards; } .hidden.xl\\:flex { opacity: 0; } .animate-banner-entry { opacity: 1 !important; transition: opacity 0.6s ease-in-out; }`;
+        document.head.appendChild(style);
+    })();
 
-        function toggleDropdown(el) { const menu = el.closest('.stream-card').querySelector('.dropdown-menu'); menu.style.display = menu.style.display === 'block' ? 'none' : 'block'; }
-        document.getElementById('scroll-to-top-btn')?.addEventListener('click', (e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); });
-        window.addEventListener('scroll', () => { const miniLogo = document.getElementById('mini-logo-container'); if (miniLogo) { if (window.scrollY > 100) { miniLogo.classList.remove('w-0', 'opacity-0'); miniLogo.classList.add('w-16', 'sm:w-24', 'opacity-100'); } else { miniLogo.classList.add('w-0', 'opacity-0'); miniLogo.classList.remove('w-16', 'sm:w-24', 'opacity-100'); } } });
-
-        (function injectAnimationStyles() {
-            if (document.getElementById('runtime-animation-styles')) return;
-            const style = document.createElement('style'); style.id = 'runtime-animation-styles';
-            style.innerHTML = `@keyframes levelCardAppear { from { opacity: 0; translate: 0 20px; } to { opacity: 1; translate: 0 0; } } @keyframes listContentFadeIn { from { opacity: 0; translate: 0 8px; } to { opacity: 1; translate: 0 0; } } .animate-card-entry { animation: levelCardAppear 0.45s cubic-bezier(0.215, 0.610, 0.355, 1) both; } #news-list, #streams-list, #leaderboard-list { opacity: 0; } .animate-list-fade { animation: listContentFadeIn 0.5s ease-out forwards; } .hidden.xl\\:flex { opacity: 0; } .animate-banner-entry { opacity: 1 !important; transition: opacity 0.6s ease-in-out; }`;
-            document.head.appendChild(style);
-        })();
-
-        initApp();
-    </script>
+    initApp();
+</script>
 </body>
 </html>

@@ -12,7 +12,6 @@
         * { font-family: 'Montserrat', sans-serif !important; }
         html, body { background-color: #000 !important; margin: 0; padding: 0; }
         
-        /* Анимация плавного появления меню */
         .dropdown-menu { display: none; transition: all 0.3s ease; }
         .dropdown-menu.show { display: block; }
         
@@ -21,8 +20,8 @@
         .hltv-border { border: 1px solid #000; box-sizing: border-box; }
         
         .banner-container img {
-            position: static !important; /* Убирает sticky/fixed */
-            margin: 0 auto !important;   /* Центрирует */
+            position: static !important;
+            margin: 0 auto !important;
             display: block !important;
         }
         .banner-container, .banner-container a, .banner-container img {
@@ -37,7 +36,6 @@
             width: 100%;
         }
 
-        /* --- НОВЫЕ СТИЛИ АНИМАЦИЙ ДЛЯ ТЕМПЛЕЙТА --- */
         @keyframes listContentFadeIn {
             from { opacity: 0; transform: translateY(8px); }
             to { opacity: 1; transform: translateY(0); }
@@ -47,17 +45,14 @@
             to { opacity: 1; }
         }
 
-        /* Контенты списков изначально прозрачны, пока не загрузятся данные */
         #news-list, #streams-list, #leaderboard-list {
             opacity: 0;
         }
 
-        /* Класс плавного проявления списков */
         .animate-list-fade {
             animation: listContentFadeIn 0.5s ease-out forwards;
         }
 
-        /* Анимация внешних брендинг-баннеров */
         .animate-banner-left {
             opacity: 0;
             animation: bannerFadeIn 0.6s ease-in-out forwards;
@@ -69,7 +64,6 @@
             animation-delay: 300ms;
         }
     </style>
-    <script src="js/news.js"></script>
 </head>
 <body class="bg-black min-h-screen">
 
@@ -84,8 +78,8 @@
             </div>
 
             <nav class="flex h-full font-bold uppercase text-xs sm:text-sm text-gray-800 items-stretch overflow-x-auto whitespace-nowrap">
-                <a href="top.html" class="nav-item px-4 sm:px-8 flex items-center border-l border-r border-gray-200 transition-colors hover:text-orange-500 hover:bg-orange-100">TOP-100</a>
-                <a href="leaderboard.html" class="nav-item px-4 sm:px-8 flex items-center border-r border-gray-200 transition-colors hover:text-orange-500 hover:bg-orange-100">leaderboard</a>
+                <a href="top.html" class="nav-item px-4 sm:px-8 flex items-center border-l border-r border-gray-200 transition-colors hover:text-orange-500 hover:bg-orange-100">LEVELS</a>
+                <a href="leaderboard.html" class="nav-item px-4 sm:px-8 flex items-center border-r border-gray-200 transition-colors hover:text-orange-500 hover:bg-orange-100">PLAYERS</a>
                 <a href="news.html" class="nav-item px-4 sm:px-8 flex items-center border-r border-gray-200 transition-colors hover:text-orange-500 hover:bg-orange-100">NEWS</a>
                 <a href="streams.html" class="nav-item px-4 sm:px-8 flex items-center border-r border-gray-200 transition-colors hover:text-orange-500 hover:bg-orange-100">STREAMS</a>
             </nav>
@@ -124,7 +118,7 @@
                             <img src="images/logo2.png" alt="Logo" class="h-12 sm:h-16 w-auto">
                         </a>
                         <div class="flex gap-8 uppercase font-medium text-sm text-gray-700">
-                            <a href="https://www.pointercrate.com" class="hover:text-orange-500 transition-colors"><b>PointerCrate.com</b></a>
+                            <a href="https://demonlist.org/" class="hover:text-orange-500 transition-colors"><b>demonlist.org</b></a>
                         </div>
                     </div>
                     
@@ -146,55 +140,46 @@
                             </h1>
                             
                             <p class="text-gray-600 text-sm sm:text-base font-normal mb-8 leading-relaxed">
-                                Наша платформа объединяет два разных подхода к категоризации контента Geometry Dash. Это позволяет игрокам как отслеживать общемировые стандарты, так и соревноваться внутри нашей независимой экосистемы с кастомными весами.
+                                Наша платформа объединяет два разных подхода к категоризации контента Geometry Dash. Это позволяет игрокам как отслеживать общемировые стандарты, так и соревноваться внутри нашей независимой экосистемы.
                             </p>
 
                             <!-- ДВУХКОЛОНОЧНЫЙ БЛОК ДЛЯ СРАВНЕНИЯ ТОПОВ -->
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10 items-start text-gray-900 text-sm sm:text-base">
                                 
-                                <!-- ЛЕВАЯ КОЛОНКА: Топ Pointercrate -->
+                                <!-- ЛЕВАЯ КОЛОНКА: Топ demonlist -->
                                 <div class="border-t-4 border-blue-400 bg-blue-50 p-5 space-y-4 shadow-sm">
                                     <h3 class="font-bold text-gray-900 uppercase text-base sm:text-lg flex items-center gap-2">
                                         <span class="w-2 h-2 bg-blue-400 rounded-full"></span>
-                                        Рейтинг <a href="top.html" target="_blank" class="hover:text-blue-500">Pointercrate.com</a>
+                                        Рейтинг <a href="top.html" target="_blank" class="hover:text-blue-500">demonlist.org</a>
                                     </h3>
                                     <p class="text-gray-600 font-normal leading-relaxed">
                                         Этот список является чистым отражением официального глобального Demonlist. На нашем ресурсе мы <b>просто берем готовую информацию</b> напрямую из открытых баз данных оригинального проекта. 
                                     </p>
                                     <p class="text-gray-600 font-normal leading-relaxed">
-                                        Здесь нет никаких внутренних корректировок или субъективных изменений со стороны нашей администрации. Это международный эталон сложности, верифицированный интернациональной командой модераторов Pointercrate.com.
+                                        Здесь нет никаких внутренних корректировок или субъективных изменений со стороны нашей администрации. Это международный эталон сложности, верифицированный интернациональной командой модераторов.
                                     </p>
                                 </div>
 
-                                <!-- ПРАВАЯ КОЛОНКА: Личный Топ + Мат модель -->
+                                <!-- ПРАВАЯ КОЛОНКА: Личный Топ -->
                                 <div class="border-t-4 border-orange-500 bg-orange-50/40 p-5 space-y-4 shadow-sm">
                                     <h3 class="font-bold text-gray-900 uppercase text-base sm:text-lg flex items-center gap-2">
                                         <span class="w-2 h-2 bg-orange-500 rounded-full"></span>
                                         Рейтинг <a href="top.html" target="_blank" class="hover:text-orange-500">H&CR</a>
                                     </h3>
                                     <p class="text-gray-600 font-normal leading-relaxed">
-                                        Наша собственная таблица сложнейших демонов, позиции в которой распределяются экспертной командой нашего проекта и локальными топ-игроками. Ценность прохождения уровней высчитывается по строгой <b>математической модели</b>.
-                                    </p>
-                                    <p class="text-gray-600 font-normal leading-relaxed">
-                                        В зависимости от позиции уровня в списке, ему присваивается базовый вес очков по экспоненциальной кривой:
-                                    </p>
-                                    <div class="bg-white border border-orange-200 p-3 font-mono text-xs text-gray-800 rounded overflow-x-auto font-normal shadow-inner">
-                                        P(x) = 1000 * ((101 - x) / 100)^1.3
-                                    </div>
-                                    <p class="text-xs text-gray-500 font-normal leading-normal">
-                                        Где <code class="bg-gray-100 px-1 font-bold text-gray-800 rounded">x</code> — это порядковый номер демона (от #1 до #100). Топ-1 приносит максимальные 1000 очков, а вес последующих мест плавно убывает.
+                                        Пока что этот рейтинг находится в стадии разработки и его еще нет. Но в нём уже есть пара крутых уровней, которые вы можете заценить в соответствующей вкладке топа!
                                     </p>
                                 </div>
 
                             </div>
-
+                            
                             <!-- НИЖНИЙ БЛОК: Лидерборд -->
                             <div class="border-l-4 border-orange-600 pl-4 py-1 space-y-4 text-gray-900 text-sm sm:text-base">
                                 <h3 class="font-bold text-gray-900 uppercase text-lg sm:text-xl tracking-wide">
                                     Глобальная Таблица Лидеров (Leaderboard)
                                 </h3>
                                 <p class="text-gray-600 font-normal leading-relaxed">
-                                    На основе распределения очков кастомной математической модели строится глобальный рейтинг игроков. Очки в личные профили суммируются автоматически по двум категориям достижений:
+                                    Глобальный рейтинг игроков формируется на основе очков, взятых из открытой статистики. Очки в личные профили суммируются автоматически по двум категориям достижений:
                                 </p>
                                 
                                 <div class="space-y-4 bg-gray-50 p-4 border border-gray-200 rounded">
@@ -205,8 +190,7 @@
                                             А. Полное прохождение уровня (100%):
                                         </h4>
                                         <p class="text-gray-600 font-normal pl-3">
-                                            Если игрок полностью проходит демона из списка, он мгновенно забирает его полный базовый вес:
-                                            <code class="block bg-white border border-gray-200 p-2 font-mono text-xs text-gray-800 rounded mt-2.5 w-max font-normal">Points = B(x)</code>
+                                            Если игрок полностью проходит демона из списка, он мгновенно забирает его полный базовый вес.
                                         </p>
                                     </div>
 
@@ -217,13 +201,7 @@
                                             Б. Рекорд прогресса (Progress):
                                         </h4>
                                         <p class="text-gray-600 font-normal pl-3 leading-relaxed">
-                                            Частичные рекорды также премируются, если процент прохождения равен или превышает минимальный порог, заданный для данного уровня. Расчет идет пропорционально по следующей формуле:
-                                        </p>
-                                        <div class="bg-white border border-gray-200 p-3 font-mono text-xs text-gray-800 rounded overflow-x-auto mx-3 font-normal">
-                                            Points_progress = P(x) * ((%_игрока - M) / (100 - M))
-                                        </div>
-                                        <p class="text-xs text-gray-500 font-normal pl-3 leading-normal">
-                                            Где <code class="bg-gray-100 px-1 font-bold text-gray-800 rounded">%_игрока</code> — текущий процент рекорда, а <code class="bg-gray-100 px-1 font-bold text-gray-800 rounded">M</code> — минимальный допустимый порог прохождения.
+                                            Частичные рекорды также премируются, если процент прохождения равен или превышает минимальный порог, заданный для данного уровня (расчитывается автоматически сервером).
                                         </p>
                                     </div>
                                 </div>
@@ -265,22 +243,28 @@
             <div class="flex flex-wrap justify-center items-center gap-4">
                 <a href='index.html'><img src="images/logo3.png" alt="Logo" class="h-12 sm:h-16 w-auto opacity-60 hover:opacity-100 transition-opacity"></a>
                 <a href='https://www.youtube.com/@hertzogen'><img src="images/logo4.png" alt="Logo" class="h-12 sm:h-16 w-auto opacity-60 hover:opacity-100 transition-opacity"></a>
-                <a href='https://www.pointercrate.com'><img src="images/logo5.png" alt="Logo" class="h-16 w-auto opacity-60 hover:opacity-100 transition-opacity"></a>
+                <a href='https://demonlist.org/'><img src="images/logo5.png" alt="Logo" class="h-16 w-auto opacity-60 hover:opacity-100 transition-opacity"></a>
             </div>
             <div class="flex flex-wrap justify-center gap-6">
                 <a href="https://t.me/hertzogen2007" class="text-gray-400 hover:text-orange-500 transition-colors text-base sm:text-lg font-bold uppercase">Telegram</a>
                 <a href="https://www.youtube.com/@hertzogen" class="text-gray-400 hover:text-orange-500 transition-colors text-base sm:text-lg font-bold uppercase">YouTube</a>
-                <a href="https://www.pointercrate.com" class="text-gray-400 hover:text-orange-500 transition-colors text-base sm:text-lg font-bold uppercase">Pointercrate</a>
+                <a href="https://demonlist.org/" class="text-gray-400 hover:text-orange-500 transition-colors text-base sm:text-lg font-bold uppercase">demonlist</a>
             </div>
             <div class="text-center md:text-right">
-                <a href="#" class="text-gray-500 hover:text-white transition-colors text-sm underline">Privacy Policy</a>
+                <a href="privacy-policy.html" class="text-gray-500 hover:text-white transition-colors text-sm underline">Privacy Policy</a>
             </div>
         </div>
         <p class="py-3 px-6 sm:px-12 text-gray-500 text-sm text-center md:text-left">© 2026 H&CR hertzogen</p>
     </footer>
 
     <script>
-    const URLS = { players: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTCNytbZ_R5TV-BfA1M2m0HiEe_C5FwfMlOCWWIu7gK9iOB48uKOnohrv6xTMqVmmjtB3d5XrISE4p9/pub?gid=93759483&single=true&output=csv', levels: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTCNytbZ_R5TV-BfA1M2m0HiEe_C5FwfMlOCWWIu7gK9iOB48uKOnohrv6xTMqVmmjtB3d5XrISE4p9/pub?gid=1437425318&single=true&output=csv', rankings: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTCNytbZ_R5TV-BfA1M2m0HiEe_C5FwfMlOCWWIu7gK9iOB48uKOnohrv6xTMqVmmjtB3d5XrISE4p9/pub?gid=2093715526&single=true&output=csv', streams: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTCNytbZ_R5TV-BfA1M2m0HiEe_C5FwfMlOCWWIu7gK9iOB48uKOnohrv6xTMqVmmjtB3d5XrISE4p9/pub?gid=1466784286&single=true&output=csv', news: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTCNytbZ_R5TV-BfA1M2m0HiEe_C5FwfMlOCWWIu7gK9iOB48uKOnohrv6xTMqVmmjtB3d5XrISE4p9/pub?gid=30512158&single=true&output=csv' };
+    const URLS = { 
+    players: './Players.csv', 
+    levels: './Levels.csv', 
+    rankings: './Rankings.csv', 
+    streams: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTCNytbZ_R5TV-BfA1M2m0HiEe_C5FwfMlOCWWIu7gK9iOB48uKOnohrv6xTMqVmmjtB3d5XrISE4p9/pub?gid=1466784286&single=true&output=csv', 
+    news: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTCNytbZ_R5TV-BfA1M2m0HiEe_C5FwfMlOCWWIu7gK9iOB48uKOnohrv6xTMqVmmjtB3d5XrISE4p9/pub?gid=30512158&single=true&output=csv' 
+};
     const DB = { players: {}, levels: {}, rankings: {}, streams: [], news: [], playersArr: [] };
 
     function parseCSV(csvText) {
@@ -336,6 +320,6 @@
     window.addEventListener('scroll', () => { const miniLogo = document.getElementById('mini-logo-container'); if (miniLogo) { if (window.scrollY > 100) { miniLogo.classList.remove('w-0', 'opacity-0'); miniLogo.classList.add('w-16', 'sm:w-24', 'opacity-100'); } else { miniLogo.classList.add('w-0', 'opacity-0'); miniLogo.classList.remove('w-16', 'sm:w-24', 'opacity-100'); } } });
 
     initApp();
-</script>
+    </script>
 </body>
 </html>
