@@ -82,24 +82,33 @@ def fetch_player_data(p_id, fallback_name):
     return player_info, player_records
 
 def main():
-    print("--- ЗАПУСК ОБНОВЛЕНИЯ ДАННЫХ ---")
+    print("--- ЗАПУСК ДИАГНОСТИКИ ---")
+    # Проверяем, что вообще есть в папке
+    print(f"Текущая директория: {os.getcwd()}")
+    print(f"Файлы в папке: {os.listdir('.')}")
     
-    # 1. ЗАГРУЖАЕМ СТАРЫЕ РЕКОРДЫ (чтобы не потерять их при обновлении)
     all_records = []
     seen_records = set()
+    
+    # ПРОВЕРКА ФАЙЛА
     if os.path.exists('Records.csv'):
-        try:
-            with open('Records.csv', 'r', encoding='utf-8-sig') as f:
-                reader = csv.DictReader(f)
-                for row in reader:
-                    if row.get('player_id') and row.get('level_id'):
-                        all_records.append(row)
-                        seen_records.add((str(row['player_id']), str(row['level_id'])))
-            print(f"Успешно загружено {len(all_records)} старых записей из Records.csv.")
-        except Exception as e:
-            print(f"ВНИМАНИЕ: Ошибка чтения старых рекордов: {e}")
+        file_size = os.path.getsize('Records.csv')
+        print(f"Файл Records.csv найден. Размер: {file_size} байт.")
+        if file_size > 0:
+            try:
+                with open('Records.csv', 'r', encoding='utf-8-sig') as f:
+                    reader = csv.DictReader(f)
+                    for row in reader:
+                        if row.get('player_id'):
+                            all_records.append(row)
+                            seen_records.add((str(row['player_id']), str(row['level_id'])))
+                print(f"Успешно загружено {len(all_records)} старых рекордов.")
+            except Exception as e:
+                print(f"Ошибка чтения CSV: {e}")
+        else:
+            print("Файл Records.csv пустой (0 байт).")
     else:
-        print("Файл Records.csv не найден, начинаем сбор рекордов с чистого листа.")
+        print("Файл Records.csv НЕ СУЩЕСТВУЕТ.")
 
     print("Загрузка списка уровней из API...")
     try:
