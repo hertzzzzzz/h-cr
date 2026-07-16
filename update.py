@@ -54,7 +54,7 @@ def fetch_player_data(p_id, fallback_name):
     time.sleep(0.5)
     player_info = {
         'player_id': p_id, 'nickname': fallback_name, 'country': 'world',
-        'is_banned': 'false', 'points': '0.0', 'photo': f'/images/profiles/Bez{p_id}.png',
+        'is_banned': 'false', 'points': '0.0', 'photo': f'images/profiles/Bez{p_id}.png',
         'social_yt': '', 'social_tiwtch': '', 'info': '- информация отсутствует -'
     }
     player_records = []
