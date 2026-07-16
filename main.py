@@ -39,16 +39,25 @@ def get_thumbnail(video_link):
     except: return 'images/default.jpg'
 
 def fetch_csv_data(url):
-    try:
-        response = requests.get(url, timeout=15)
-        response.encoding = 'utf-8'
-        reader = csv.DictReader(io.StringIO(response.text))
-        if reader.fieldnames:
-            reader.fieldnames = [str(name).strip().lower() for name in reader.fieldnames]
-        return list(reader)
-    except Exception as e:
-        print(f"Ошибка загрузки CSV из Google Таблиц: {e}")
-        return []
+    # Попробуем загрузить файл 3 раза, если первый не удался
+    for attempt in range(3):
+        try:
+            print(f"Попытка загрузки данных ({attempt + 1}/3)...")
+            response = requests.get(url, timeout=30) # Увеличили таймаут до 30 секунд
+            response.encoding = 'utf-8'
+            reader = csv.DictReader(io.StringIO(response.text))
+            
+            if reader.fieldnames:
+                reader.fieldnames = [str(name).strip().lower() for name in reader.fieldnames]
+            
+            return list(reader)
+            
+        except Exception as e:
+            print(f"Ошибка при попытке {attempt + 1}: {e}")
+            time.sleep(5) # Пауза 5 секунд перед повторной попыткой
+            
+    print("КРИТИЧЕСКАЯ ОШИБКА: Не удалось загрузить CSV после 3 попыток.")
+    return []
 
 def fetch_player_data(p_id, fallback_name):
     time.sleep(0.5)
