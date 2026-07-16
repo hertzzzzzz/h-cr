@@ -3,6 +3,7 @@ import csv
 import concurrent.futures
 import time
 import io
+import os
 
 # --- НАСТРОЙКИ ---
 API_LEVEL_LIST = "https://api.demonlist.org/level/classic/list"
@@ -42,7 +43,6 @@ def fetch_csv_data(url):
         response = requests.get(url, timeout=15)
         response.encoding = 'utf-8'
         reader = csv.DictReader(io.StringIO(response.text))
-        # ИСПРАВЛЕНИЕ: принудительно делаем все заголовки из гугл-таблиц строчными буквами!
         if reader.fieldnames:
             reader.fieldnames = [str(name).strip().lower() for name in reader.fieldnames]
         return list(reader)
@@ -74,10 +74,24 @@ def fetch_player_data(p_id, fallback_name):
 
 def main():
     print("Загрузка данных...")
+    
+    # 1. ЗАГРУЖАЕМ СТАРЫЕ РЕКОРДЫ (чтобы не потерять их при обновлении)
+    all_records = []
+    seen_records = set()
+    if os.path.exists('Records.csv'):
+        try:
+            with open('Records.csv', 'r', encoding='utf-8-sig') as f:
+                reader = csv.DictReader(f)
+                for row in reader:
+                    all_records.append(row)
+                    seen_records.add((str(row.get('player_id', '')), str(row.get('level_id', ''))))
+            print(f"Загружено {len(all_records)} старых записей.")
+        except Exception as e:
+            print(f"Ошибка чтения старых рекордов: {e}")
+
     resp = requests.get(API_LEVEL_LIST)
     api_levels = resp.json()['data']['levels']
     
-    # Загрузка твоих CSV
     hcr_players = fetch_csv_data(URL_PLAYERS_CSV)
     hcr_levels = fetch_csv_data(URL_LEVELS_CSV)
     hcr_rankings = fetch_csv_data(URL_RANKINGS_CSV)
@@ -115,16 +129,10 @@ def main():
     total = len(ids_to_process)
     print(f"Парсинг {total} новых игроков из API...")
     
-    all_records = []
-    seen_records = set()
-    processed_count = 0
-    
     with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
         futures = {executor.submit(fetch_player_data, pid, unique_player_map[pid]): pid for pid in ids_to_process}
         for future in concurrent.futures.as_completed(futures):
-            processed_count += 1
             p_info, p_recs = future.result()
-            print(f"[{processed_count}/{total}] Обработан: {p_info['nickname']}")
             all_players.append(p_info)
             for rec in p_recs:
                 key = (str(rec['player_id']), str(rec['level_id']))
@@ -145,7 +153,7 @@ def main():
         writer = csv.DictWriter(f, fieldnames=['ranking_id', 'top_name', 'level_id', 'position', 'requirement'], extrasaction='ignore')
         writer.writeheader(); writer.writerows(rankings_data)
 
-    # ИСПРАВЛЕНИЕ: Добавлено сохранение Records.csv (иначе прохождения никогда не сохранялись)
+    # Сохраняем полный список (старые + новые)
     with open('Records.csv', 'w', newline='', encoding='utf-8-sig') as f:
         writer = csv.DictWriter(f, fieldnames=['player_id', 'level_id', 'progress', 'video_url'], extrasaction='ignore')
         writer.writeheader(); writer.writerows(all_records)
