@@ -2,6 +2,8 @@ name: Update Demonlist Data
 
 # Настройка расписания
 on:
+  permissions:
+    contents: write
   schedule:
     # Запускается каждый день в 03:00 ночи (по UTC)
     - cron: '0 3 * * *'
