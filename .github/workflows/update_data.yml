@@ -2,13 +2,15 @@ name: Update Demonlist Data
 
 # Настройка расписания
 on:
-  permissions:
-    contents: write
   schedule:
     # Запускается каждый день в 03:00 ночи (по UTC)
     - cron: '0 3 * * *'
   # Эта строчка позволяет запускать скрипт вручную прямо с сайта GitHub по кнопке
   workflow_dispatch: 
+
+# ПРАВИЛЬНОЕ МЕСТО ДЛЯ ПРАВ ДОСТУПА (без отступов от левого края)
+permissions:
+  contents: write
 
 jobs:
   update-csv:
@@ -30,9 +32,9 @@ jobs:
       - name: Install dependencies
         run: pip install requests
 
-      # 4. Запускаем твой скрипт (убедись, что файл называется update.py)
+      # 4. Запускаем твой скрипт (исправил на main.py, проверь свое название!)
       - name: Run script
-        run: python update.py
+        run: python main.py
 
       # 5. Сохраняем новые CSV файлы и пушим их обратно в твой репозиторий
       - name: Commit and push changes
