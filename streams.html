@@ -224,12 +224,12 @@
 <!-- ВСЕ СКРИПТЫ ЛОГИКИ -->
 <script>
     const URLS = { 
-    players: './Players.csv', 
-    levels: './Levels.csv', 
-    rankings: './Rankings.csv', 
-    streams: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTCNytbZ_R5TV-BfA1M2m0HiEe_C5FwfMlOCWWIu7gK9iOB48uKOnohrv6xTMqVmmjtB3d5XrISE4p9/pub?gid=1466784286&single=true&output=csv', 
-    news: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTCNytbZ_R5TV-BfA1M2m0HiEe_C5FwfMlOCWWIu7gK9iOB48uKOnohrv6xTMqVmmjtB3d5XrISE4p9/pub?gid=30512158&single=true&output=csv' 
-};
+        players: './Players.csv', 
+        levels: './Levels.csv', 
+        rankings: './Rankings.csv', 
+        streams: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTCNytbZ_R5TV-BfA1M2m0HiEe_C5FwfMlOCWWIu7gK9iOB48uKOnohrv6xTMqVmmjtB3d5XrISE4p9/pub?gid=1466784286&single=true&output=csv', 
+        news: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTCNytbZ_R5TV-BfA1M2m0HiEe_C5FwfMlOCWWIu7gK9iOB48uKOnohrv6xTMqVmmjtB3d5XrISE4p9/pub?gid=30512158&single=true&output=csv' 
+    };
     const DB = { players: {}, levels: {}, rankings: {}, streams: [], news: [], playersArr: [] };
 
     (function injectAnimationStyles() {
@@ -239,35 +239,85 @@
         document.head.appendChild(style);
     })();
 
-    function parseCSV(csvText) {
-        const rows = csvText.split('\n').filter(r => r.trim());
-        if(rows.length < 2) return [];
-        const headers = rows[0].split(',').map(h => h.trim().toLowerCase());
-        return rows.slice(1).map(row => { const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/); let obj = {}; headers.forEach((h, i) => { let val = cols[i] ? cols[i].trim() : ''; if (val.startsWith('"') && val.endsWith('"')) val = val.slice(1, -1); obj[h] = val; }); return obj; });
+    // 1. Улучшенный парсер (теперь сохраняет сырую строку для надежности)
+    function parseCSV(str) {
+        const result = [];
+        const lines = str.split(/\r?\n/).filter(l => l.trim());
+        if (!lines.length) return result;
+        
+        let delim = ',';
+        if (lines[0].indexOf(',') === -1 && lines[0].indexOf(';') !== -1) delim = ';';
+        const headers = lines[0].split(delim).map(h => h.replace(/["\r\n\s\ufeff]/g, '').toLowerCase());
+        
+        for (let i = 1; i < lines.length; i++) {
+            const row = lines[i];
+            const cols = [];
+            let curr = '';
+            let inQuotes = false;
+            for (let j = 0; j < row.length; j++) {
+                const char = row[j];
+                if (char === '"') { inQuotes = !inQuotes; }
+                else if (char === delim && !inQuotes) { cols.push(curr); curr = ''; }
+                else { curr += char; }
+            }
+            cols.push(curr);
+            
+            // Запоминаем сырую строку, чтобы потом выдрать из нее ссылку напрямую
+            let obj = { _rawStr: row };
+            headers.forEach((h, idx) => {
+                let val = cols[idx] ? cols[idx].trim() : '';
+                if (val.startsWith('"') && val.endsWith('"')) val = val.slice(1, -1);
+                obj[h] = val;
+            });
+            result.push(obj);
+        }
+        return result;
     }
 
+    // 2. Бронебойная сборка стримов (вытаскивает URL при любых условиях)
     function getParsedStreams() {
-        return DB.streams.filter(stream => {
-            // Пропускаем строки, где нет критических данных (фантомы)
-            const parts = String(stream.stream_id || '').split(',');
-            return (stream.player_id || parts[2]) && (stream.level_id || parts[3]);
-        }).map(stream => {
-            const parts = String(stream.stream_id || '').split(',');
-            const pId = stream.player_id || parts[2]; 
-            const lId = stream.level_id || parts[3];
-            const status = stream.is_live || parts[1];
-            const progress = stream.progress || parts[4];
-            const player = DB.players[pId] || { nickname: 'Unknown', country: 'WORLD' };
-            const level = DB.levels[lId] || { name: 'Unknown Level' };
-            return { status, progress, link: stream.link, player, level, rank: DB.rankings[lId] || 9999, pId, lId };
-        });
+        return DB.streams.map(stream => {
+            // 1. АБСОЛЮТНАЯ ЗАЩИТА ССЫЛКИ: Сканируем объект в поисках любой ссылки
+            let link = '';
+            const allValues = Object.values(stream);
+            const urlMatch = allValues.find(val => String(val).includes('http'));
+            if (urlMatch) {
+                link = urlMatch;
+            }
+
+            // 2. Пытаемся достать ID игрока и уровня (если они тоже съехали, берем значения по порядку)
+            let pId = stream.player_id || allValues[2]; 
+            let lId = stream.level_id || allValues[3];
+            let status = stream.is_live || allValues[1] || 'LIVE';
+            let progress = stream.progress || allValues[4] || '0';
+
+            if (!pId || !lId) return null; // Пропуск пустых строк
+
+            // Очистка ссылки
+            link = (link && link.length > 5) ? String(link).trim() : 'https://youtube.com';
+            
+            const player = DB.players[String(pId).trim()] || { nickname: 'Unknown', country: 'WORLD' };
+            const level = DB.levels[String(lId).trim()] || { name: 'Unknown Level' };
+            
+            return { status, progress, link, player, level, rank: DB.rankings[String(lId).trim()] || 9999 };
+        }).filter(s => s !== null);
     }
 
     async function initApp() {
         try {
-            const responses = await Promise.all(Object.values(URLS).map(url => fetch(url)));
+            // Защита от кэша браузера
+            const responses = await Promise.all(Object.values(URLS).map(url => {
+                const sep = url.includes('?') ? '&' : '?';
+                return fetch(url + sep + 't=' + new Date().getTime());
+            }));
             const texts = await Promise.all(responses.map(res => res.text()));
-            const pArr = parseCSV(texts[0]); const lArr = parseCSV(texts[1]); const rArr = parseCSV(texts[2]); DB.streams = parseCSV(texts[3]); DB.news = parseCSV(texts[4]);
+            
+            const pArr = parseCSV(texts[0]); 
+            const lArr = parseCSV(texts[1]); 
+            const rArr = parseCSV(texts[2]); 
+            DB.streams = parseCSV(texts[3]); 
+            DB.news = parseCSV(texts[4]);
+            
             pArr.forEach(p => DB.players[String(p.player_id).trim()] = p); DB.playersArr = pArr;
             lArr.forEach(l => DB.levels[String(l.level_id).trim()] = l);
             rArr.forEach(r => { const lId = String(r.level_id).trim(); const pos = parseInt(r.position) || 9999; if (!DB.rankings[lId] || pos < DB.rankings[lId]) DB.rankings[lId] = pos; });
@@ -334,7 +384,11 @@
         const streamsContainer = document.getElementById('streams-list');
         if (streamsContainer) {
             const streams = getParsedStreams().sort((a, b) => a.rank - b.rank).slice(0, 5);
-            streamsContainer.innerHTML = streams.map(s => { const isLive = String(s.status).trim().toUpperCase() === 'LIVE'; return `<div class="stream-card mb-3 border border-gray-200 bg-white"><div class="px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors" onclick="toggleDropdown(this)"><div class="flex items-center mb-1.5"><span class="flex items-center text-[10px] font-bold uppercase ${isLive ? 'text-red-500' : 'text-gray-400'}"><span class="w-2 h-2 rounded-full mr-1.5 inline-block ${isLive ? 'bg-red-500 animate-pulse' : 'bg-gray-400'}"></span>${isLive ? 'LIVE' : 'OFFLINE'}</span></div><div class="flex justify-between items-center mb-1"><div class="flex items-center gap-2"><img src="images/flags/${(s.player.country||'WORLD').toLowerCase()}.gif" class="w-6 h-4 border hltv-border object-cover" onerror="this.src='images/flags/WORLD.gif'"><span class="text-sm font-bold text-gray-900 truncate max-w-[140px]">${s.player.nickname}</span></div><span class="text-xs font-bold text-orange-600 bg-orange-100 px-2 py-0.5 rounded">#${s.rank === 9999 ? '—' : s.rank}</span></div><div class="text-xs text-gray-600 font-medium truncate">${s.level.name} — <span class="font-bold text-gray-900">${s.progress}%</span></div></div><div class="dropdown-menu px-4 pb-3" style="display: none;"><a href="${s.link}" target="_blank" class="block w-full bg-orange-600 text-white font-bold py-2 rounded text-[12px] uppercase text-center hover:bg-orange-700">СЛЕДИТЬ</a></div></div>`; }).join(''), streamsContainer.classList.add('animate-list-fade');
+            streamsContainer.innerHTML = streams.map(s => { 
+                const isLive = String(s.status).trim().toUpperCase() === 'LIVE'; 
+                return `<div class="stream-card mb-3 border border-gray-200 bg-white"><div class="px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors" onclick="toggleDropdown(this)"><div class="flex items-center mb-1.5"><span class="flex items-center text-[10px] font-bold uppercase ${isLive ? 'text-red-500' : 'text-gray-400'}"><span class="w-2 h-2 rounded-full mr-1.5 inline-block ${isLive ? 'bg-red-500 animate-pulse' : 'bg-gray-400'}"></span>${isLive ? 'LIVE' : 'OFFLINE'}</span></div><div class="flex justify-between items-center mb-1"><div class="flex items-center gap-2"><img src="images/flags/${(s.player.country||'WORLD').toLowerCase()}.gif" class="w-6 h-4 border hltv-border object-cover" onerror="this.src='images/flags/WORLD.gif'"><span class="text-sm font-bold text-gray-900 truncate max-w-[140px]">${s.player.nickname}</span></div><span class="text-xs font-bold text-orange-600 bg-orange-100 px-2 py-0.5 rounded">#${s.rank === 9999 ? '—' : s.rank}</span></div><div class="text-xs text-gray-600 font-medium truncate">${s.level.name} — <span class="font-bold text-gray-900">${s.progress}%</span></div></div><div class="dropdown-menu px-4 pb-3" style="display: none;"><a href="${s.link}" target="_blank" class="block w-full bg-orange-600 text-white font-bold py-2 rounded text-[12px] uppercase text-center hover:bg-orange-700">СЛЕДИТЬ</a></div></div>`; 
+            }).join(''); 
+            streamsContainer.classList.add('animate-list-fade');
         }
 
         const newsContainer = document.getElementById('news-list');
