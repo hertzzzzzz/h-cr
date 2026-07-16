@@ -141,25 +141,83 @@
 };
     const DB = { players: {}, levels: {}, rankings: {}, streams: [], news: [], playersArr: [] };
 
-    function parseCSV(csvText) {
-        const rows = csvText.split('\n').filter(r => r.trim());
-        if(rows.length < 2) return [];
-        const headers = rows[0].split(',').map(h => h.trim().toLowerCase());
-        return rows.slice(1).map(row => { const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/); let obj = {}; headers.forEach((h, i) => { let val = cols[i] ? cols[i].trim() : ''; if (val.startsWith('"') && val.endsWith('"')) val = val.slice(1, -1); obj[h] = val; }); return obj; });
+    // 1. НАСТОЯЩИЙ CSV-ПАРСЕР (не ломается от переносов строк внутри ячеек)
+function parseCSV(text) {
+    const rows = [];
+    let currentRow = [];
+    let currentCell = '';
+    let insideQuotes = false;
+
+    for (let i = 0; i < text.length; i++) {
+        const char = text[i];
+        const nextChar = text[i + 1];
+
+        if (char === '"') {
+            if (insideQuotes && nextChar === '"') {
+                currentCell += '"'; // Экранированная кавычка
+                i++; 
+            } else {
+                insideQuotes = !insideQuotes;
+            }
+        } else if (char === ',' && !insideQuotes) {
+            currentRow.push(currentCell);
+            currentCell = '';
+        } else if ((char === '\n' || char === '\r') && !insideQuotes) {
+            if (char === '\r' && nextChar === '\n') i++; // Пропускаем \n после \r
+            currentRow.push(currentCell);
+            rows.push(currentRow);
+            currentRow = [];
+            currentCell = '';
+        } else {
+            currentCell += char;
+        }
+    }
+    if (currentCell !== '' || currentRow.length > 0) {
+        currentRow.push(currentCell);
+        rows.push(currentRow);
+    }
+    
+    // Удаляем пустую строку в конце, если есть
+    if (rows.length && rows[rows.length - 1].length === 1 && rows[rows.length - 1][0] === '') {
+        rows.pop();
     }
 
-    function getParsedStreams() {
-        return DB.streams.map(stream => {
-            const parts = String(stream.stream_id || '').split(',');
-            const pId = stream.player_id || parts[2]; 
-            const lId = stream.level_id || parts[3];
-            const status = stream.is_live || parts[1];
-            const progress = stream.progress || parts[4];
-            const player = DB.players[pId] || { nickname: 'Unknown', country: 'WORLD' };
-            const level = DB.levels[lId] || { name: 'Unknown Level' };
-            return { status, progress, link: stream.link, player, level, rank: DB.rankings[lId] || 9999, pId, lId };
+    if (rows.length < 2) return [];
+    
+    const headers = rows[0].map(h => h.trim().toLowerCase());
+    return rows.slice(1).map(row => {
+        const obj = {};
+        headers.forEach((h, idx) => {
+            obj[h] = row[idx] ? row[idx].trim() : '';
         });
-    }
+        return obj;
+    });
+}
+
+// 2. ЧИСТАЯ И ПРОСТАЯ СБОРКА СТРИМОВ
+function getParsedStreams() {
+    return DB.streams.map(stream => {
+        const pId = stream.player_id; 
+        const lId = stream.level_id;
+        
+        if (!pId || !lId) return null; // Пропускаем пустые строки
+
+        const player = DB.players[String(pId).trim()] || { nickname: 'Unknown', country: 'WORLD' };
+        const level = DB.levels[String(lId).trim()] || { name: 'Unknown Level' };
+        
+        // Жестко вычищаем из ссылки любые случайные абзацы или пробелы, которые пришли из Google Таблиц
+        const link = stream.link ? stream.link.replace(/[\r\n\s]+/g, '') : '#';
+
+        return { 
+            status: stream.is_live || 'LIVE', 
+            progress: stream.progress || '0', 
+            link: link, 
+            player, 
+            level, 
+            rank: DB.rankings[String(lId).trim()] || 9999 
+        };
+    }).filter(s => s !== null);
+}
 
     async function initApp() {
         try {

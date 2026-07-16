@@ -244,38 +244,57 @@
         return '';
     }
 
-    function parseCSV(str) {
-        const result = [];
-        const lines = str.split(/\r?\n/).filter(l => l.trim());
-        if (!lines.length) return result;
-        
-        let delim = ',';
-        if (lines[0].indexOf(',') === -1 && lines[0].indexOf(';') !== -1) delim = ';';
-        const headers = lines[0].split(delim).map(h => h.replace(/["\r\n\s\ufeff]/g, '').toLowerCase());
-        
-        for (let i = 1; i < lines.length; i++) {
-            const row = lines[i];
-            const cols = [];
-            let curr = '';
-            let inQuotes = false;
-            for (let j = 0; j < row.length; j++) {
-                const char = row[j];
-                if (char === '"') { inQuotes = !inQuotes; }
-                else if (char === delim && !inQuotes) { cols.push(curr); curr = ''; }
-                else { curr += char; }
+    function parseCSV(text) {
+    const rows = [];
+    let currentRow = [];
+    let currentCell = '';
+    let insideQuotes = false;
+
+    for (let i = 0; i < text.length; i++) {
+        const char = text[i];
+        const nextChar = text[i + 1];
+
+        if (char === '"') {
+            if (insideQuotes && nextChar === '"') {
+                currentCell += '"'; // Экранированная кавычка
+                i++; 
+            } else {
+                insideQuotes = !insideQuotes;
             }
-            cols.push(curr);
-            
-            let obj = {};
-            headers.forEach((h, idx) => {
-                let val = cols[idx] ? cols[idx].trim() : '';
-                if (val.startsWith('"') && val.endsWith('"')) val = val.slice(1, -1);
-                obj[h] = val;
-            });
-            result.push(obj);
+        } else if (char === ',' && !insideQuotes) {
+            currentRow.push(currentCell);
+            currentCell = '';
+        } else if ((char === '\n' || char === '\r') && !insideQuotes) {
+            if (char === '\r' && nextChar === '\n') i++; // Пропускаем \n после \r
+            currentRow.push(currentCell);
+            rows.push(currentRow);
+            currentRow = [];
+            currentCell = '';
+        } else {
+            currentCell += char;
         }
-        return result;
     }
+    if (currentCell !== '' || currentRow.length > 0) {
+        currentRow.push(currentCell);
+        rows.push(currentRow);
+    }
+    
+    // Удаляем пустую строку в конце, если есть
+    if (rows.length && rows[rows.length - 1].length === 1 && rows[rows.length - 1][0] === '') {
+        rows.pop();
+    }
+
+    if (rows.length < 2) return [];
+    
+    const headers = rows[0].map(h => h.trim().toLowerCase());
+    return rows.slice(1).map(row => {
+        const obj = {};
+        headers.forEach((h, idx) => {
+            obj[h] = row[idx] ? row[idx].trim() : '';
+        });
+        return obj;
+    });
+}
 
     // ИСПОЛЬЗУЕМ ФУНКЦИЮ ИЗ ТВОЕГО news.html (Она точно находит стримы без ошибок)
     function getParsedStreams() {

@@ -111,22 +111,57 @@
     function clean(val) { return String(val || '').trim(); }
 
     // Утилита: надежный парсер CSV
-    function parseCSV(csvText) {
-        if (!csvText || csvText.length < 5) return [];
-        const rows = csvText.split('\n').filter(r => r.trim());
-        if(rows.length < 2) return [];
-        const headers = rows[0].split(',').map(h => h.trim().toLowerCase());
-        return rows.slice(1).map(row => { 
-            const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/); 
-            let obj = {}; 
-            headers.forEach((h, i) => { 
-                let val = cols[i] ? cols[i].trim() : ''; 
-                if (val.startsWith('"') && val.endsWith('"')) val = val.slice(1, -1); 
-                obj[h] = val; 
-            }); 
-            return obj; 
-        });
+    function parseCSV(text) {
+    const rows = [];
+    let currentRow = [];
+    let currentCell = '';
+    let insideQuotes = false;
+
+    for (let i = 0; i < text.length; i++) {
+        const char = text[i];
+        const nextChar = text[i + 1];
+
+        if (char === '"') {
+            if (insideQuotes && nextChar === '"') {
+                currentCell += '"'; // Экранированная кавычка
+                i++; 
+            } else {
+                insideQuotes = !insideQuotes;
+            }
+        } else if (char === ',' && !insideQuotes) {
+            currentRow.push(currentCell);
+            currentCell = '';
+        } else if ((char === '\n' || char === '\r') && !insideQuotes) {
+            if (char === '\r' && nextChar === '\n') i++; // Пропускаем \n после \r
+            currentRow.push(currentCell);
+            rows.push(currentRow);
+            currentRow = [];
+            currentCell = '';
+        } else {
+            currentCell += char;
+        }
     }
+    if (currentCell !== '' || currentRow.length > 0) {
+        currentRow.push(currentCell);
+        rows.push(currentRow);
+    }
+    
+    // Удаляем пустую строку в конце, если есть
+    if (rows.length && rows[rows.length - 1].length === 1 && rows[rows.length - 1][0] === '') {
+        rows.pop();
+    }
+
+    if (rows.length < 2) return [];
+    
+    const headers = rows[0].map(h => h.trim().toLowerCase());
+    return rows.slice(1).map(row => {
+        const obj = {};
+        headers.forEach((h, idx) => {
+            obj[h] = row[idx] ? row[idx].trim() : '';
+        });
+        return obj;
+    });
+}
 
     async function initApp() {
         try {
