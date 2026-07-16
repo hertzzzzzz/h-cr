@@ -8,7 +8,6 @@ import io
 API_LEVEL_LIST = "https://api.demonlist.org/level/classic/list"
 API_USER_GET = "https://api.demonlist.org/user/get?id="
 
-# Твои ссылки на CSV (обновил ссылку на игроков)
 URL_LEVELS_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTCNytbZ_R5TV-BfA1M2m0HiEe_C5FwfMlOCWWIu7gK9iOB48uKOnohrv6xTMqVmmjtB3d5XrISE4p9/pub?gid=1437425318&single=true&output=csv"
 URL_RANKINGS_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTCNytbZ_R5TV-BfA1M2m0HiEe_C5FwfMlOCWWIu7gK9iOB48uKOnohrv6xTMqVmmjtB3d5XrISE4p9/pub?gid=2093715526&single=true&output=csv"
 URL_PLAYERS_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTCNytbZ_R5TV-BfA1M2m0HiEe_C5FwfMlOCWWIu7gK9iOB48uKOnohrv6xTMqVmmjtB3d5XrISE4p9/pub?gid=93759483&single=true&output=csv"
@@ -18,8 +17,8 @@ COUNTRY_MAP = {
     "portugal": "pt", "france": "fr", "united-kingdom": "gb", "japan": "jp",
     "south-korea": "kr", "australia": "au", "finland": "fi", "kazakhstan": "kz",
     "new-zealand": "nz", "brazil": "br", "germany": "de", "hungary": "hu",
-    "romania": "ro", "poland": "pl", "netherlands": "nl", "vietnam": "vn", "austria": "at"
-    , "belarus": "by"
+    "romania": "ro", "poland": "pl", "netherlands": "nl", "vietnam": "vn", "austria": "at",
+    "belarus": "by"
 }
 
 def get_country_code(country_name):
@@ -42,7 +41,11 @@ def fetch_csv_data(url):
     try:
         response = requests.get(url, timeout=15)
         response.encoding = 'utf-8'
-        return list(csv.DictReader(io.StringIO(response.text)))
+        reader = csv.DictReader(io.StringIO(response.text))
+        # ИСПРАВЛЕНИЕ: принудительно делаем все заголовки из гугл-таблиц строчными буквами!
+        if reader.fieldnames:
+            reader.fieldnames = [str(name).strip().lower() for name in reader.fieldnames]
+        return list(reader)
     except Exception as e:
         print(f"Ошибка загрузки CSV: {e}")
         return []
@@ -85,7 +88,6 @@ def main():
     all_levels = hcr_levels
     rankings_data = hcr_rankings
 
-    # Добавляем PCR (Demonlist) данные
     unique_player_map = {}
     for i, lvl in enumerate(api_levels):
         l_id = str(lvl['id'])
@@ -105,12 +107,10 @@ def main():
             if uid not in seen_player_ids:
                 unique_player_map[uid] = lvl['verifier']['username']
 
-    # Очистка требований от % в hcr_rankings
     for row in rankings_data:
         if 'requirement' in row:
             row['requirement'] = str(row['requirement']).replace('%', '')
 
-    # Парсинг только новых игроков
     ids_to_process = list(unique_player_map.keys())
     total = len(ids_to_process)
     print(f"Парсинг {total} новых игроков из API...")
@@ -144,6 +144,11 @@ def main():
     with open('Rankings.csv', 'w', newline='', encoding='utf-8-sig') as f:
         writer = csv.DictWriter(f, fieldnames=['ranking_id', 'top_name', 'level_id', 'position', 'requirement'], extrasaction='ignore')
         writer.writeheader(); writer.writerows(rankings_data)
+
+    # ИСПРАВЛЕНИЕ: Добавлено сохранение Records.csv (иначе прохождения никогда не сохранялись)
+    with open('Records.csv', 'w', newline='', encoding='utf-8-sig') as f:
+        writer = csv.DictWriter(f, fieldnames=['player_id', 'level_id', 'progress', 'video_url'], extrasaction='ignore')
+        writer.writeheader(); writer.writerows(all_records)
 
     print("Готово!")
 
