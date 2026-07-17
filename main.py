@@ -9,7 +9,7 @@ import sys
 # --- НАСТРОЙКИ ---
 API_LEVEL_LIST = "https://api.demonlist.org/level/classic/list"
 API_USER_GET = "https://api.demonlist.org/user/get?id="
-API_LEADERBOARD = "https://api.demonlist.org/user/ranking?limit=100" 
+API_LEADERBOARD = "https://api.demonlist.org/user/ranking?limit=200" # Увеличил лимит до 200, чтобы собрать больше топов!
 
 URL_LEVELS_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTCNytbZ_R5TV-BfA1M2m0HiEe_C5FwfMlOCWWIu7gK9iOB48uKOnohrv6xTMqVmmjtB3d5XrISE4p9/pub?gid=1437425318&single=true&output=csv"
 URL_RANKINGS_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTCNytbZ_R5TV-BfA1M2m0HiEe_C5FwfMlOCWWIu7gK9iOB48uKOnohrv6xTMqVmmjtB3d5XrISE4p9/pub?gid=2093715526&single=true&output=csv"
@@ -66,7 +66,8 @@ def fetch_player_data(p_id, fallback_name, custom_data):
         'photo': custom_data.get('photo') or f'images/profiles/Bez{p_id}.png',
         'social_yt': custom_data.get('social_yt') or '', 
         'social_tiwtch': custom_data.get('social_tiwtch') or '', 
-        'info': custom_data.get('info') or '- информация ещё не была добавлена -'
+        'info': custom_data.get('info') or '- информация ещё не была добавлена -',
+        'global_rank': custom_data.get('global_rank') or '0' # <- ДОБАВИЛИ ГЛОБАЛЬНЫЙ РАНК
     }
     
     player_records = []
@@ -80,6 +81,9 @@ def fetch_player_data(p_id, fallback_name, custom_data):
                     player_info['nickname'] = u_data.get('name') or player_info['nickname']
                     player_info['points'] = f"{float(u_data.get('points', 0)):.2f}"
                     
+                    # Берем официальное место из API
+                    player_info['global_rank'] = str(u_data.get('placement', '0'))
+                    
                     api_country = get_country_code(u_data.get('country'))
                     if api_country != "world":
                         player_info['country'] = api_country
@@ -88,16 +92,10 @@ def fetch_player_data(p_id, fallback_name, custom_data):
                     if isinstance(levels_data, dict):
                         for cat in ['hardest', 'main', 'extended', 'verified']:
                             cat_data = levels_data.get(cat)
-                            
                             if not cat_data:
                                 continue
-                                
-                            # ИСПРАВЛЕНИЕ БАГА ИЗ-ЗА СТРУКТУРЫ API:
-                            # Если API вернул одиночный словарь (как в "hardest"), делаем его списком
                             if isinstance(cat_data, dict):
                                 cat_data = [cat_data]
-                                
-                            # Теперь безопасно перебираем список
                             if isinstance(cat_data, list):
                                 for lvl in cat_data:
                                     if isinstance(lvl, dict):
@@ -110,7 +108,7 @@ def fetch_player_data(p_id, fallback_name, custom_data):
     return player_info, player_records
 
 def main():
-    print("--- ЗАПУСК ОБНОВЛЕНИЯ ДАННЫХ (УМНЫЙ СБОР) ---")
+    print("--- ЗАПУСК ОБНОВЛЕНИЯ ДАННЫХ ---")
     
     all_records = []
     seen_records = set()
@@ -177,7 +175,13 @@ def main():
                     if pid:
                         unique_player_map[pid] = top_p.get('name', 'Unknown')
     except Exception as e:
-        print("API Топ-100 недоступно.")
+        print("API Топ-100/200 недоступно.")
+
+    # === ДИАГНОСТИКА СБОРА ===
+    print("\n--- ДИАГНОСТИКА СБОРА ID ---")
+    print(f"Игроков из Google Таблицы: {len(hcr_players)}")
+    print(f"Всего уникальных ID для парсинга: {len(unique_player_map)}")
+    print("----------------------------\n")
 
     for row in rankings_data:
         if 'requirement' in row:
@@ -185,7 +189,6 @@ def main():
 
     ids_to_process = list(unique_player_map.keys())
     total = len(ids_to_process)
-    print(f"Парсинг {total} игроков для сбора их рекордов (может занять время)...")
     
     final_players = []
     processed_count = 0
@@ -212,8 +215,9 @@ def main():
 
     print("\n--- СОХРАНЕНИЕ ФАЙЛОВ ---")
     
+    # Добавили global_rank в сохранение CSV
     with open('Players.csv', 'w', newline='', encoding='utf-8-sig') as f:
-        writer = csv.DictWriter(f, fieldnames=['player_id', 'nickname', 'country', 'is_banned', 'points', 'photo', 'social_yt', 'social_tiwtch', 'info'], extrasaction='ignore')
+        writer = csv.DictWriter(f, fieldnames=['player_id', 'nickname', 'country', 'is_banned', 'points', 'photo', 'social_yt', 'social_tiwtch', 'info', 'global_rank'], extrasaction='ignore')
         writer.writeheader(); writer.writerows(final_players)
         
     with open('Levels.csv', 'w', newline='', encoding='utf-8-sig') as f:
@@ -227,7 +231,6 @@ def main():
     with open('Records.csv', 'w', newline='', encoding='utf-8-sig') as f:
         writer = csv.DictWriter(f, fieldnames=['player_id', 'level_id', 'progress', 'video_url'], extrasaction='ignore')
         writer.writeheader(); writer.writerows(all_records)
-        print("Records.csv успешно сохранен.")
 
     print("--- ГОТОВО! ---")
 
