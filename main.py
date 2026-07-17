@@ -84,48 +84,37 @@ def fetch_player_data(p_id, fallback_name, custom_data):
     return player_info, player_records
 
 def main():
-    print("--- ЗАПУСК ОБНОВЛЕНИЯ ---")
-    all_records = []
-    seen_records = set()
-    if os.path.exists('Records.csv'):
-        with open('Records.csv', 'r', encoding='utf-8-sig') as f:
-            for row in csv.DictReader(f):
-                if row.get('player_id'):
-                    all_records.append(row)
-                    seen_records.add((str(row['player_id']), str(row['level_id'])))
-
-    hcr_players = fetch_csv_data(URL_PLAYERS_CSV)
+    print("--- ЗАПУСК УСИЛЕННОГО СБОРА ИГРОКОВ ---")
     
-    unique_player_map = {}
-    player_custom_data = {}
+    unique_player_map = {} # Здесь будут ТОЛЬКО ID и имена
+    player_custom_data = {} # Здесь данные из твоей Google Таблицы
 
-    # 1. Принудительный сбор Топ-200 из API
+    # 1. ШАГ ПЕРВЫЙ: Берем всех из Leaderboard (ЭТО НАШ ФУНДАМЕНТ)
     try:
-        data = requests.get(API_LEADERBOARD).json().get('data', [])
-        for p in data:
-            pid = str(p.get('id', p.get('user_id', '')))
-            unique_player_map[pid] = p.get('name', 'Unknown')
-    except: pass
+        print("Загрузка Leaderboard...")
+        lb_response = requests.get(API_LEADERBOARD, timeout=20)
+        if lb_response.status_code == 200:
+            lb_data = lb_response.json().get('data', [])
+            for p in lb_data:
+                pid = str(p.get('id', p.get('user_id', '')))
+                if pid:
+                    unique_player_map[pid] = p.get('name', 'Unknown')
+        print(f"Из Leaderboard API получено {len(unique_player_map)} игроков.")
+    except Exception as e:
+        print(f"Ошибка загрузки Leaderboard: {e}")
 
-    # 2. Добавляем тех, кто есть в таблице (на случай, если они не в топ-200)
+    # 2. ШАГ ВТОРОЙ: Дополняем из Google Таблицы (на случай, если кого-то нет в топе, но мы хотим его видеть)
+    hcr_players = fetch_csv_data(URL_PLAYERS_CSV)
     for p in hcr_players:
         pid = str(p.get('player_id', ''))
         if pid:
             unique_player_map[pid] = p.get('nickname', 'Unknown')
             player_custom_data[pid] = p 
-    
-    # 3. Верификаторы
-    try:
-        levels = requests.get(API_LEVEL_LIST).json()['data']['levels']
-        for lvl in levels:
-            if lvl.get('verifier'): 
-                uid = str(lvl['verifier']['user_id'])
-                if uid not in unique_player_map: unique_player_map[uid] = lvl['verifier']['username']
-    except: pass
+    print(f"После добавления из Google Таблиц всего уникальных ID: {len(unique_player_map)}")
 
-    print(f"Собрано {len(unique_player_map)} игроков для парсинга.")
-
+    # 3. ШАГ ТРЕТИЙ: Парсинг (забираем полные данные каждого найденного ID)
     final_players = []
+    # ... (дальше идет запуск ThreadPoolExecutor и сохранение, как было)
     with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
         futures = {executor.submit(fetch_player_data, pid, unique_player_map[pid], player_custom_data.get(pid, {})): pid for pid in unique_player_map}
         for future in concurrent.futures.as_completed(futures):
