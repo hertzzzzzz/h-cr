@@ -106,7 +106,7 @@
         <!-- ЛЕВЫЙ ВНЕШНИЙ БАННЕР -->
         <div class="hidden xl:block w-[200px] flex-shrink-0 animate-banner-left">
             <div class="mt-6 flex flex-col items-center w-full">
-                <a href="https://www.youtube.com/@hertzogen" class="block w-full">
+                <a href="https://www.youtube.com/@hertzogen" class="block w-full" target="_blank">
                     <img src="images/left-banner.png" alt="Left Banner" class="max-w-full h-auto block mx-auto">
                 </a>
             </div>
@@ -191,14 +191,14 @@
     <footer id="footer" class="bg-[#1a1a1a] text-white py-12 border-t-2 border-bold opacity-0 transition-opacity duration-500 mt-0">
         <div class="max-w-6xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-8">
             <div class="flex flex-wrap justify-center items-center gap-4">
-                <a href='index'><img src="images/logo3.png" alt="Logo" class="h-12 sm:h-16 w-auto opacity-60 hover:opacity-100 transition-opacity"></a>
-                <a href='https://www.youtube.com/@hertzogen'><img src="images/logo4.png" alt="Logo" class="h-16 w-auto opacity-60 hover:opacity-100 transition-opacity"></a>
-                <a href='https://demonlist.org/'><img src="images/logo5.png" alt="Logo" class="h-16 w-auto opacity-60 hover:opacity-100 transition-opacity"></a>
+                <a href='/'><img src="images/logo3.png" alt="Logo" class="h-12 sm:h-16 w-auto opacity-60 hover:opacity-100 transition-opacity"></a>
+                <a href='https://www.youtube.com/@hertzogen' target="_blank"><img src="images/logo4.png" alt="Logo" class="h-16 w-auto opacity-60 hover:opacity-100 transition-opacity"></a>
+                <a href='https://demonlist.org/' target="_blank"><img src="images/logo5.png" alt="Logo" class="h-16 w-auto opacity-60 hover:opacity-100 transition-opacity"></a>
             </div>
             <div class="flex flex-wrap justify-center gap-6">
-                <a href="https://t.me/hertzogen2007" class="text-gray-400 hover:text-orange-500 transition-colors text-base sm:text-lg font-bold uppercase">Telegram</a>
-                <a href="https://www.youtube.com/@hertzogen" class="text-gray-400 hover:text-orange-500 transition-colors text-base sm:text-lg font-bold uppercase">YouTube</a>
-                <a href="https://demonlist.org/" class="text-gray-400 hover:text-orange-500 transition-colors text-base sm:text-lg font-bold uppercase">demonlist</a>
+                <a href="https://t.me/hertzogen2007" target="_blank" class="text-gray-400 hover:text-orange-500 transition-colors text-base sm:text-lg font-bold uppercase">Telegram</a>
+                <a href="https://www.youtube.com/@hertzogen" target="_blank" class="text-gray-400 hover:text-orange-500 transition-colors text-base sm:text-lg font-bold uppercase">YouTube</a>
+                <a href="https://demonlist.org/" target="_blank" class="text-gray-400 hover:text-orange-500 transition-colors text-base sm:text-lg font-bold uppercase">demonlist</a>
             </div>
             <div class="text-center md:text-right">
                 <a href="privacy-policy" class="text-gray-500 hover:text-white transition-colors text-sm underline">Privacy Policy</a>
@@ -208,7 +208,6 @@
     </footer>
 
     <script>
-        // === 1. ССЫЛКИ НА НОВЫЕ ТАБЛИЦЫ ===
         const URLS = { 
             players: './Players.csv', 
             levels: './Levels.csv', 
@@ -223,71 +222,61 @@
             rankings: {}, 
             streams: [],
             news: [],
-            sortedPlayers: [] // Добавлено для хранения игроков
+            sortedPlayers: []
         };
 
-        let currentLoaded = 0; // Счетчик показанных игроков
-        const CHUNK_SIZE = 50; // Сколько игроков грузить за один раз
+        let currentLoaded = 0; 
+        const CHUNK_SIZE = 50; 
 
-        // === 2. УМНЫЙ ПАРСЕР CSV ===
+        function clean(val) { return String(val || '').trim(); }
+
         function parseCSV(text) {
-    const rows = [];
-    let currentRow = [];
-    let currentCell = '';
-    let insideQuotes = false;
+            const rows = [];
+            let currentRow = [];
+            let currentCell = '';
+            let insideQuotes = false;
 
-    for (let i = 0; i < text.length; i++) {
-        const char = text[i];
-        const nextChar = text[i + 1];
+            for (let i = 0; i < text.length; i++) {
+                const char = text[i];
+                const nextChar = text[i + 1];
 
-        if (char === '"') {
-            if (insideQuotes && nextChar === '"') {
-                currentCell += '"'; // Экранированная кавычка
-                i++; 
-            } else {
-                insideQuotes = !insideQuotes;
+                if (char === '"') {
+                    if (insideQuotes && nextChar === '"') {
+                        currentCell += '"'; 
+                        i++; 
+                    } else {
+                        insideQuotes = !insideQuotes;
+                    }
+                } else if (char === ',' && !insideQuotes) {
+                    currentRow.push(currentCell);
+                    currentCell = '';
+                } else if ((char === '\n' || char === '\r') && !insideQuotes) {
+                    if (char === '\r' && nextChar === '\n') i++;
+                    currentRow.push(currentCell);
+                    rows.push(currentRow);
+                    currentRow = [];
+                    currentCell = '';
+                } else {
+                    currentCell += char;
+                }
             }
-        } else if (char === ',' && !insideQuotes) {
-            currentRow.push(currentCell);
-            currentCell = '';
-        } else if ((char === '\n' || char === '\r') && !insideQuotes) {
-            if (char === '\r' && nextChar === '\n') i++; // Пропускаем \n после \r
-            currentRow.push(currentCell);
-            rows.push(currentRow);
-            currentRow = [];
-            currentCell = '';
-        } else {
-            currentCell += char;
+            if (currentCell !== '' || currentRow.length > 0) { currentRow.push(currentCell); rows.push(currentRow); }
+            if (rows.length && rows[rows.length - 1].length === 1 && rows[rows.length - 1][0] === '') { rows.pop(); }
+            if (rows.length < 2) return [];
+            
+            const headers = rows[0].map(h => h.trim().toLowerCase());
+            return rows.slice(1).map(row => {
+                const obj = {};
+                headers.forEach((h, idx) => { obj[h] = row[idx] ? row[idx].trim() : ''; });
+                return obj;
+            });
         }
-    }
-    if (currentCell !== '' || currentRow.length > 0) {
-        currentRow.push(currentCell);
-        rows.push(currentRow);
-    }
-    
-    // Удаляем пустую строку в конце, если есть
-    if (rows.length && rows[rows.length - 1].length === 1 && rows[rows.length - 1][0] === '') {
-        rows.pop();
-    }
-
-    if (rows.length < 2) return [];
-    
-    const headers = rows[0].map(h => h.trim().toLowerCase());
-    return rows.slice(1).map(row => {
-        const obj = {};
-        headers.forEach((h, idx) => {
-            obj[h] = row[idx] ? row[idx].trim() : '';
-        });
-        return obj;
-    });
-}
 
         function getCacheSafeUrl(url) {
             const separator = url.includes('?') ? '&' : '?';
             return url + separator + 't=' + new Date().getTime();
         }
 
-        // === 3. ГЛАВНАЯ ФУНКЦИЯ ЗАГРУЗКИ ===
         async function initApp() {
             try {
                 const responses = await Promise.all([
@@ -328,28 +317,26 @@
             }
         }
 
-        // === 4. РЕНДЕР ЛИДЕРБОРДА И ЛЕНИВАЯ ЗАГРУЗКА ===
         function renderLeaderboard(playersArray) {
             const sidebarContainer = document.getElementById('leaderboard-list'); 
             const mainGridContainer = document.getElementById('main-leaderboard-grid');
 
-            // Сортируем и сохраняем глобально ОДИН РАЗ
             DB.sortedPlayers = playersArray
                 .filter(p => p.is_banned !== 'TRUE' && p.is_banned !== 'true')
                 .sort((a, b) => (parseInt(b.points) || 0) - (parseInt(a.points) || 0));
 
-            // Рендер сайдбара (топ 5)
+            // Выводим официальный global_rank в сайдбаре
             sidebarContainer.innerHTML = DB.sortedPlayers.slice(0, 5).map((p, index) => {
                 const countryCode = (p.country || 'WORLD').toLowerCase();
-                return `<a href="player?id=${p.player_id}" class="block stream-card mb-1.5 border border-gray-200 p-2.5 hover:border-gray-500 hover:bg-gray-50 transition-all"><div class="flex items-center justify-between"><div class="flex items-center gap-2"><span class="text-sm font-bold text-gray-500 w-5">#${index + 1}</span><img src="images/flags/${countryCode}.gif" class="w-5 h-3 hltv-border" onerror="this.src='images/flags/WORLD.gif'"><span class="text-sm font-bold text-gray-900">${p.nickname}</span></div></div></a>`;
+                const rankToDisplay = p.global_rank && p.global_rank !== '0' ? `#${p.global_rank}` : `#${index + 1}`;
+                
+                return `<a href="player?id=${p.player_id}" class="block stream-card mb-1.5 border border-gray-200 p-2.5 hover:border-gray-500 hover:bg-gray-50 transition-all"><div class="flex items-center justify-between"><div class="flex items-center gap-2"><span class="text-sm font-bold text-gray-500 w-5">${rankToDisplay}</span><img src="images/flags/${countryCode}.gif" class="w-5 h-3 hltv-border" onerror="this.src='images/flags/WORLD.gif'"><span class="text-sm font-bold text-gray-900">${p.nickname}</span></div></div></a>`;
             }).join('') + `<a href="leaderboard" class="block w-full text-center border border-gray-200 py-2 text-xs font-bold text-orange-600 hover:bg-orange-600 hover:text-white transition-all uppercase">Полный Список</a>`;
             sidebarContainer.classList.add('animate-list-fade');
 
-            // Очищаем сетку перед стартом
             mainGridContainer.innerHTML = '';
             currentLoaded = 0;
             
-            // Загружаем первую порцию (50 карточек)
             loadMorePlayers();
         }
 
@@ -357,7 +344,6 @@
             const grid = document.getElementById('main-leaderboard-grid');
             const btnContainer = document.getElementById('load-more-container');
             
-            // Берем следующую порцию (по умолчанию 50 штук)
             const nextChunk = DB.sortedPlayers.slice(currentLoaded, currentLoaded + CHUNK_SIZE);
             
             nextChunk.forEach((p, index) => {
@@ -369,17 +355,19 @@
                 
                 const countryCode = (p.country || 'WORLD').toLowerCase();
                 const photoSrc = p.photo || 'images/default-profile.png';
+                
+                // ВАЖНО: Выводим официальный global_rank на карточках сетки
+                const rankToDisplay = p.global_rank && p.global_rank !== '0' ? `#${p.global_rank}` : `#${globalIndex + 1}`;
 
-                // Создаем элемент карточки
                 const card = document.createElement('a');
                 card.href = `player?id=${p.player_id}`;
                 card.className = "bg-white border border-gray-200 flex flex-col overflow-hidden card-hover relative group block opacity-0 animate-list-fade";
-                card.style.animationDelay = `${(index % CHUNK_SIZE) * 0.04}s`; // Плавное появление порции
+                card.style.animationDelay = `${(index % CHUNK_SIZE) * 0.04}s`;
 
                 card.innerHTML = `
                     <div class="w-full aspect-[4/3] bg-gray-300 relative overflow-hidden">
                         <div class="absolute top-0 left-0 bg-black/85 text-white font-bold text-sm sm:text-base px-2.5 py-1 z-10 flex items-center gap-1 rounded-br">
-                            <span>#${globalIndex + 1}</span>
+                            <span>${rankToDisplay}</span>
                             ${diffHtml}
                         </div>
                         <div class="absolute top-0 right-0 bg-orange-600 text-white font-bold text-[11px] sm:text-xs px-2.5 py-1 z-10 rounded-bl tracking-wide">
@@ -403,7 +391,6 @@
 
             currentLoaded += nextChunk.length;
 
-            // Если загрузили всех игроков из базы — скрываем кнопку
             if (currentLoaded >= DB.sortedPlayers.length) {
                 btnContainer.classList.add('hidden');
                 btnContainer.classList.remove('block');
@@ -413,21 +400,25 @@
             }
         }
 
-        // === 5. РЕНДЕР СТРИМОВ ===
         function renderStreams() {
             const container = document.getElementById('streams-list');
+            
+            // ВАЖНО: Улучшенный парсер ссылок из таблицы
             const streamData = DB.streams.map(stream => {
                 const parts = String(stream.stream_id || '').split(',');
-                const pId = stream.player_id || parts[2]; 
-                const lId = stream.level_id || parts[3];
+                const pId = clean(stream.player_id || parts[2]); 
+                const lId = clean(stream.level_id || parts[3]);
                 const status = stream.is_live || parts[1];
                 const progress = stream.progress || parts[4];
+                
+                let rawLink = stream.link || stream.url || stream.stream_url || stream.video_url || stream['ссылка'] || '';
+                let streamLink = clean(rawLink);
 
                 const player = DB.players[pId] || {};
                 const level = DB.levels[lId] || {};
 
                 return {
-                    status: status, percent: progress, link: stream.link,
+                    status: status, percent: progress, link: streamLink || '#',
                     streamer: player.nickname || 'Unknown', country: player.country || 'WORLD',
                     levelName: level.name || 'Unknown Level', position: DB.rankings[lId] || 9999
                 };
@@ -468,7 +459,6 @@
             container.classList.add('animate-list-fade');
         }
 
-        // === 6. РЕНДЕР НОВОСТЕЙ ===
         function renderNews() {
             const container = document.getElementById('news-list');
             const top10News = DB.news.reverse().slice(0, 10);
@@ -477,8 +467,9 @@
                 const date = item['хедлайнер'] || '';
                 const title = item['заголовок'] || '';
                 
+                // ВАЖНО: Убрали .html из ссылки
                 return `
-                    <a href="news.html#news-${index}" class="stream-card block mb-3 border border-gray-200 p-4 hover:border-gray-400 hover:bg-gray-50 transition-all">
+                    <a href="news#news-${index}" class="stream-card block mb-3 border border-gray-200 p-4 hover:border-gray-400 hover:bg-gray-50 transition-all">
                         <div class="text-[12px] font-bold text-orange-500 uppercase tracking-wider mb-1">${date}</div>
                         <div class="text-sm font-bold text-gray-900 leading-tight">${title}</div>
                     </a>`;
@@ -487,7 +478,6 @@
             container.classList.add('animate-list-fade');
         }
 
-        // UI логика
         function toggleDropdown(element) { 
             const menu = element.closest('.stream-card')?.querySelector('.dropdown-menu'); 
             if (menu) menu.classList.toggle('show'); 
@@ -504,7 +494,6 @@
             } 
         });
 
-        // Запуск!
         initApp();
     </script>
 </body>
