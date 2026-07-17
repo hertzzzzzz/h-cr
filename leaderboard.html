@@ -1,506 +1,82 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <link rel="icon" type="image/x-icon" href="images/favicon.ico">
-    <meta name="description" content="Глобальная таблица лидеров Geometry Dash, лучшие игроки и стримы.">
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>H&CR | Leaderboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        * { font-family: 'Montserrat', sans-serif !important; }
-        html, body { background-color: #000 !important; margin: 0; padding: 0; }
-        
-        /* Анимация плавного появления меню */
-        .dropdown-menu { display: none; transition: all 0.3s ease; }
+        .card-hover { transition: transform 0.3s ease; }
+        .card-hover:hover { transform: scale(1.03); }
+        .dropdown-menu { display: none; }
         .dropdown-menu.show { display: block; }
-        
-        .card-hover { transition: transform 0.3s ease, box-shadow 0.3s ease; }
-        .card-hover:hover { transform: scale(1.03); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
-        .hltv-border { border: 1px solid #000; box-sizing: border-box; }
-        
-        .banner-container img {
-            position: static !important;
-            margin: 0 auto !important;
-            display: block !important;
-        }
-        .banner-container, .banner-container a, .banner-container img {
-            position: static !important; 
-            display: block !important;
-            margin: 0 auto !important;
-        }
-        
-        .banner-container {
-            display: flex;
-            justify-content: center;
-            width: 100%;
-        }
-
-        /* --- ЭФФЕКТ УВЕЛИЧЕНИЯ НИКА ПРИ НАВЕДЕНИИ --- */
-        .grow-text { 
-            transition: transform 0.2s ease-in-out; 
-            display: inline-block; 
-        }
-
-        /* --- НОВЫЕ СТИЛИ АНИМАЦИЙ ДЛЯ ТЕМПЛЕЙТА --- */
-        @keyframes listContentFadeIn {
-            from { opacity: 0; transform: translateY(8px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes bannerFadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        #news-list, #streams-list, #leaderboard-list {
-            opacity: 0;
-        }
-
-        .animate-list-fade {
-            animation: listContentFadeIn 0.5s ease-out forwards;
-        }
-
-        .animate-banner-left {
-            opacity: 0;
-            animation: bannerFadeIn 0.6s ease-in-out forwards;
-            animation-delay: 150ms;
-        }
-        .animate-banner-right {
-            opacity: 0;
-            animation: bannerFadeIn 0.6s ease-in-out forwards;
-            animation-delay: 300ms;
-        }
-        #main-profile-card {
-            background-image: url('https://i.postimg.cc/wB24crD6/Bez-nazvania170-20260713223113.png') !important;
-            background-size: cover !important;
-            background-position: center !important;
-            background-repeat: no-repeat !important;
-        }
     </style>
 </head>
 <body class="bg-black min-h-screen">
+    <!-- Навигация -->
+    <nav class="flex justify-center bg-white border-b border-gray-200 p-4">
+        <a href="top" class="px-6 font-bold hover:text-orange-500">LEVELS</a>
+        <a href="leaderboard" class="px-6 font-bold hover:text-orange-500">PLAYERS</a>
+        <a href="news" class="px-6 font-bold hover:text-orange-500">NEWS</a>
+        <a href="streams" class="px-6 font-bold hover:text-orange-500">STREAMS</a>
+    </nav>
 
-    <!-- Верхняя навигация -->
-    <div id="top-nav" class="w-full bg-white border-b border-gray-200 sticky top-0 z-50 h-20">
-        <div class="h-full flex items-stretch justify-center max-w-[1350px] mx-auto w-full px-2 sm:px-4">
-            
-            <div id="mini-logo-container" class="w-0 overflow-hidden opacity-0 transition-all duration-500 ease-in-out flex-none">
-                <a href="/" class="h-full flex items-center justify-center px-2 sm:px-4" onclick="window.scrollTo({top: 0, behavior: 'smooth'}); return false;">
-                    <img src="images/logo.png" alt="Logo" class="h-12 sm:h-16 w-auto block">
-                </a>
-            </div>
+    <div class="max-w-6xl mx-auto p-6 bg-gray-100 min-h-screen">
+        <h1 class="text-3xl font-bold text-center mb-8 uppercase">Глобальная таблица лидеров</h1>
+        
+        <div id="main-leaderboard-grid" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-4">
+            <!-- Карточки -->
+        </div>
 
-            <nav class="flex h-full font-bold uppercase text-xs sm:text-sm text-gray-800 items-stretch overflow-x-auto whitespace-nowrap">
-                <a href="top" class="nav-item px-4 sm:px-8 flex items-center border-l border-r border-gray-200 transition-colors hover:text-orange-500 hover:bg-orange-100">LEVELS</a>
-                <a href="leaderboard" class="nav-item px-4 sm:px-8 flex items-center border-r border-gray-200 transition-colors hover:text-orange-500 hover:bg-orange-100">PLAYERS</a>
-                <a href="news" class="nav-item px-4 sm:px-8 flex items-center border-r border-gray-200 transition-colors hover:text-orange-500 hover:bg-orange-100">NEWS</a>
-                <a href="streams" class="nav-item px-4 sm:px-8 flex items-center border-r border-gray-200 transition-colors hover:text-orange-500 hover:bg-orange-100">STREAMS</a>
-            </nav>
+        <div id="load-more-container" class="text-center py-8 hidden">
+            <button onclick="loadMorePlayers()" class="bg-gray-800 text-white py-3 px-8 rounded uppercase font-bold">Показать еще</button>
         </div>
     </div>
-
-    <!-- ГЛАВНАЯ ОБЕРТКА -->
-    <div class="flex justify-center w-full gap-x-4 xl:gap-x-20">
-        
-        <!-- ЛЕВЫЙ ВНЕШНИЙ БАННЕР -->
-        <div class="hidden xl:block w-[200px] flex-shrink-0 animate-banner-left">
-            <div class="mt-6 flex flex-col items-center w-full">
-                <a href="https://www.youtube.com/@hertzogen" class="block w-full" target="_blank">
-                    <img src="images/left-banner.png" alt="Left Banner" class="max-w-full h-auto block mx-auto">
-                </a>
-            </div>
-        </div>
-
-        <!-- КОНТЕНТНАЯ ЗОНА -->
-        <div class="w-full max-w-[1350px] bg-gray-100">
-            
-            <div class="flex flex-col lg:flex-row items-stretch lg:items-start justify-center gap-4 pt-4 lg:pt-0 px-2 sm:px-4">
-                
-                <!-- ЛЕВАЯ КОЛОНКА (ТОП ИГРОКОВ В САЙДБАРЕ) -->
-                <aside class="w-full lg:w-52 flex-shrink-0 space-y-4 order-2 lg:order-1">
-                    <div class="bg-white border border-gray-200 shadow-sm overflow-hidden mb-2 lg:mb-6">
-                        <a href='leaderboard'><h3 class="font-bold text-gray-800 uppercase p-4 border-b border-orange-200 flex justify-between">ТОП ИГРОКОВ</h3></a>
-                        <div id="leaderboard-list" class="flex flex-col"></div>
-                    </div>
-                </aside>
-
-                <!-- ЦЕНТРАЛЬНЫЙ БЛОК -->
-                <main class="w-full lg:flex-1 min-w-0 lg:min-w-[650px] max-w-4xl bg-white min-h-screen border-l border-r border-gray-200 shadow-xl order-1 lg:order-2">
-                    <div class="py-4 px-4 sm:py-6 sm:px-6 border-b border-gray-200 flex flex-col sm:flex-row gap-4 items-center justify-between text-center sm:text-left">
-                        <a href="/" id="main-logo" class="block">
-                            <img src="images/logo2.png" alt="Logo" class="h-12 sm:h-16 w-auto">
-                        </a>
-                        <div class="flex gap-8 uppercase font-medium text-sm text-gray-700">
-                            <a href="https://demonlist.org/" class="hover:text-orange-500 transition-colors"><b>demonlist.org</b></a>
-                        </div>
-                    </div>
-
-                    <!-- ОСНОВНОЙ КОНТЕНТ ЛИДЕРБОРДА -->
-                    <div id="main-content" class="p-4 sm:p-6">
-                        <div class="mb-6">
-                            <h2 class="text-xl font-bold text-gray-900 uppercase tracking-tight flex items-center gap-2 justify-center">
-                                Глобальная таблица лидеров
-                            </h2>
-                            <h2 class="text-m  text-gray-500 uppercase tracking-tight flex items-center gap-4 justify-center">
-                                Рейтинг лучших игроков по очкам взятых из demonlist.org
-                            </h2>
-                        </div>
-
-                        <!-- СЕТКА КАРТОЧЕК ИГРОКОВ -->
-                        <div id="main-leaderboard-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                            <!-- Карточки вставляются динамически -->
-                        </div>
-
-                        <!-- КНОПКА ПОКАЗАТЬ ЕЩЕ -->
-                        <div id="load-more-container" class="text-center py-8 hidden">
-                            <button id="load-more-btn" onclick="loadMorePlayers()" class="bg-gray-800 hover:bg-orange-600 text-white font-bold py-3 px-8 rounded transition-all uppercase text-sm cursor-pointer shadow-md hover:shadow-lg">
-                                Показать еще
-                            </button>
-                        </div>
-                    </div>
-                </main>
-
-                <!-- ПРАВАЯ КОЛОНКА -->
-                <aside class="w-full lg:w-52 flex-shrink-0 space-y-4 order-3">
-                    <div class="bg-white border border-gray-200 shadow-sm">
-                        <a href='streams'><h3 class="font-bold text-gray-800 uppercase p-4 border-b border-orange-200">СТРИМЫ И ПРОГРЕССЫ</h3></a>
-                        <div id="streams-list" class="flex flex-col"></div>
-                    </div>
-                    <div class="bg-white border border-gray-200 shadow-sm">
-                        <a href='news'><h3 class="font-bold text-gray-800 uppercase p-4 border-b border-orange-200">Новости</h3></a>
-                        <div id="news-list" class="flex flex-col"></div>
-                    </div>
-                </aside>
-            </div>
-            
-        </div>
-        
-        <!-- ПРАВАЯ КОЛОНКА (ЗАГЛУШКА БАННЕРА) -->
-        <div class="hidden xl:block w-[200px] flex-shrink-0 animate-banner-right">
-            <div class="mt-6 banner-container"> 
-                <a href="https://www.youtube.com/@hertzogen" class="block" target="_blank">
-                    <img src="images/right-banner.png" alt="Right Banner" class="max-w-full h-auto mx-auto" onerror="this.style.display='none'">
-                </a>
-            </div>
-        </div>
-
-    </div>
-
-    <!-- АДАПТИВНЫЙ ФУТЕР -->
-    <footer id="footer" class="bg-[#1a1a1a] text-white py-12 border-t-2 border-bold opacity-0 transition-opacity duration-500 mt-0">
-        <div class="max-w-6xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-8">
-            <div class="flex flex-wrap justify-center items-center gap-4">
-                <a href='/'><img src="images/logo3.png" alt="Logo" class="h-12 sm:h-16 w-auto opacity-60 hover:opacity-100 transition-opacity"></a>
-                <a href='https://www.youtube.com/@hertzogen' target="_blank"><img src="images/logo4.png" alt="Logo" class="h-16 w-auto opacity-60 hover:opacity-100 transition-opacity"></a>
-                <a href='https://demonlist.org/' target="_blank"><img src="images/logo5.png" alt="Logo" class="h-16 w-auto opacity-60 hover:opacity-100 transition-opacity"></a>
-            </div>
-            <div class="flex flex-wrap justify-center gap-6">
-                <a href="https://t.me/hertzogen2007" target="_blank" class="text-gray-400 hover:text-orange-500 transition-colors text-base sm:text-lg font-bold uppercase">Telegram</a>
-                <a href="https://www.youtube.com/@hertzogen" target="_blank" class="text-gray-400 hover:text-orange-500 transition-colors text-base sm:text-lg font-bold uppercase">YouTube</a>
-                <a href="https://demonlist.org/" target="_blank" class="text-gray-400 hover:text-orange-500 transition-colors text-base sm:text-lg font-bold uppercase">demonlist</a>
-            </div>
-            <div class="text-center md:text-right">
-                <a href="privacy-policy" class="text-gray-500 hover:text-white transition-colors text-sm underline">Privacy Policy</a>
-            </div>
-        </div>
-        <p class="py-3 px-6 sm:px-12 text-gray-500 text-sm text-center md:text-left">© 2026 H&CR hertzogen</p>
-    </footer>
 
     <script>
-        const URLS = { 
-            players: './Players.csv', 
-            levels: './Levels.csv', 
-            rankings: './Rankings.csv', 
-            streams: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTCNytbZ_R5TV-BfA1M2m0HiEe_C5FwfMlOCWWIu7gK9iOB48uKOnohrv6xTMqVmmjtB3d5XrISE4p9/pub?gid=1466784286&single=true&output=csv', 
-            news: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTCNytbZ_R5TV-BfA1M2m0HiEe_C5FwfMlOCWWIu7gK9iOB48uKOnohrv6xTMqVmmjtB3d5XrISE4p9/pub?gid=30512158&single=true&output=csv' 
-        };
-
-        const DB = {
-            players: {}, 
-            levels: {}, 
-            rankings: {}, 
-            streams: [],
-            news: [],
-            sortedPlayers: []
-        };
-
-        let currentLoaded = 0; 
-        const CHUNK_SIZE = 50; 
-
-        function clean(val) { return String(val || '').trim(); }
-
-        function parseCSV(text) {
-            const rows = [];
-            let currentRow = [];
-            let currentCell = '';
-            let insideQuotes = false;
-
-            for (let i = 0; i < text.length; i++) {
-                const char = text[i];
-                const nextChar = text[i + 1];
-
-                if (char === '"') {
-                    if (insideQuotes && nextChar === '"') {
-                        currentCell += '"'; 
-                        i++; 
-                    } else {
-                        insideQuotes = !insideQuotes;
-                    }
-                } else if (char === ',' && !insideQuotes) {
-                    currentRow.push(currentCell);
-                    currentCell = '';
-                } else if ((char === '\n' || char === '\r') && !insideQuotes) {
-                    if (char === '\r' && nextChar === '\n') i++;
-                    currentRow.push(currentCell);
-                    rows.push(currentRow);
-                    currentRow = [];
-                    currentCell = '';
-                } else {
-                    currentCell += char;
-                }
-            }
-            if (currentCell !== '' || currentRow.length > 0) { currentRow.push(currentCell); rows.push(currentRow); }
-            if (rows.length && rows[rows.length - 1].length === 1 && rows[rows.length - 1][0] === '') { rows.pop(); }
-            if (rows.length < 2) return [];
-            
-            const headers = rows[0].map(h => h.trim().toLowerCase());
-            return rows.slice(1).map(row => {
-                const obj = {};
-                headers.forEach((h, idx) => { obj[h] = row[idx] ? row[idx].trim() : ''; });
+        const DB = { players: [], records: [] };
+        let currentLoaded = 0;
+        
+        async function init() {
+            const resp = await fetch('./Players.csv?t=' + new Date().getTime());
+            const text = await resp.text();
+            // Простейший CSV парсер
+            const lines = text.split('\n').filter(l => l.trim());
+            const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+            DB.players = lines.slice(1).map(line => {
+                const values = line.split(',');
+                let obj = {};
+                headers.forEach((h, i) => obj[h] = values[i] ? values[i].trim() : '');
                 return obj;
-            });
+            }).sort((a,b) => (parseInt(b.points)||0) - (parseInt(a.points)||0));
+
+            render();
         }
 
-        function getCacheSafeUrl(url) {
-            const separator = url.includes('?') ? '&' : '?';
-            return url + separator + 't=' + new Date().getTime();
-        }
+        function render() {
+            const grid = document.getElementById('main-leaderboard-grid');
+            const btn = document.getElementById('load-more-container');
+            const chunk = DB.players.slice(currentLoaded, currentLoaded + 50);
 
-        async function initApp() {
-            try {
-                const responses = await Promise.all([
-                    fetch(getCacheSafeUrl(URLS.players)), 
-                    fetch(getCacheSafeUrl(URLS.levels)),
-                    fetch(getCacheSafeUrl(URLS.rankings)), 
-                    fetch(getCacheSafeUrl(URLS.streams)),
-                    fetch(getCacheSafeUrl(URLS.news))
-                ]);
-                
-                const texts = await Promise.all(responses.map(res => res.text()));
+            chunk.forEach((p, i) => {
+                const localRank = currentLoaded + i + 1;
+                const globalBadge = p.global_rank && p.global_rank !== '0' && parseInt(p.global_rank) !== localRank 
+                    ? `<span class="text-[10px] text-gray-400 ml-1">(Gl. #${p.global_rank})</span>` : '';
 
-                const playersArray = parseCSV(texts[0]);
-                const levelsArray = parseCSV(texts[1]);
-                const rankingsArray = parseCSV(texts[2]);
-                DB.streams = parseCSV(texts[3]);
-                DB.news = parseCSV(texts[4]);
-
-                playersArray.forEach(p => DB.players[p.player_id] = p);
-                levelsArray.forEach(l => DB.levels[l.level_id] = l);
-                
-                rankingsArray.forEach(r => {
-                    const lId = r.level_id;
-                    const pos = parseInt(r.position) || 9999;
-                    if (!DB.rankings[lId] || pos < DB.rankings[lId]) {
-                        DB.rankings[lId] = pos;
-                    }
-                });
-
-                renderLeaderboard(playersArray);
-                renderStreams();
-                renderNews();
-
-                document.getElementById('footer').style.opacity = '1';
-
-            } catch (err) {
-                console.error("Ошибка инициализации базы данных:", err);
-            }
-        }
-
-        function renderLeaderboard(playersArray) {
-    const sidebarContainer = document.getElementById('leaderboard-list'); 
-    const mainGridContainer = document.getElementById('main-leaderboard-grid');
-
-    DB.sortedPlayers = playersArray
-        .filter(p => p.is_banned !== 'TRUE' && p.is_banned !== 'true')
-        .sort((a, b) => (parseInt(b.points) || 0) - (parseInt(a.points) || 0));
-
-    // Выводим ЛОКАЛЬНЫЙ ранг (1, 2, 3...), чтобы не было дыр в сайдбаре
-    sidebarContainer.innerHTML = DB.sortedPlayers.slice(0, 5).map((p, index) => {
-        const countryCode = (p.country || 'WORLD').toLowerCase();
-        const localRank = index + 1;
-        
-        return `<a href="player?id=${p.player_id}" class="block stream-card mb-1.5 border border-gray-200 p-2.5 hover:border-gray-500 hover:bg-gray-50 transition-all"><div class="flex items-center justify-between"><div class="flex items-center gap-2"><span class="text-sm font-bold text-gray-500 w-5">#${localRank}</span><img src="images/flags/${countryCode}.gif" class="w-5 h-3 hltv-border" onerror="this.src='images/flags/WORLD.gif'"><span class="text-sm font-bold text-gray-900">${p.nickname}</span></div></div></a>`;
-    }).join('') + `<a href="leaderboard" class="block w-full text-center border border-gray-200 py-2 text-xs font-bold text-orange-600 hover:bg-orange-600 hover:text-white transition-all uppercase">Полный Список</a>`;
-    
-    sidebarContainer.classList.add('animate-list-fade');
-
-    mainGridContainer.innerHTML = '';
-    currentLoaded = 0;
-    
-    loadMorePlayers();
-}
-
-function loadMorePlayers() {
-    const grid = document.getElementById('main-leaderboard-grid');
-    const btnContainer = document.getElementById('load-more-container');
-    
-    const nextChunk = DB.sortedPlayers.slice(currentLoaded, currentLoaded + CHUNK_SIZE);
-    
-    nextChunk.forEach((p, index) => {
-        const globalIndex = currentLoaded + index;
-        const diffValue = parseInt(p.diff) || 0;
-        let diffHtml = diffValue > 0 ? `<span class="text-green-400 font-bold ml-1 text-xs sm:text-sm">+${diffValue}</span>` : 
-                       diffValue < 0 ? `<span class="text-red-400 font-bold ml-1 text-xs sm:text-sm">-${Math.abs(diffValue)}</span>` : 
-                       `<span class="text-gray-400 font-bold ml-1 text-xs sm:text-sm">-</span>`;
-        
-        const countryCode = (p.country || 'WORLD').toLowerCase();
-        const photoSrc = p.photo || 'images/default-profile.png';
-        
-        // Строгая локальная нумерация для черного квадрата карточки (1, 2, 3...)
-        const localRank = globalIndex + 1;
-        
-        // Приписка с официальным местом (если отличается от локального)
-        const globalBadge = p.global_rank && p.global_rank !== '0' && parseInt(p.global_rank) !== localRank 
-            ? `<span class="text-[10px] text-gray-400 font-normal ml-1 whitespace-nowrap">(Gl. #${p.global_rank})</span>` 
-            : '';
-
-        const card = document.createElement('a');
-        card.href = `player?id=${p.player_id}`;
-        card.className = "bg-white border border-gray-200 flex flex-col overflow-hidden card-hover relative group block opacity-0 animate-list-fade";
-        card.style.animationDelay = `${(index % CHUNK_SIZE) * 0.04}s`;
-
-        card.innerHTML = `
-            <div class="w-full aspect-[4/3] bg-gray-300 relative overflow-hidden">
-                <div class="absolute top-0 left-0 bg-black/85 text-white font-bold text-sm sm:text-base px-2.5 py-1 z-10 flex items-center gap-1 rounded-br">
-                    <span>#${localRank}</span>
-                    ${diffHtml}
-                </div>
-                <div class="absolute top-0 right-0 bg-orange-600 text-white font-bold text-[11px] sm:text-xs px-2.5 py-1 z-10 rounded-bl tracking-wide">
-                    ${p.points || 0} PTS
-                </div>
-                <img src="${photoSrc}" alt="${p.nickname}" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" 
-                     onerror="this.src='images/default-profile.png';">
-            </div>
-            <div class="p-2.5 bg-white border-t border-gray-100 flex items-center min-w-0">
-                <div class="flex items-center gap-1.5 min-w-0 w-full">
-                    <img src="images/flags/${countryCode}.gif" class="w-5 h-3.5 object-cover border hltv-border flex-shrink-0" onerror="this.src='images/flags/WORLD.gif'">
-                    <span class="text-xs sm:text-sm font-bold text-gray-900 truncate grow-text group-hover:text-orange-600 transition-colors flex items-center min-w-0">
-                        <span class="truncate">${p.nickname}</span> ${globalBadge}
-                    </span>
-                </div>
-            </div>
-        `;
-        
-        grid.appendChild(card);
-    });
-
-    currentLoaded += nextChunk.length;
-
-    if (currentLoaded >= DB.sortedPlayers.length) {
-        btnContainer.classList.add('hidden');
-        btnContainer.classList.remove('block');
-    } else {
-        btnContainer.classList.remove('hidden');
-        btnContainer.classList.add('block');
-    }
-}
-
-        function renderStreams() {
-            const container = document.getElementById('streams-list');
-            
-            // ВАЖНО: Улучшенный парсер ссылок из таблицы
-            const streamData = DB.streams.map(stream => {
-                const parts = String(stream.stream_id || '').split(',');
-                const pId = clean(stream.player_id || parts[2]); 
-                const lId = clean(stream.level_id || parts[3]);
-                const status = stream.is_live || parts[1];
-                const progress = stream.progress || parts[4];
-                
-                let rawLink = stream.link || stream.url || stream.stream_url || stream.video_url || stream['ссылка'] || '';
-                let streamLink = clean(rawLink);
-
-                const player = DB.players[pId] || {};
-                const level = DB.levels[lId] || {};
-
-                return {
-                    status: status, percent: progress, link: streamLink || '#',
-                    streamer: player.nickname || 'Unknown', country: player.country || 'WORLD',
-                    levelName: level.name || 'Unknown Level', position: DB.rankings[lId] || 9999
-                };
+                const card = document.createElement('a');
+                card.href = `player?id=${p.player_id}`;
+                card.className = "bg-white p-4 border card-hover";
+                card.innerHTML = `
+                    <div class="font-bold text-xl">#${localRank}</div>
+                    <div class="font-bold text-lg">${p.nickname} ${globalBadge}</div>
+                    <div class="text-sm text-orange-600">${p.points} PTS</div>
+                `;
+                grid.appendChild(card);
             });
 
-            streamData.sort((a, b) => a.position - b.position);
-
-            container.innerHTML = streamData.slice(0, 5).map(item => {
-                const isLive = String(item.status).trim().toUpperCase() === 'LIVE';
-                const posText = item.position === 9999 ? '—' : '#' + item.position;
-                const flagSrc = `images/flags/${String(item.country).toLowerCase()}.gif`;
-
-                return `<div class="stream-card mb-3 border border-gray-200 rounded-none bg-white">
-                    <div class="px-4 py-3 cursor-pointer select-none hover:bg-gray-50 transition-colors" onclick="toggleDropdown(this)">
-                        <div class="flex items-center mb-1.5">
-                            <span class="flex items-center text-[10px] font-bold uppercase ${isLive ? 'text-red-500' : 'text-gray-400'}">
-                                <span class="w-2 h-2 rounded-full mr-1.5 inline-block ${isLive ? 'bg-red-500 animate-pulse' : 'bg-gray-400'}"></span>
-                                ${isLive ? 'LIVE' : 'OFFLINE'}
-                            </span>
-                        </div>
-                        <div class="flex justify-between items-center mb-1">
-                            <div class="flex items-center gap-2">
-                                <img src="${flagSrc}" class="w-6 h-4 border hltv-border object-cover flex-shrink-0" onerror="this.src='images/flags/WORLD.gif'">
-                                <span class="text-sm font-bold text-gray-900 truncate max-w-[140px]">${item.streamer}</span>
-                            </div>
-                            <span class="text-xs font-bold text-orange-600 bg-orange-100 px-2 py-0.5 rounded">${posText}</span>
-                        </div>
-                        <div class="text-xs text-gray-600 font-medium truncate mt-1">
-                            ${item.levelName} — <span class="font-bold text-gray-900">${item.percent}%</span>
-                        </div>
-                    </div>
-                    <div class="dropdown-menu px-4 pb-3">
-                        <a href="${item.link}" target="_blank" class="block w-full bg-orange-600 text-white font-bold py-2 rounded text-[12px] uppercase text-center hover:bg-orange-700 transition-colors">СЛЕДИТЬ</a>
-                    </div>
-                </div>`;
-            }).join('');
-
-            container.classList.add('animate-list-fade');
+            currentLoaded += chunk.length;
+            if (currentLoaded < DB.players.length) btn.classList.remove('hidden');
         }
-
-        function renderNews() {
-            const container = document.getElementById('news-list');
-            const top10News = DB.news.reverse().slice(0, 10);
-
-            container.innerHTML = top10News.map((item, index) => {
-                const date = item['хедлайнер'] || '';
-                const title = item['заголовок'] || '';
-                
-                // ВАЖНО: Убрали .html из ссылки
-                return `
-                    <a href="news#news-${index}" class="stream-card block mb-3 border border-gray-200 p-4 hover:border-gray-400 hover:bg-gray-50 transition-all">
-                        <div class="text-[12px] font-bold text-orange-500 uppercase tracking-wider mb-1">${date}</div>
-                        <div class="text-sm font-bold text-gray-900 leading-tight">${title}</div>
-                    </a>`;
-            }).join('');
-            
-            container.classList.add('animate-list-fade');
-        }
-
-        function toggleDropdown(element) { 
-            const menu = element.closest('.stream-card')?.querySelector('.dropdown-menu'); 
-            if (menu) menu.classList.toggle('show'); 
-        }
-
-        window.addEventListener('scroll', () => { 
-            const miniLogo = document.getElementById('mini-logo-container'); 
-            if (window.scrollY > 100) { 
-                miniLogo.classList.remove('w-0', 'opacity-0'); 
-                miniLogo.classList.add('w-16', 'sm:w-24', 'opacity-100'); 
-            } else { 
-                miniLogo.classList.add('w-0', 'opacity-0'); 
-                miniLogo.classList.remove('w-16', 'sm:w-24', 'opacity-100'); 
-            } 
-        });
-
-        initApp();
+        init();
     </script>
 </body>
 </html>
