@@ -49,12 +49,11 @@ def fetch_csv_data(url):
             if reader.fieldnames:
                 reader.fieldnames = [str(name).strip().lower() for name in reader.fieldnames]
             return list(reader)
-        except Exception:
-            time.sleep(3)
+        except Exception: time.sleep(3)
     return []
 
 def fetch_player_data(p_id, fallback_name, custom_data):
-    time.sleep(0.5)
+    time.sleep(0.3)
     player_info = {
         'player_id': p_id, 'nickname': custom_data.get('nickname') or fallback_name, 
         'country': custom_data.get('country') or 'world', 'is_banned': custom_data.get('is_banned') or 'false', 
@@ -66,26 +65,21 @@ def fetch_player_data(p_id, fallback_name, custom_data):
     try:
         response = requests.get(f"{API_USER_GET}{p_id}", timeout=10)
         if response.status_code == 200:
-            req_json = response.json()
-            if isinstance(req_json, dict):
-                u_data = req_json.get('data', {})
-                if isinstance(u_data, dict):
-                    player_info['nickname'] = u_data.get('name') or player_info['nickname']
-                    player_info['points'] = f"{float(u_data.get('points', 0)):.2f}"
-                    player_info['global_rank'] = str(u_data.get('placement', '0'))
-                    api_country = get_country_code(u_data.get('country'))
-                    if api_country != "world": player_info['country'] = api_country
-
-                    levels_data = u_data.get('levels', {})
-                    if isinstance(levels_data, dict):
-                        for cat in ['hardest', 'main', 'extended', 'verified']:
-                            cat_data = levels_data.get(cat)
-                            if isinstance(cat_data, dict): cat_data = [cat_data]
-                            if isinstance(cat_data, list):
-                                for lvl in cat_data:
-                                    if isinstance(lvl, dict):
-                                        l_id = lvl.get('id')
-                                        if l_id: player_records.append({'player_id': p_id, 'level_id': l_id, 'progress': 100, 'video_url': lvl.get('video_url', '')})
+            data = response.json().get('data', {})
+            if isinstance(data, dict):
+                player_info['nickname'] = data.get('name') or player_info['nickname']
+                player_info['points'] = f"{float(data.get('points', 0)):.2f}"
+                player_info['global_rank'] = str(data.get('placement', '0'))
+                
+                levels_data = data.get('levels', {})
+                if isinstance(levels_data, dict):
+                    for cat in ['hardest', 'main', 'extended', 'verified']:
+                        cat_data = levels_data.get(cat)
+                        if isinstance(cat_data, dict): cat_data = [cat_data]
+                        if isinstance(cat_data, list):
+                            for lvl in cat_data:
+                                if isinstance(lvl, dict) and lvl.get('id'):
+                                    player_records.append({'player_id': p_id, 'level_id': str(lvl.get('id')), 'progress': 100, 'video_url': lvl.get('video_url', '')})
     except: pass
     return player_info, player_records
 
@@ -101,12 +95,11 @@ def main():
                     seen_records.add((str(row['player_id']), str(row['level_id'])))
 
     hcr_players = fetch_csv_data(URL_PLAYERS_CSV)
-    api_levels = requests.get(API_LEVEL_LIST).json()['data']['levels']
     
     unique_player_map = {}
     player_custom_data = {}
 
-    # Фундамент: Топ-200 из API
+    # 1. Принудительный сбор Топ-200 из API
     try:
         data = requests.get(API_LEADERBOARD).json().get('data', [])
         for p in data:
@@ -114,24 +107,31 @@ def main():
             unique_player_map[pid] = p.get('name', 'Unknown')
     except: pass
 
-    # Объединение с ручными правками и верификаторами
+    # 2. Добавляем тех, кто есть в таблице (на случай, если они не в топ-200)
     for p in hcr_players:
         pid = str(p.get('player_id', ''))
-        if pid: unique_player_map[pid] = p.get('nickname', 'Unknown'); player_custom_data[pid] = p 
+        if pid:
+            unique_player_map[pid] = p.get('nickname', 'Unknown')
+            player_custom_data[pid] = p 
     
-    for lvl in api_levels:
-        if lvl.get('verifier'): 
-            uid = str(lvl['verifier']['user_id'])
-            if uid not in unique_player_map: unique_player_map[uid] = lvl['verifier']['username']
+    # 3. Верификаторы
+    try:
+        levels = requests.get(API_LEVEL_LIST).json()['data']['levels']
+        for lvl in levels:
+            if lvl.get('verifier'): 
+                uid = str(lvl['verifier']['user_id'])
+                if uid not in unique_player_map: unique_player_map[uid] = lvl['verifier']['username']
+    except: pass
 
-    # Парсинг
+    print(f"Собрано {len(unique_player_map)} игроков для парсинга.")
+
     final_players = []
     with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
         futures = {executor.submit(fetch_player_data, pid, unique_player_map[pid], player_custom_data.get(pid, {})): pid for pid in unique_player_map}
         for future in concurrent.futures.as_completed(futures):
-            p_info, p_recs = future.result()
-            final_players.append(p_info)
-            for rec in p_recs:
+            p, r = future.result()
+            final_players.append(p)
+            for rec in r:
                 if (str(rec['player_id']), str(rec['level_id'])) not in seen_records:
                     all_records.append(rec)
                     seen_records.add((str(rec['player_id']), str(rec['level_id'])))
