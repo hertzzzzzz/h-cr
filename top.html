@@ -82,16 +82,16 @@
         <div class="h-full flex items-stretch justify-center max-w-[1350px] mx-auto w-full px-2 sm:px-4">
             
             <div id="mini-logo-container" class="w-0 overflow-hidden opacity-0 transition-all duration-500 ease-in-out flex-none">
-                <a href="top.html" class="h-full flex items-center justify-center px-2 sm:px-4" onclick="window.scrollTo({top: 0, behavior: 'smooth'}); return false;">
+                <a href="top" class="h-full flex items-center justify-center px-2 sm:px-4" onclick="window.scrollTo({top: 0, behavior: 'smooth'}); return false;">
                     <img src="images/logo.png" alt="Logo" class="h-12 sm:h-16 w-auto block">
                 </a>
             </div>
 
             <nav class="flex h-full font-bold uppercase text-xs sm:text-sm text-gray-800 items-stretch overflow-x-auto whitespace-nowrap">
-                <a href="top.html" class="nav-item px-4 sm:px-8 flex items-center border-l border-r border-gray-200 transition-colors hover:text-orange-500 hover:bg-orange-100">LEVELS</a>
-                <a href="leaderboard.html" class="nav-item px-4 sm:px-8 flex items-center border-r border-gray-200 transition-colors hover:text-orange-500 hover:bg-orange-100">PLAYERS</a>
-                <a href="news.html" class="nav-item px-4 sm:px-8 flex items-center border-r border-gray-200 transition-colors hover:text-orange-500 hover:bg-orange-100">NEWS</a>
-                <a href="streams.html" class="nav-item px-4 sm:px-8 flex items-center border-r border-gray-200 transition-colors hover:text-orange-500 hover:bg-orange-100">STREAMS</a>
+                <a href="top" class="nav-item px-4 sm:px-8 flex items-center border-l border-r border-gray-200 transition-colors hover:text-orange-500 hover:bg-orange-100">LEVELS</a>
+                <a href="leaderboard" class="nav-item px-4 sm:px-8 flex items-center border-r border-gray-200 transition-colors hover:text-orange-500 hover:bg-orange-100">PLAYERS</a>
+                <a href="news" class="nav-item px-4 sm:px-8 flex items-center border-r border-gray-200 transition-colors hover:text-orange-500 hover:bg-orange-100">NEWS</a>
+                <a href="streams" class="nav-item px-4 sm:px-8 flex items-center border-r border-gray-200 transition-colors hover:text-orange-500 hover:bg-orange-100">STREAMS</a>
             </nav>
         </div>
     </div>
@@ -127,7 +127,7 @@
                 <!-- ЦЕНТРАЛЬНАЯ ЧАСТЬ (ОСНОВНОЙ КОНТЕНТ) -->
                 <main class="w-full lg:flex-1 min-w-0 lg:min-w-[650px] max-w-4xl bg-white min-h-screen border-l border-r border-gray-200 shadow-xl order-1 lg:order-2">
                     <div class="py-4 px-4 sm:py-6 sm:px-6 border-b border-gray-200 flex flex-col sm:flex-row gap-4 items-center justify-between text-center sm:text-left">
-                        <a href="index.html" id="main-logo" class="block flex-shrink-0">
+                        <a href="/" id="main-logo" class="block flex-shrink-0">
                             <img src="images/logo2.png" alt="Logo" class="h-12 sm:h-16 w-auto">
                         </a>
                         <div class="flex uppercase font-medium text-xs sm:text-sm text-gray-700">
@@ -216,7 +216,7 @@
                 <a href="https://demonlist.org/" target="_blank" class="text-gray-400 hover:text-orange-500 transition-colors text-base sm:text-lg font-bold uppercase">demonlist</a>
             </div>
             <div class="text-center md:text-right">
-                <a href="privacy-policy.html" class="text-gray-500 hover:text-white transition-colors text-sm underline">Privacy Policy</a>
+                <a href="privacy-policy" class="text-gray-500 hover:text-white transition-colors text-sm underline">Privacy Policy</a>
             </div>
         </div>
         <p class="py-3 px-6 sm:px-12 text-gray-500 text-sm text-center md:text-left">© 2026 H&CR hertzogen</p>
@@ -394,20 +394,20 @@
             const lvlName = getField(level, ['name', 'levelname']) || 'Unknown';
             const thumb = getField(level, ['thumbnail', 'thumb']) || 'images/default.jpg';
             const ytLink = getField(level, ['video_url', 'videourl', 'link']) || '#';
-            const detailLink = `level.html?id=${item.lId}`;
+            const detailLink = `level?id=${item.lId}`;
             
             const verifierId = String(getField(level, ['verifier_id', 'verifierid', 'verifier', 'verif'])).trim();
             const verifierObj = DB.players[verifierId] || { nickname: verifierId ? `ID:${verifierId}` : 'Unknown', country: 'WORLD' };
             
             const authorName = getField(level, ['builder']) || 'Unknown';
             const verifierName = verifierObj.nickname; const verifierFlag = getFlag(verifierObj.country);
-            const pLink = (verifierId && verifierId !== '') ? `player.html?id=${verifierId}` : '#';
+            const pLink = (verifierId && verifierId !== '') ? `player?id=${verifierId}` : '#';
             
             const div = document.createElement('div');
             div.className = "level-card card-hover bg-white border border-gray-200 shadow-sm cursor-pointer hover:shadow-xl overflow-hidden animate-card-entry mb-4";
             div.style.animationDelay = `${cardIndex++ * 35}ms`;
             
-            div.innerHTML = `<div class="flex flex-col sm:flex-row sm:items-center justify-between p-4 gap-3 sm:gap-4 min-h-[5rem]"><div class="flex items-center gap-3 sm:gap-4"><span class="text-xl sm:text-2xl font-bold text-black w-8 sm:w-12 text-center">#${pos}</span><img src="${thumb}" class="h-12 w-20 sm:h-16 sm:w-28 object-cover rounded bg-gray-100 flex-shrink-0" onerror="this.src='images/default.jpg'"><div class="min-w-0"><h3 class="font-bold text-base sm:text-xl text-gray-900 truncate">${lvlName}</h3><p class="text-xs sm:text-sm mt-0.5 truncate"><span class="text-gray-400">by </span><span class="font-bold text-sm sm:text-base text-gray-800">${authorName}</span></p></div></div><div class="text-left sm:text-right flex-shrink-0 pl-11 sm:pl-0"><div class="text-orange-600 font-bold text-xl sm:text-2xl base-points-text" style="transition: all 0.3s ease;">${isOpen ? dpOpen : dpClosed} pts</div></div></div><div class="extra-info" style="height: ${isOpen ? 'auto' : '0px'};"><div class="border-t border-gray-100 p-4 bg-gray-50 flex flex-col sm:flex-row sm:items-center justify-between gap-4"><div class="text-center sm:flex-1"><p class="text-[10px] text-gray-400 uppercase font-bold mb-1">Верифицировано:</p><a href="${pLink}"><div class="font-bold text-base sm:text-lg text-gray-800 hover:opacity-70 grow-text cursor-pointer">${verifierName} ${verifierFlag}</div></a></div><div class="sm:flex-1 flex flex-row sm:flex-col items-center gap-2 w-full sm:w-auto"><a href="${ytLink}" target="_blank" class="bg-black text-white px-4 py-2 rounded font-bold hover:bg-gray-800 transition-colors text-xs sm:text-sm flex-1 sm:w-full text-center">Смотреть</a><a href="${detailLink}" class="bg-gray-200 text-black px-4 py-2 rounded font-bold hover:bg-gray-300 transition-colors text-xs sm:text-sm flex-1 sm:w-full text-center">Подробнее</a></div><div class="text-center sm:flex-1"><p class="text-[10px] text-gray-400 uppercase font-bold mb-1 flex items-center justify-center gap-1">POINTS<a href="rating-info.html" class="w-4 h-4 bg-gray-300 rounded-full flex items-center justify-center text-[10px] text-white hover:bg-orange-600 transition-colors cursor-help" title="Как считается рейтинг?">?</a></p><div class="text-xl sm:text-2xl font-bold text-gray-800">${item.req}%</div><div class="text-sm sm:text-base font-bold text-gray-500">${pos <= 150 ? dpSmall + " pts" : "EL"}</div></div></div></div>`;
+            div.innerHTML = `<div class="flex flex-col sm:flex-row sm:items-center justify-between p-4 gap-3 sm:gap-4 min-h-[5rem]"><div class="flex items-center gap-3 sm:gap-4"><span class="text-xl sm:text-2xl font-bold text-black w-8 sm:w-12 text-center">#${pos}</span><img src="${thumb}" class="h-12 w-20 sm:h-16 sm:w-28 object-cover rounded bg-gray-100 flex-shrink-0" onerror="this.src='images/default.jpg'"><div class="min-w-0"><h3 class="font-bold text-base sm:text-xl text-gray-900 truncate">${lvlName}</h3><p class="text-xs sm:text-sm mt-0.5 truncate"><span class="text-gray-400">by </span><span class="font-bold text-sm sm:text-base text-gray-800">${authorName}</span></p></div></div><div class="text-left sm:text-right flex-shrink-0 pl-11 sm:pl-0"><div class="text-orange-600 font-bold text-xl sm:text-2xl base-points-text" style="transition: all 0.3s ease;">${isOpen ? dpOpen : dpClosed} pts</div></div></div><div class="extra-info" style="height: ${isOpen ? 'auto' : '0px'};"><div class="border-t border-gray-100 p-4 bg-gray-50 flex flex-col sm:flex-row sm:items-center justify-between gap-4"><div class="text-center sm:flex-1"><p class="text-[10px] text-gray-400 uppercase font-bold mb-1">Верифицировано:</p><a href="${pLink}"><div class="font-bold text-base sm:text-lg text-gray-800 hover:opacity-70 grow-text cursor-pointer">${verifierName} ${verifierFlag}</div></a></div><div class="sm:flex-1 flex flex-row sm:flex-col items-center gap-2 w-full sm:w-auto"><a href="${ytLink}" target="_blank" class="bg-black text-white px-4 py-2 rounded font-bold hover:bg-gray-800 transition-colors text-xs sm:text-sm flex-1 sm:w-full text-center">Смотреть</a><a href="${detailLink}" class="bg-gray-200 text-black px-4 py-2 rounded font-bold hover:bg-gray-300 transition-colors text-xs sm:text-sm flex-1 sm:w-full text-center">Подробнее</a></div><div class="text-center sm:flex-1"><p class="text-[10px] text-gray-400 uppercase font-bold mb-1 flex items-center justify-center gap-1">POINTS<a href="rating-info" class="w-4 h-4 bg-gray-300 rounded-full flex items-center justify-center text-[10px] text-white hover:bg-orange-600 transition-colors cursor-help" title="Как считается рейтинг?">?</a></p><div class="text-xl sm:text-2xl font-bold text-gray-800">${item.req}%</div><div class="text-sm sm:text-base font-bold text-gray-500">${pos <= 150 ? dpSmall + " pts" : "EL"}</div></div></div></div>`;
             div.addEventListener('click', (e) => { if(e.target.closest('a')) return; const info = div.querySelector('.extra-info'); const ptEl = div.querySelector('.base-points-text'); const isExp = info.style.height === '0px' || info.style.height === ''; if (isExp) { info.style.height = 'auto'; const targetHeight = info.scrollHeight + 'px'; info.style.height = '0px'; info.offsetHeight; info.style.height = targetHeight; } else { if (info.style.height === 'auto' || !info.style.height) { info.style.height = info.scrollHeight + 'px'; info.offsetHeight; } info.style.height = '0px'; } ptEl.style.opacity = 0; ptEl.style.transform = "scale(0.95)"; setTimeout(() => { ptEl.textContent = (isExp ? dpOpen : dpClosed) + " pts"; ptEl.style.opacity = 1; ptEl.style.transform = "scale(1)"; }, 200); });
             container.appendChild(div);
         });
@@ -420,7 +420,7 @@
     function renderSidebars() { 
         const leadList = DB.playersArr.filter(p => p.is_banned !== 'TRUE' && p.is_banned !== 'true').sort((a,b) => (parseInt(b.points)||0) - (parseInt(a.points)||0)).slice(0, 5);
         const lContainer = document.getElementById('leaderboard-list');
-        if (lContainer) lContainer.innerHTML = leadList.map((p, i) => `<a href="player.html?id=${p.player_id}" class="block stream-card mb-1.5 border border-gray-200 p-2.5 hover:border-gray-500 hover:bg-gray-50 transition-all"><div class="flex items-center gap-2"><span class="text-sm font-bold text-gray-500 w-5">#${i+1}</span><img src="images/flags/${(p.country||'WORLD').toLowerCase()}.gif" class="w-5 h-3 hltv-border" onerror="this.src='images/flags/WORLD.gif'"><span class="text-sm font-bold text-gray-900">${p.nickname}</span></div></a>`).join('') + `<a href="leaderboard.html" class="block w-full text-center border border-gray-200 py-2 text-xs font-bold text-orange-600 hover:bg-orange-600 hover:text-white transition-all uppercase">Полный Список</a>`, lContainer.classList.add('animate-list-fade');
+        if (lContainer) lContainer.innerHTML = leadList.map((p, i) => `<a href="player?id=${p.player_id}" class="block stream-card mb-1.5 border border-gray-200 p-2.5 hover:border-gray-500 hover:bg-gray-50 transition-all"><div class="flex items-center gap-2"><span class="text-sm font-bold text-gray-500 w-5">#${i+1}</span><img src="images/flags/${(p.country||'WORLD').toLowerCase()}.gif" class="w-5 h-3 hltv-border" onerror="this.src='images/flags/WORLD.gif'"><span class="text-sm font-bold text-gray-900">${p.nickname}</span></div></a>`).join('') + `<a href="leaderboard" class="block w-full text-center border border-gray-200 py-2 text-xs font-bold text-orange-600 hover:bg-orange-600 hover:text-white transition-all uppercase">Полный Список</a>`, lContainer.classList.add('animate-list-fade');
 
         const streamsContainer = document.getElementById('streams-list');
         if (streamsContainer) {

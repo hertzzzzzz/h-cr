@@ -72,16 +72,16 @@
         <div class="h-full flex items-stretch justify-center max-w-[1350px] mx-auto w-full px-2 sm:px-4">
             
             <div id="mini-logo-container" class="w-0 overflow-hidden opacity-0 transition-all duration-500 ease-in-out flex-none">
-                <a href="index.html" class="h-full flex items-center justify-center px-2 sm:px-4" onclick="window.scrollTo({top: 0, behavior: 'smooth'}); return false;">
+                <a href="/" class="h-full flex items-center justify-center px-2 sm:px-4" onclick="window.scrollTo({top: 0, behavior: 'smooth'}); return false;">
                     <img src="images/logo.png" alt="Logo" class="h-12 sm:h-16 w-auto block">
                 </a>
             </div>
 
             <nav class="flex h-full font-bold uppercase text-xs sm:text-sm text-gray-800 items-stretch overflow-x-auto whitespace-nowrap">
-                <a href="top.html" class="nav-item px-4 sm:px-8 flex items-center border-l border-r border-gray-200 transition-colors hover:text-orange-500 hover:bg-orange-100">LEVELS</a>
-                <a href="leaderboard.html" class="nav-item px-4 sm:px-8 flex items-center border-r border-gray-200 transition-colors hover:text-orange-500 hover:bg-orange-100">PLAYERS</a>
-                <a href="news.html" class="nav-item px-4 sm:px-8 flex items-center border-r border-gray-200 transition-colors hover:text-orange-500 hover:bg-orange-100">NEWS</a>
-                <a href="streams.html" class="nav-item px-4 sm:px-8 flex items-center border-r border-gray-200 transition-colors hover:text-orange-500 hover:bg-orange-100">STREAMS</a>
+                <a href="top" class="nav-item px-4 sm:px-8 flex items-center border-l border-r border-gray-200 transition-colors hover:text-orange-500 hover:bg-orange-100">LEVELS</a>
+                <a href="leaderboard" class="nav-item px-4 sm:px-8 flex items-center border-r border-gray-200 transition-colors hover:text-orange-500 hover:bg-orange-100">PLAYERS</a>
+                <a href="news" class="nav-item px-4 sm:px-8 flex items-center border-r border-gray-200 transition-colors hover:text-orange-500 hover:bg-orange-100">NEWS</a>
+                <a href="streams" class="nav-item px-4 sm:px-8 flex items-center border-r border-gray-200 transition-colors hover:text-orange-500 hover:bg-orange-100">STREAMS</a>
             </nav>
         </div>
     </div>
@@ -114,7 +114,7 @@
                 <!-- ЦЕНТР -->
                 <main class="w-full lg:flex-1 min-w-0 lg:min-w-[650px] max-w-4xl bg-white min-h-screen border-l border-r border-gray-200 shadow-xl order-1 lg:order-2">
                     <div class="py-4 px-4 sm:py-6 sm:px-6 border-b border-gray-200 flex flex-col sm:flex-row gap-4 items-center justify-between text-center sm:text-left">
-                        <a href="index.html" id="main-logo" class="block">
+                        <a href="/" id="main-logo" class="block">
                             <img src="images/logo2.png" alt="Logo" class="h-12 sm:h-16 w-auto">
                         </a>
                         <div class="flex gap-8 uppercase font-medium text-sm text-gray-700">
@@ -150,7 +150,7 @@
                                 <div class="border-t-4 border-blue-400 bg-blue-50 p-5 space-y-4 shadow-sm">
                                     <h3 class="font-bold text-gray-900 uppercase text-base sm:text-lg flex items-center gap-2">
                                         <span class="w-2 h-2 bg-blue-400 rounded-full"></span>
-                                        Рейтинг <a href="top.html" target="_blank" class="hover:text-blue-500">demonlist.org</a>
+                                        Рейтинг <a href="top" target="_blank" class="hover:text-blue-500">demonlist.org</a>
                                     </h3>
                                     <p class="text-gray-600 font-normal leading-relaxed">
                                         Этот список является чистым отражением официального глобального Demonlist. На нашем ресурсе мы <b>просто берем готовую информацию</b> напрямую из открытых баз данных оригинального проекта. 
@@ -164,7 +164,7 @@
                                 <div class="border-t-4 border-orange-500 bg-orange-50/40 p-5 space-y-4 shadow-sm">
                                     <h3 class="font-bold text-gray-900 uppercase text-base sm:text-lg flex items-center gap-2">
                                         <span class="w-2 h-2 bg-orange-500 rounded-full"></span>
-                                        Рейтинг <a href="top.html" target="_blank" class="hover:text-orange-500">H&CR</a>
+                                        Рейтинг <a href="top" target="_blank" class="hover:text-orange-500">H&CR</a>
                                     </h3>
                                     <p class="text-gray-600 font-normal leading-relaxed">
                                         Пока что этот рейтинг находится в стадии разработки и его еще нет. Но в нём уже есть пара крутых уровней, которые вы можете заценить в соответствующей вкладке топа!
@@ -251,7 +251,7 @@
                 <a href="https://demonlist.org/" class="text-gray-400 hover:text-orange-500 transition-colors text-base sm:text-lg font-bold uppercase">demonlist</a>
             </div>
             <div class="text-center md:text-right">
-                <a href="privacy-policy.html" class="text-gray-500 hover:text-white transition-colors text-sm underline">Privacy Policy</a>
+                <a href="privacy-policy" class="text-gray-500 hover:text-white transition-colors text-sm underline">Privacy Policy</a>
             </div>
         </div>
         <p class="py-3 px-6 sm:px-12 text-gray-500 text-sm text-center md:text-left">© 2026 H&CR hertzogen</p>
@@ -360,7 +360,7 @@ function getParsedStreams() {
     function renderSidebars() {
         const leadList = DB.playersArr.filter(p => p.is_banned !== 'TRUE' && p.is_banned !== 'true').sort((a,b) => (parseInt(b.points)||0) - (parseInt(a.points)||0)).slice(0, 5);
         const lContainer = document.getElementById('leaderboard-list');
-        if (lContainer) lContainer.innerHTML = leadList.map((p, i) => `<a href="player.html?id=${p.player_id}" class="block stream-card mb-1.5 border border-gray-200 p-2.5 hover:border-gray-500 hover:bg-gray-50 transition-all"><div class="flex items-center gap-2"><span class="text-sm font-bold text-gray-500 w-5">#${i+1}</span><img src="images/flags/${(p.country||'WORLD').toLowerCase()}.gif" class="w-5 h-3 hltv-border" onerror="this.src='images/flags/WORLD.gif'"><span class="text-sm font-bold text-gray-900">${p.nickname}</span></div></a>`).join('') + `<a href="leaderboard.html" class="block w-full text-center border border-gray-200 py-2 text-xs font-bold text-orange-600 hover:bg-orange-600 hover:text-white transition-all uppercase">Полный Список</a>`, lContainer.classList.add('animate-list-fade');
+        if (lContainer) lContainer.innerHTML = leadList.map((p, i) => `<a href="player?id=${p.player_id}" class="block stream-card mb-1.5 border border-gray-200 p-2.5 hover:border-gray-500 hover:bg-gray-50 transition-all"><div class="flex items-center gap-2"><span class="text-sm font-bold text-gray-500 w-5">#${i+1}</span><img src="images/flags/${(p.country||'WORLD').toLowerCase()}.gif" class="w-5 h-3 hltv-border" onerror="this.src='images/flags/WORLD.gif'"><span class="text-sm font-bold text-gray-900">${p.nickname}</span></div></a>`).join('') + `<a href="leaderboard" class="block w-full text-center border border-gray-200 py-2 text-xs font-bold text-orange-600 hover:bg-orange-600 hover:text-white transition-all uppercase">Полный Список</a>`, lContainer.classList.add('animate-list-fade');
 
         const streamsContainer = document.getElementById('streams-list');
         if (streamsContainer) {
