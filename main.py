@@ -4,10 +4,12 @@ import concurrent.futures
 import time
 import io
 import os
+import sys
 
 # --- НАСТРОЙКИ ---
 API_LEVEL_LIST = "https://api.demonlist.org/level/classic/list"
 API_USER_GET = "https://api.demonlist.org/user/get?id="
+API_LEADERBOARD = "https://api.demonlist.org/user/ranking?limit=100" 
 
 URL_LEVELS_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTCNytbZ_R5TV-BfA1M2m0HiEe_C5FwfMlOCWWIu7gK9iOB48uKOnohrv6xTMqVmmjtB3d5XrISE4p9/pub?gid=1437425318&single=true&output=csv"
 URL_RANKINGS_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTCNytbZ_R5TV-BfA1M2m0HiEe_C5FwfMlOCWWIu7gK9iOB48uKOnohrv6xTMqVmmjtB3d5XrISE4p9/pub?gid=2093715526&single=true&output=csv"
@@ -39,43 +41,77 @@ def get_thumbnail(video_link):
     except: return 'images/default.jpg'
 
 def fetch_csv_data(url):
-    try:
-        response = requests.get(url, timeout=15)
-        response.encoding = 'utf-8'
-        reader = csv.DictReader(io.StringIO(response.text))
-        if reader.fieldnames:
-            reader.fieldnames = [str(name).strip().lower() for name in reader.fieldnames]
-        return list(reader)
-    except Exception as e:
-        print(f"Ошибка загрузки CSV из Google Таблиц: {e}")
-        return []
+    for _ in range(3):
+        try:
+            response = requests.get(url, timeout=20)
+            response.encoding = 'utf-8'
+            reader = csv.DictReader(io.StringIO(response.text))
+            if reader.fieldnames:
+                reader.fieldnames = [str(name).strip().lower() for name in reader.fieldnames]
+            return list(reader)
+        except Exception:
+            time.sleep(3)
+    print(f"ВНИМАНИЕ: Ошибка загрузки CSV из Google Таблиц после 3 попыток.")
+    return []
 
-def fetch_player_data(p_id, fallback_name):
+def fetch_player_data(p_id, fallback_name, custom_data):
     time.sleep(0.5)
+    
     player_info = {
-        'player_id': p_id, 'nickname': fallback_name, 'country': 'world',
-        'is_banned': 'false', 'points': '0.0', 'photo': f'images/profiles/Bez{p_id}.png',
-        'social_yt': '', 'social_tiwtch': '', 'info': '- информация ещё не была добавлена -'
+        'player_id': p_id, 
+        'nickname': custom_data.get('nickname') or fallback_name, 
+        'country': custom_data.get('country') or 'world',
+        'is_banned': custom_data.get('is_banned') or 'false', 
+        'points': '0.0', 
+        'photo': custom_data.get('photo') or f'images/profiles/Bez{p_id}.png',
+        'social_yt': custom_data.get('social_yt') or '', 
+        'social_tiwtch': custom_data.get('social_tiwtch') or '', 
+        'info': custom_data.get('info') or '- информация ещё не была добавлена -'
     }
+    
     player_records = []
     try:
         response = requests.get(f"{API_USER_GET}{p_id}", timeout=10)
         if response.status_code == 200:
-            u_data = response.json().get('data', {})
-            player_info['nickname'] = u_data.get('name') or fallback_name
-            player_info['points'] = f"{float(u_data.get('points', 0)):.2f}"
-            player_info['country'] = get_country_code(u_data.get('country'))
-            for cat in ['hardest', 'main', 'extended', 'verified']:
-                for lvl in u_data.get('levels', {}).get(cat, []):
-                    l_id = lvl.get('id')
-                    if l_id: player_records.append({'player_id': p_id, 'level_id': l_id, 'progress': 100, 'video_url': lvl.get('video_url', '')})
-    except: pass
+            req_json = response.json()
+            if isinstance(req_json, dict):
+                u_data = req_json.get('data', {})
+                if isinstance(u_data, dict):
+                    player_info['nickname'] = u_data.get('name') or player_info['nickname']
+                    player_info['points'] = f"{float(u_data.get('points', 0)):.2f}"
+                    
+                    api_country = get_country_code(u_data.get('country'))
+                    if api_country != "world":
+                        player_info['country'] = api_country
+
+                    levels_data = u_data.get('levels', {})
+                    if isinstance(levels_data, dict):
+                        for cat in ['hardest', 'main', 'extended', 'verified']:
+                            cat_data = levels_data.get(cat)
+                            
+                            if not cat_data:
+                                continue
+                                
+                            # ИСПРАВЛЕНИЕ БАГА ИЗ-ЗА СТРУКТУРЫ API:
+                            # Если API вернул одиночный словарь (как в "hardest"), делаем его списком
+                            if isinstance(cat_data, dict):
+                                cat_data = [cat_data]
+                                
+                            # Теперь безопасно перебираем список
+                            if isinstance(cat_data, list):
+                                for lvl in cat_data:
+                                    if isinstance(lvl, dict):
+                                        l_id = lvl.get('id')
+                                        if l_id: 
+                                            player_records.append({'player_id': p_id, 'level_id': l_id, 'progress': 100, 'video_url': lvl.get('video_url', '')})
+    except Exception as e:
+        print(f"Ошибка парсинга игрока {p_id}: {e}")
+        
     return player_info, player_records
 
 def main():
-    print("--- ЗАПУСК ОБНОВЛЕНИЯ ДАННЫХ ---")
+    print("--- ЗАПУСК ОБНОВЛЕНИЯ ДАННЫХ (УМНЫЙ СБОР) ---")
     
-    # 1. ЗАГРУЖАЕМ СТАРЫЕ РЕКОРДЫ (чтобы не потерять их при обновлении)
     all_records = []
     seen_records = set()
     if os.path.exists('Records.csv'):
@@ -86,11 +122,8 @@ def main():
                     if row.get('player_id') and row.get('level_id'):
                         all_records.append(row)
                         seen_records.add((str(row['player_id']), str(row['level_id'])))
-            print(f"Успешно загружено {len(all_records)} старых записей из Records.csv.")
         except Exception as e:
-            print(f"ВНИМАНИЕ: Ошибка чтения старых рекордов: {e}")
-    else:
-        print("Файл Records.csv не найден, начинаем сбор рекордов с чистого листа.")
+            pass
 
     print("Загрузка списка уровней из API...")
     try:
@@ -105,13 +138,18 @@ def main():
     hcr_levels = fetch_csv_data(URL_LEVELS_CSV)
     hcr_rankings = fetch_csv_data(URL_RANKINGS_CSV)
     
-    all_players = hcr_players
-    seen_player_ids = {str(p.get('player_id', '')) for p in hcr_players}
-    
     all_levels = hcr_levels
     rankings_data = hcr_rankings
-
+    
     unique_player_map = {}
+    player_custom_data = {}
+
+    for p in hcr_players:
+        pid = str(p.get('player_id', ''))
+        if pid:
+            unique_player_map[pid] = p.get('nickname', 'Unknown')
+            player_custom_data[pid] = p 
+
     for i, lvl in enumerate(api_levels):
         l_id = str(lvl['id'])
         req = str(lvl.get('list_percent', 100)).replace('%', '') 
@@ -127,8 +165,19 @@ def main():
         
         if lvl.get('verifier'): 
             uid = str(lvl['verifier']['user_id'])
-            if uid not in seen_player_ids:
-                unique_player_map[uid] = lvl['verifier']['username']
+            unique_player_map[uid] = lvl['verifier']['username']
+
+    try:
+        lb_resp = requests.get(API_LEADERBOARD, timeout=10)
+        if lb_resp.status_code == 200:
+            lb_data = lb_resp.json()
+            if isinstance(lb_data, dict) and 'data' in lb_data:
+                for top_p in lb_data['data']:
+                    pid = str(top_p.get('id', top_p.get('user_id', '')))
+                    if pid:
+                        unique_player_map[pid] = top_p.get('name', 'Unknown')
+    except Exception as e:
+        print("API Топ-100 недоступно.")
 
     for row in rankings_data:
         if 'requirement' in row:
@@ -136,43 +185,44 @@ def main():
 
     ids_to_process = list(unique_player_map.keys())
     total = len(ids_to_process)
-    print(f"Парсинг {total} новых игроков из API (может занять время)...")
+    print(f"Парсинг {total} игроков для сбора их рекордов (может занять время)...")
     
+    final_players = []
     processed_count = 0
+    
     with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
-        futures = {executor.submit(fetch_player_data, pid, unique_player_map[pid]): pid for pid in ids_to_process}
+        futures = {executor.submit(fetch_player_data, pid, unique_player_map[pid], player_custom_data.get(pid, {})): pid for pid in ids_to_process}
+        
         for future in concurrent.futures.as_completed(futures):
             processed_count += 1
             p_info, p_recs = future.result()
-            all_players.append(p_info)
+            final_players.append(p_info)
             for rec in p_recs:
                 key = (str(rec['player_id']), str(rec['level_id']))
                 if key not in seen_records:
                     all_records.append(rec)
                     seen_records.add(key)
             if processed_count % 10 == 0 or processed_count == total:
-                print(f"[{processed_count}/{total}] Обработаны рекорды для: {p_info['nickname']}")
+                print(f"[{processed_count}/{total}] Обработаны данные для: {p_info['nickname']}")
+
+    print(f"ИТОГО рекордов к сохранению: {len(all_records)}")
+    if len(all_records) == 0:
+        print("КРИТИЧЕСКАЯ ОШИБКА: Список рекордов пуст! Запись отменена.")
+        sys.exit(1)
 
     print("\n--- СОХРАНЕНИЕ ФАЙЛОВ ---")
     
     with open('Players.csv', 'w', newline='', encoding='utf-8-sig') as f:
         writer = csv.DictWriter(f, fieldnames=['player_id', 'nickname', 'country', 'is_banned', 'points', 'photo', 'social_yt', 'social_tiwtch', 'info'], extrasaction='ignore')
-        writer.writeheader(); writer.writerows(all_players)
-        print("Players.csv сохранен.")
-
+        writer.writeheader(); writer.writerows(final_players)
+        
     with open('Levels.csv', 'w', newline='', encoding='utf-8-sig') as f:
         writer = csv.DictWriter(f, fieldnames=['level_id', 'name', 'publisher_id', 'builder', 'verifier_id', 'video_url', 'thumbnail', 'info', 'points'], extrasaction='ignore')
         writer.writeheader(); writer.writerows(all_levels)
-        print("Levels.csv сохранен.")
-
+        
     with open('Rankings.csv', 'w', newline='', encoding='utf-8-sig') as f:
         writer = csv.DictWriter(f, fieldnames=['ranking_id', 'top_name', 'level_id', 'position', 'requirement'], extrasaction='ignore')
         writer.writeheader(); writer.writerows(rankings_data)
-        print("Rankings.csv сохранен.")
-
-    print(f"ИТОГО рекордов к сохранению: {len(all_records)}")
-    if len(all_records) == 0:
-        print("ОШИБКА: Список рекордов пуст! Файл Records.csv создастся пустым (только заголовки).")
         
     with open('Records.csv', 'w', newline='', encoding='utf-8-sig') as f:
         writer = csv.DictWriter(f, fieldnames=['player_id', 'level_id', 'progress', 'video_url'], extrasaction='ignore')
