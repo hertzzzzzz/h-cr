@@ -60,23 +60,27 @@ def fetch_player_data(p_id, nickname, custom_data):
     return player_info, player_records
 
 def main():
-    print("--- ЗАПУСК С ПРИОРИТЕТОМ CSV (SPB СОХРАНИТСЯ) ---")
+    print("--- ЗАПУСК ПОЛНОЙ СИНХРОНИЗАЦИИ ---")
     
-    # 1. Загрузка существующих данных
-    old_levels = {}
-    if os.path.exists('Levels.csv'):
-        with open('Levels.csv', 'r', encoding='utf-8-sig') as f:
-            for row in csv.DictReader(f): old_levels[row['level_id']] = row
+    # 1. Загружаем ТВОИ уровни из CSV (приоритет!)
+    hcr_levels = fetch_csv_data(URL_LEVELS_CSV)
+    # Делаем словарь для быстрого доступа, чтобы API не перезаписывал твое описание
+    all_levels_dict = {str(lvl['level_id']): lvl for lvl in hcr_levels}
 
-    all_records = []
-    seen_records = set()
-    if os.path.exists('Records.csv'):
-        with open('Records.csv', 'r', encoding='utf-8-sig') as f:
-            for row in csv.DictReader(f):
-                if row.get('player_id'):
-                    all_records.append(row)
-                    seen_records.add((str(row['player_id']), str(row['level_id'])))
-
+    # 2. Загружаем уровни из API и ДОБАВЛЯЕМ их, если их нет
+    try:
+        api_levels = requests.get(API_LEVEL_LIST, headers=HEADERS).json()['data']['levels']
+        for lvl in api_levels:
+            l_id = str(lvl['id'])
+            # Если уровня нет в таблице, добавляем его
+            if l_id not in all_levels_dict:
+                all_levels_dict[l_id] = {
+                    'level_id': l_id, 'name': lvl['name'], 'publisher_id': '', 
+                    'builder': lvl.get('holder', 'Unknown'), 'verifier_id': str(lvl['verifier']['user_id']) if lvl.get('verifier') else '',
+                    'video_url': lvl.get('verification_url', ''), 'thumbnail': '', 
+                    'info': 'уровень из global demonlist', 'points': lvl.get('points', 0)
+                }
+    except Exception as e: print(f"Ошибка API уровней: {e}")
     # 2. Сбор игроков
     unique_player_map = {}
     custom_player_data = {}
@@ -116,9 +120,10 @@ def main():
         writer = csv.DictWriter(f, fieldnames=['player_id', 'nickname', 'country', 'is_banned', 'points', 'photo', 'social_yt', 'social_tiwtch', 'info', 'global_rank'], extrasaction='ignore')
         writer.writeheader(); writer.writerows(final_players)
     with open('Levels.csv', 'w', newline='', encoding='utf-8-sig') as f:
-        if old_levels:
-            writer = csv.DictWriter(f, fieldnames=list(next(iter(old_levels.values())).keys()), extrasaction='ignore')
-            writer.writeheader(); writer.writerows(old_levels.values())
+        # Берем ключи из любого словаря, чтобы сохранить структуру колонок
+        writer = csv.DictWriter(f, fieldnames=['level_id', 'name', 'publisher_id', 'builder', 'verifier_id', 'video_url', 'thumbnail', 'info', 'points'], extrasaction='ignore')
+        writer.writeheader()
+        writer.writerows(all_levels_dict.values())
     with open('Records.csv', 'w', newline='', encoding='utf-8-sig') as f:
         writer = csv.DictWriter(f, fieldnames=['player_id', 'level_id', 'progress', 'video_url'], extrasaction='ignore')
         writer.writeheader(); writer.writerows(all_records)
