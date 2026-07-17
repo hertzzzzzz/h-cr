@@ -318,87 +318,93 @@
         }
 
         function renderLeaderboard(playersArray) {
-            const sidebarContainer = document.getElementById('leaderboard-list'); 
-            const mainGridContainer = document.getElementById('main-leaderboard-grid');
+    const sidebarContainer = document.getElementById('leaderboard-list'); 
+    const mainGridContainer = document.getElementById('main-leaderboard-grid');
 
-            DB.sortedPlayers = playersArray
-                .filter(p => p.is_banned !== 'TRUE' && p.is_banned !== 'true')
-                .sort((a, b) => (parseInt(b.points) || 0) - (parseInt(a.points) || 0));
+    DB.sortedPlayers = playersArray
+        .filter(p => p.is_banned !== 'TRUE' && p.is_banned !== 'true')
+        .sort((a, b) => (parseInt(b.points) || 0) - (parseInt(a.points) || 0));
 
-            // Выводим официальный global_rank в сайдбаре
-            sidebarContainer.innerHTML = DB.sortedPlayers.slice(0, 5).map((p, index) => {
-                const countryCode = (p.country || 'WORLD').toLowerCase();
-                const rankToDisplay = p.global_rank && p.global_rank !== '0' ? `#${p.global_rank}` : `#${index + 1}`;
-                
-                return `<a href="player?id=${p.player_id}" class="block stream-card mb-1.5 border border-gray-200 p-2.5 hover:border-gray-500 hover:bg-gray-50 transition-all"><div class="flex items-center justify-between"><div class="flex items-center gap-2"><span class="text-sm font-bold text-gray-500 w-5">${rankToDisplay}</span><img src="images/flags/${countryCode}.gif" class="w-5 h-3 hltv-border" onerror="this.src='images/flags/WORLD.gif'"><span class="text-sm font-bold text-gray-900">${p.nickname}</span></div></div></a>`;
-            }).join('') + `<a href="leaderboard" class="block w-full text-center border border-gray-200 py-2 text-xs font-bold text-orange-600 hover:bg-orange-600 hover:text-white transition-all uppercase">Полный Список</a>`;
-            sidebarContainer.classList.add('animate-list-fade');
+    // Выводим ЛОКАЛЬНЫЙ ранг (1, 2, 3...), чтобы не было дыр в сайдбаре
+    sidebarContainer.innerHTML = DB.sortedPlayers.slice(0, 5).map((p, index) => {
+        const countryCode = (p.country || 'WORLD').toLowerCase();
+        const localRank = index + 1;
+        
+        return `<a href="player?id=${p.player_id}" class="block stream-card mb-1.5 border border-gray-200 p-2.5 hover:border-gray-500 hover:bg-gray-50 transition-all"><div class="flex items-center justify-between"><div class="flex items-center gap-2"><span class="text-sm font-bold text-gray-500 w-5">#${localRank}</span><img src="images/flags/${countryCode}.gif" class="w-5 h-3 hltv-border" onerror="this.src='images/flags/WORLD.gif'"><span class="text-sm font-bold text-gray-900">${p.nickname}</span></div></div></a>`;
+    }).join('') + `<a href="leaderboard" class="block w-full text-center border border-gray-200 py-2 text-xs font-bold text-orange-600 hover:bg-orange-600 hover:text-white transition-all uppercase">Полный Список</a>`;
+    
+    sidebarContainer.classList.add('animate-list-fade');
 
-            mainGridContainer.innerHTML = '';
-            currentLoaded = 0;
-            
-            loadMorePlayers();
-        }
+    mainGridContainer.innerHTML = '';
+    currentLoaded = 0;
+    
+    loadMorePlayers();
+}
 
-        function loadMorePlayers() {
-            const grid = document.getElementById('main-leaderboard-grid');
-            const btnContainer = document.getElementById('load-more-container');
-            
-            const nextChunk = DB.sortedPlayers.slice(currentLoaded, currentLoaded + CHUNK_SIZE);
-            
-            nextChunk.forEach((p, index) => {
-                const globalIndex = currentLoaded + index;
-                const diffValue = parseInt(p.diff) || 0;
-                let diffHtml = diffValue > 0 ? `<span class="text-green-400 font-bold ml-1 text-xs sm:text-sm">+${diffValue}</span>` : 
-                               diffValue < 0 ? `<span class="text-red-400 font-bold ml-1 text-xs sm:text-sm">-${Math.abs(diffValue)}</span>` : 
-                               `<span class="text-gray-400 font-bold ml-1 text-xs sm:text-sm">-</span>`;
-                
-                const countryCode = (p.country || 'WORLD').toLowerCase();
-                const photoSrc = p.photo || 'images/default-profile.png';
-                
-                // ВАЖНО: Выводим официальный global_rank на карточках сетки
-                const rankToDisplay = p.global_rank && p.global_rank !== '0' ? `#${p.global_rank}` : `#${globalIndex + 1}`;
+function loadMorePlayers() {
+    const grid = document.getElementById('main-leaderboard-grid');
+    const btnContainer = document.getElementById('load-more-container');
+    
+    const nextChunk = DB.sortedPlayers.slice(currentLoaded, currentLoaded + CHUNK_SIZE);
+    
+    nextChunk.forEach((p, index) => {
+        const globalIndex = currentLoaded + index;
+        const diffValue = parseInt(p.diff) || 0;
+        let diffHtml = diffValue > 0 ? `<span class="text-green-400 font-bold ml-1 text-xs sm:text-sm">+${diffValue}</span>` : 
+                       diffValue < 0 ? `<span class="text-red-400 font-bold ml-1 text-xs sm:text-sm">-${Math.abs(diffValue)}</span>` : 
+                       `<span class="text-gray-400 font-bold ml-1 text-xs sm:text-sm">-</span>`;
+        
+        const countryCode = (p.country || 'WORLD').toLowerCase();
+        const photoSrc = p.photo || 'images/default-profile.png';
+        
+        // Строгая локальная нумерация для черного квадрата карточки (1, 2, 3...)
+        const localRank = globalIndex + 1;
+        
+        // Приписка с официальным местом (если отличается от локального)
+        const globalBadge = p.global_rank && p.global_rank !== '0' && parseInt(p.global_rank) !== localRank 
+            ? `<span class="text-[10px] text-gray-400 font-normal ml-1 whitespace-nowrap">(Gl. #${p.global_rank})</span>` 
+            : '';
 
-                const card = document.createElement('a');
-                card.href = `player?id=${p.player_id}`;
-                card.className = "bg-white border border-gray-200 flex flex-col overflow-hidden card-hover relative group block opacity-0 animate-list-fade";
-                card.style.animationDelay = `${(index % CHUNK_SIZE) * 0.04}s`;
+        const card = document.createElement('a');
+        card.href = `player?id=${p.player_id}`;
+        card.className = "bg-white border border-gray-200 flex flex-col overflow-hidden card-hover relative group block opacity-0 animate-list-fade";
+        card.style.animationDelay = `${(index % CHUNK_SIZE) * 0.04}s`;
 
-                card.innerHTML = `
-                    <div class="w-full aspect-[4/3] bg-gray-300 relative overflow-hidden">
-                        <div class="absolute top-0 left-0 bg-black/85 text-white font-bold text-sm sm:text-base px-2.5 py-1 z-10 flex items-center gap-1 rounded-br">
-                            <span>${rankToDisplay}</span>
-                            ${diffHtml}
-                        </div>
-                        <div class="absolute top-0 right-0 bg-orange-600 text-white font-bold text-[11px] sm:text-xs px-2.5 py-1 z-10 rounded-bl tracking-wide">
-                            ${p.points || 0} PTS
-                        </div>
-                        <img src="${photoSrc}" alt="${p.nickname}" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" 
-                             onerror="this.src='images/default-profile.png';">
-                    </div>
-                    <div class="p-2.5 bg-white border-t border-gray-100 flex items-center min-w-0">
-                        <div class="flex items-center gap-1.5 min-w-0 w-full">
-                            <img src="images/flags/${countryCode}.gif" class="w-5 h-3.5 object-cover border hltv-border flex-shrink-0" onerror="this.src='images/flags/WORLD.gif'">
-                            <span class="text-xs sm:text-sm font-bold text-gray-900 truncate grow-text group-hover:text-orange-600 transition-colors">
-                                ${p.nickname}
-                            </span>
-                        </div>
-                    </div>
-                `;
-                
-                grid.appendChild(card);
-            });
+        card.innerHTML = `
+            <div class="w-full aspect-[4/3] bg-gray-300 relative overflow-hidden">
+                <div class="absolute top-0 left-0 bg-black/85 text-white font-bold text-sm sm:text-base px-2.5 py-1 z-10 flex items-center gap-1 rounded-br">
+                    <span>#${localRank}</span>
+                    ${diffHtml}
+                </div>
+                <div class="absolute top-0 right-0 bg-orange-600 text-white font-bold text-[11px] sm:text-xs px-2.5 py-1 z-10 rounded-bl tracking-wide">
+                    ${p.points || 0} PTS
+                </div>
+                <img src="${photoSrc}" alt="${p.nickname}" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" 
+                     onerror="this.src='images/default-profile.png';">
+            </div>
+            <div class="p-2.5 bg-white border-t border-gray-100 flex items-center min-w-0">
+                <div class="flex items-center gap-1.5 min-w-0 w-full">
+                    <img src="images/flags/${countryCode}.gif" class="w-5 h-3.5 object-cover border hltv-border flex-shrink-0" onerror="this.src='images/flags/WORLD.gif'">
+                    <span class="text-xs sm:text-sm font-bold text-gray-900 truncate grow-text group-hover:text-orange-600 transition-colors flex items-center min-w-0">
+                        <span class="truncate">${p.nickname}</span> ${globalBadge}
+                    </span>
+                </div>
+            </div>
+        `;
+        
+        grid.appendChild(card);
+    });
 
-            currentLoaded += nextChunk.length;
+    currentLoaded += nextChunk.length;
 
-            if (currentLoaded >= DB.sortedPlayers.length) {
-                btnContainer.classList.add('hidden');
-                btnContainer.classList.remove('block');
-            } else {
-                btnContainer.classList.remove('hidden');
-                btnContainer.classList.add('block');
-            }
-        }
+    if (currentLoaded >= DB.sortedPlayers.length) {
+        btnContainer.classList.add('hidden');
+        btnContainer.classList.remove('block');
+    } else {
+        btnContainer.classList.remove('hidden');
+        btnContainer.classList.add('block');
+    }
+}
 
         function renderStreams() {
             const container = document.getElementById('streams-list');
