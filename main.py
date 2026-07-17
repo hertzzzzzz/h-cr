@@ -19,22 +19,27 @@ def get_country_code(name):
     return COUNTRY_MAP.get(str(name).lower().replace(" ", "-"), "world")
 
 def fetch_player_data(p_id, nickname, custom_data):
-    # Данные по умолчанию из CSV
+    # Берем данные из CSV как базу
     player_info = {
         'player_id': p_id, 'nickname': nickname, 'country': 'world', 'is_banned': 'false', 
         'points': '0', 'photo': custom_data.get('photo', f'images/profiles/Bez{p_id}.png'), 
-        'social_yt': '', 'social_tiwtch': '', 'info': '-', 'global_rank': '999'
+        'social_yt': '', 'social_tiwtch': '', 'info': '-', 'global_rank': custom_data.get('global_rank', '999')
     }
     player_info.update(custom_data)
     
-    # ПРИОРИТЕТ API: перезаписываем данные, если они пришли из API
     try:
         resp = requests.get(f"{API_USER_GET}{p_id}", headers=HEADERS, timeout=10)
         if resp.status_code == 200:
             data = resp.json().get('data', {})
-            player_info['points'] = str(int(float(data.get('points', 0))))
-            player_info['global_rank'] = str(data.get('placement', '999'))
-            if data.get('country'): player_info['country'] = get_country_code(data.get('country'))
+            # Обновляем только если API реально вернул данные
+            if data.get('points'):
+                player_info['points'] = str(int(float(data.get('points', 0))))
+            # Если API вернул placement (ранг), то обновляем. Если нет - оставляем ранг из CSV!
+            if data.get('placement'):
+                player_info['global_rank'] = str(data.get('placement'))
+            
+            if data.get('country'): 
+                player_info['country'] = get_country_code(data.get('country'))
     except: pass
     return player_info
 
