@@ -2,144 +2,110 @@ import requests
 import csv
 import concurrent.futures
 import time
-import io
 import os
-import sys
+import io
 
 # --- НАСТРОЙКИ ---
 API_LEVEL_LIST = "https://api.demonlist.org/level/classic/list"
 API_USER_GET = "https://api.demonlist.org/user/get?id="
-API_LEADERBOARD = "https://api.demonlist.org/user/ranking?limit=200" 
+# Используем новый API для получения списка
+API_LEADERBOARD = "https://api.demonlist.org/leaderboard/user/list?limit=200"
 
-URL_LEVELS_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTCNytbZ_R5TV-BfA1M2m0HiEe_C5FwfMlOCWWIu7gK9iOB48uKOnohrv6xTMqVmmjtB3d5XrISE4p9/pub?gid=1437425318&single=true&output=csv"
-URL_RANKINGS_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTCNytbZ_R5TV-BfA1M2m0HiEe_C5FwfMlOCWWIu7gK9iOB48uKOnohrv6xTMqVmmjtB3d5XrISE4p9/pub?gid=2093715526&single=true&output=csv"
+HEADERS = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'}
 URL_PLAYERS_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTCNytbZ_R5TV-BfA1M2m0HiEe_C5FwfMlOCWWIu7gK9iOB48uKOnohrv6xTMqVmmjtB3d5XrISE4p9/pub?gid=93759483&single=true&output=csv"
 
-# [Функции get_country_code, get_thumbnail, fetch_csv_data и fetch_player_data оставляем как в твоем оригинале]
+COUNTRY_MAP = {
+    "united-states": "us", "russia": "ru", "spain": "es", "canada": "ca", "portugal": "pt", 
+    "france": "fr", "united-kingdom": "gb", "japan": "jp", "south-korea": "kr", "australia": "au", 
+    "finland": "fi", "kazakhstan": "kz", "new-zealand": "nz", "brazil": "br", "germany": "de", 
+    "hungary": "hu", "romania": "ro", "poland": "pl", "netherlands": "nl", "vietnam": "vn", 
+    "austria": "at", "belarus": "by", "sweden": "se", "norway": "no", "denmark": "dk", 
+    "italy": "it", "ukraine": "ua", "turkey": "tr", "china": "cn", "switzerland": "ch", "belgium": "be"
+}
+
 def get_country_code(country_name):
-    if not country_name: return "world"
-    name = str(country_name).lower().replace(" ", "-")
-    if "russia" in name: return "ru"
-    if "united-states" in name: return "us"
-    return {"united-states": "us", "russia": "ru", "spain": "es", "canada": "ca", "portugal": "pt", "france": "fr", "united-kingdom": "gb", "japan": "jp", "south-korea": "kr", "australia": "au", "finland": "fi", "kazakhstan": "kz", "new-zealand": "nz", "brazil": "br", "germany": "de", "hungary": "hu", "romania": "ro", "poland": "pl", "netherlands": "nl", "vietnam": "vn", "austria": "at", "belarus": "by"}.get(name, "world")
-
-def get_thumbnail(video_link):
-    if not video_link: return 'images/default.jpg'
-    try:
-        if 'watch?v=' in video_link: video_id = video_link.split('watch?v=')[1].split('&')[0]
-        elif 'youtu.be/' in video_link: video_id = video_link.split('youtu.be/')[1].split('?')[0]
-        else: return 'images/default.jpg'
-        return f"https://i.ytimg.com/vi/{video_id}/hqdefault.jpg"
-    except: return 'images/default.jpg'
-
-def fetch_csv_data(url):
-    for _ in range(3):
-        try:
-            response = requests.get(url, timeout=20)
-            response.encoding = 'utf-8'
-            reader = csv.DictReader(io.StringIO(response.text))
-            if reader.fieldnames:
-                reader.fieldnames = [str(name).strip().lower() for name in reader.fieldnames]
-            return list(reader)
-        except Exception: time.sleep(3)
-    return []
+    return COUNTRY_MAP.get(str(country_name).lower().replace(" ", "-"), "world")
 
 def fetch_player_data(p_id, fallback_name, custom_data):
-    time.sleep(0.5)
+    # Данные из таблицы + дефолтные
     player_info = {
         'player_id': p_id, 'nickname': custom_data.get('nickname') or fallback_name, 
         'country': custom_data.get('country') or 'world', 'is_banned': custom_data.get('is_banned') or 'false', 
-        'points': '0.0', 'photo': custom_data.get('photo') or f'images/profiles/Bez{p_id}.png',
+        'points': '0', 'photo': custom_data.get('photo') or f'images/profiles/Bez{p_id}.png',
         'social_yt': custom_data.get('social_yt') or '', 'social_tiwtch': custom_data.get('social_tiwtch') or '', 
-        'info': custom_data.get('info') or '- информация ещё не была добавлена -'
+        'info': custom_data.get('info') or '-', 'global_rank': '999'
     }
-    player_records = []
+    player_info.update(custom_data)
+    
     try:
-        response = requests.get(f"{API_USER_GET}{p_id}", timeout=10)
-        if response.status_code == 200:
-            u_data = response.json().get('data', {})
-            player_info['nickname'] = u_data.get('name') or player_info['nickname']
-            player_info['points'] = f"{float(u_data.get('points', 0)):.2f}"
-            api_country = get_country_code(u_data.get('country'))
-            if api_country != "world": player_info['country'] = api_country
-            levels_data = u_data.get('levels', {})
-            if isinstance(levels_data, dict):
-                for cat in ['hardest', 'main', 'extended', 'verified']:
-                    cat_data = levels_data.get(cat)
-                    if isinstance(cat_data, dict): cat_data = [cat_data]
-                    if isinstance(cat_data, list):
-                        for lvl in cat_data:
-                            if isinstance(lvl, dict) and lvl.get('id'):
-                                player_records.append({'player_id': p_id, 'level_id': str(lvl['id']), 'progress': 100, 'video_url': lvl.get('video_url', '')})
+        resp = requests.get(f"{API_USER_GET}{p_id}", headers=HEADERS, timeout=10)
+        if resp.status_code == 200:
+            data = resp.json().get('data', {})
+            # Обновляем актуальные данные из API (точки и ранк)
+            player_info['points'] = str(int(float(data.get('points', 0))))
+            player_info['global_rank'] = str(data.get('placement', '999'))
+            if data.get('country'): player_info['country'] = get_country_code(data.get('country'))
     except: pass
-    return player_info, player_records
+    return player_info
 
 def main():
-    print("--- ЗАПУСК ОБНОВЛЕНИЯ (ПОЛНЫЙ СБОР) ---")
-    all_records = []
-    seen_records = set()
-    if os.path.exists('Records.csv'):
-        with open('Records.csv', 'r', encoding='utf-8-sig') as f:
-            for row in csv.DictReader(f):
-                if row.get('player_id'):
-                    all_records.append(row)
-                    seen_records.add((str(row['player_id']), str(row['level_id'])))
-
-    # 1. Загружаем данные из CSV
-    hcr_players = fetch_csv_data(URL_PLAYERS_CSV)
-    rankings_data = fetch_csv_data(URL_RANKINGS_CSV)
-    all_levels = fetch_csv_data(URL_LEVELS_CSV)
+    print("--- ЗАПУСК УМНОГО ОБНОВЛЕНИЯ ТОПА ---")
     
     unique_player_map = {}
-    player_custom_data = {}
+    custom_player_data = {}
 
-    # Заполняем базу игроками из таблиц
-    for p in hcr_players:
-        pid = str(p.get('player_id', ''))
-        if pid:
-            unique_player_map[pid] = p.get('nickname', 'Unknown')
-            player_custom_data[pid] = p 
-
-    # 2. Добавляем верификаторов из уровней
+    # 1. Загружаем ТОП-200 из API (приоритет №1)
     try:
-        api_levels = requests.get(API_LEVEL_LIST, timeout=10).json()['data']['levels']
+        print("Загрузка Leaderboard API...")
+        resp = requests.get(API_LEADERBOARD, headers=HEADERS, timeout=15)
+        users = resp.json().get('data', {}).get('users', [])
+        for u in users:
+            pid = str(u['id'])
+            unique_player_map[pid] = u['username']
+    except Exception as e: print(f"Ошибка API: {e}")
+
+    # 2. Добавляем верификаторов (чтобы не потерять)
+    try:
+        api_levels = requests.get(API_LEVEL_LIST, headers=HEADERS, timeout=15).json()['data']['levels']
         for lvl in api_levels:
             if lvl.get('verifier'): 
                 uid = str(lvl['verifier']['user_id'])
                 if uid not in unique_player_map: unique_player_map[uid] = lvl['verifier']['username']
     except: pass
 
-    # 3. Добавляем топ из лидерборда (КЛЮЧЕВОЙ ШАГ)
+    # 3. Добавляем игроков из CSV (чтобы не потерять кастомные данные)
     try:
-        lb_resp = requests.get(API_LEADERBOARD, timeout=10).json().get('data', [])
-        for top_p in lb_resp:
-            pid = str(top_p.get('id', top_p.get('user_id', '')))
-            if pid and pid not in unique_player_map:
-                unique_player_map[pid] = top_p.get('name', 'Unknown')
-    except: print("API Лидерборда временно недоступен.")
+        csv_players = []
+        resp = requests.get(URL_PLAYERS_CSV, headers=HEADERS, timeout=20)
+        csv_players = list(csv.DictReader(io.StringIO(resp.text)))
+        for p in csv_players:
+            pid = str(p.get('player_id', ''))
+            if pid:
+                unique_player_map[pid] = p.get('nickname', 'Unknown')
+                custom_player_data[pid] = p 
+    except: pass
 
-    print(f"Всего игроков к обработке: {len(unique_player_map)}")
-
-    # 4. Парсинг
+    # 4. Парсинг (собираем данные)
+    print(f"Всего к обработке: {len(unique_player_map)} игроков.")
     final_players = []
-    with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
-        futures = {executor.submit(fetch_player_data, pid, unique_player_map[pid], player_custom_data.get(pid, {})): pid for pid in unique_player_map}
-        for future in concurrent.futures.as_completed(futures):
-            p_info, p_recs = future.result()
-            final_players.append(p_info)
-            for rec in p_recs:
-                if (str(rec['player_id']), str(rec['level_id'])) not in seen_records:
-                    all_records.append(rec)
-                    seen_records.add((str(rec['player_id']), str(rec['level_id'])))
     
-    # 5. Сохранение (Твой оригинальный формат)
+    # Чтобы сохранить порядок, используем map (он сохраняет последовательность)
+    with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+        # Создаем список аргументов
+        args = [(pid, unique_player_map[pid], custom_player_data.get(pid, {})) for pid in unique_player_map]
+        results = list(executor.map(lambda p: fetch_player_data(*p), args))
+        final_players = results
+
+    # 5. СОРТИРОВКА (ТОП-РАНК)
+    # Сортируем так: сначала по ранку (число), если ранк 999 — то по очкам
+    final_players.sort(key=lambda x: (int(x['global_rank']), -float(x['points'])))
+
+    # 6. Сохранение
     with open('Players.csv', 'w', newline='', encoding='utf-8-sig') as f:
-        writer = csv.DictWriter(f, fieldnames=['player_id', 'nickname', 'country', 'is_banned', 'points', 'photo', 'social_yt', 'social_tiwtch', 'info'], extrasaction='ignore')
+        writer = csv.DictWriter(f, fieldnames=['player_id', 'nickname', 'country', 'is_banned', 'points', 'photo', 'social_yt', 'social_tiwtch', 'info', 'global_rank'], extrasaction='ignore')
         writer.writeheader(); writer.writerows(final_players)
-    with open('Records.csv', 'w', newline='', encoding='utf-8-sig') as f:
-        writer = csv.DictWriter(f, fieldnames=['player_id', 'level_id', 'progress', 'video_url'], extrasaction='ignore')
-        writer.writeheader(); writer.writerows(all_records)
-    print("--- ГОТОВО ---")
+    
+    print("--- УСПЕШНО: Топ отсортирован и сохранен ---")
 
 if __name__ == "__main__":
     main()
