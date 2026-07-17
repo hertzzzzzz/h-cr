@@ -1,82 +1,88 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <title>H&CR | Leaderboard</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        .card-hover { transition: transform 0.3s ease; }
-        .card-hover:hover { transform: scale(1.03); }
-        .dropdown-menu { display: none; }
-        .dropdown-menu.show { display: block; }
-    </style>
-</head>
-<body class="bg-black min-h-screen">
-    <!-- Навигация -->
-    <nav class="flex justify-center bg-white border-b border-gray-200 p-4">
-        <a href="top" class="px-6 font-bold hover:text-orange-500">LEVELS</a>
-        <a href="leaderboard" class="px-6 font-bold hover:text-orange-500">PLAYERS</a>
-        <a href="news" class="px-6 font-bold hover:text-orange-500">NEWS</a>
-        <a href="streams" class="px-6 font-bold hover:text-orange-500">STREAMS</a>
-    </nav>
+function renderLeaderboard(playersArray) {
+    const sidebarContainer = document.getElementById('leaderboard-list'); 
+    const mainGridContainer = document.getElementById('main-leaderboard-grid');
 
-    <div class="max-w-6xl mx-auto p-6 bg-gray-100 min-h-screen">
-        <h1 class="text-3xl font-bold text-center mb-8 uppercase">Глобальная таблица лидеров</h1>
+    DB.sortedPlayers = playersArray
+        .filter(p => p.is_banned !== 'TRUE' && p.is_banned !== 'true')
+        .sort((a, b) => (parseInt(b.points) || 0) - (parseInt(a.points) || 0));
+
+    // Выводим ЛОКАЛЬНЫЙ ранг (1, 2, 3...), чтобы не было дыр в сайдбаре
+    sidebarContainer.innerHTML = DB.sortedPlayers.slice(0, 5).map((p, index) => {
+        const countryCode = (p.country || 'WORLD').toLowerCase();
+        const localRank = index + 1;
         
-        <div id="main-leaderboard-grid" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-4">
-            <!-- Карточки -->
-        </div>
+        return `<a href="player?id=${p.player_id}" class="block stream-card mb-1.5 border border-gray-200 p-2.5 hover:border-gray-500 hover:bg-gray-50 transition-all"><div class="flex items-center justify-between"><div class="flex items-center gap-2"><span class="text-sm font-bold text-gray-500 w-5">#${localRank}</span><img src="images/flags/${countryCode}.gif" class="w-5 h-3 hltv-border" onerror="this.src='images/flags/WORLD.gif'"><span class="text-sm font-bold text-gray-900">${p.nickname}</span></div></div></a>`;
+    }).join('') + `<a href="leaderboard" class="block w-full text-center border border-gray-200 py-2 text-xs font-bold text-orange-600 hover:bg-orange-600 hover:text-white transition-all uppercase">Полный Список</a>`;
+    
+    sidebarContainer.classList.add('animate-list-fade');
 
-        <div id="load-more-container" class="text-center py-8 hidden">
-            <button onclick="loadMorePlayers()" class="bg-gray-800 text-white py-3 px-8 rounded uppercase font-bold">Показать еще</button>
-        </div>
-    </div>
+    mainGridContainer.innerHTML = '';
+    currentLoaded = 0;
+    
+    loadMorePlayers();
+}
 
-    <script>
-        const DB = { players: [], records: [] };
-        let currentLoaded = 0;
+function loadMorePlayers() {
+    const grid = document.getElementById('main-leaderboard-grid');
+    const btnContainer = document.getElementById('load-more-container');
+    
+    const nextChunk = DB.sortedPlayers.slice(currentLoaded, currentLoaded + CHUNK_SIZE);
+    
+    nextChunk.forEach((p, index) => {
+        const globalIndex = currentLoaded + index;
+        const diffValue = parseInt(p.diff) || 0;
+        let diffHtml = diffValue > 0 ? `<span class="text-green-400 font-bold ml-1 text-xs sm:text-sm">+${diffValue}</span>` : 
+                       diffValue < 0 ? `<span class="text-red-400 font-bold ml-1 text-xs sm:text-sm">-${Math.abs(diffValue)}</span>` : 
+                       `<span class="text-gray-400 font-bold ml-1 text-xs sm:text-sm">-</span>`;
         
-        async function init() {
-            const resp = await fetch('./Players.csv?t=' + new Date().getTime());
-            const text = await resp.text();
-            // Простейший CSV парсер
-            const lines = text.split('\n').filter(l => l.trim());
-            const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
-            DB.players = lines.slice(1).map(line => {
-                const values = line.split(',');
-                let obj = {};
-                headers.forEach((h, i) => obj[h] = values[i] ? values[i].trim() : '');
-                return obj;
-            }).sort((a,b) => (parseInt(b.points)||0) - (parseInt(a.points)||0));
+        const countryCode = (p.country || 'WORLD').toLowerCase();
+        const photoSrc = p.photo || 'images/default-profile.png';
+        
+        // Строгая локальная нумерация для черного квадрата карточки (1, 2, 3...)
+        const localRank = globalIndex + 1;
+        
+        // Приписка с официальным местом (если отличается от локального)
+        const globalBadge = p.global_rank && p.global_rank !== '0' && parseInt(p.global_rank) !== localRank 
+            ? `<span class="text-[10px] text-gray-400 font-normal ml-1 whitespace-nowrap">(Gl. #${p.global_rank})</span>` 
+            : '';
 
-            render();
-        }
+        const card = document.createElement('a');
+        card.href = `player?id=${p.player_id}`;
+        card.className = "bg-white border border-gray-200 flex flex-col overflow-hidden card-hover relative group block opacity-0 animate-list-fade";
+        card.style.animationDelay = `${(index % CHUNK_SIZE) * 0.04}s`;
 
-        function render() {
-            const grid = document.getElementById('main-leaderboard-grid');
-            const btn = document.getElementById('load-more-container');
-            const chunk = DB.players.slice(currentLoaded, currentLoaded + 50);
+        card.innerHTML = `
+            <div class="w-full aspect-[4/3] bg-gray-300 relative overflow-hidden">
+                <div class="absolute top-0 left-0 bg-black/85 text-white font-bold text-sm sm:text-base px-2.5 py-1 z-10 flex items-center gap-1 rounded-br">
+                    <span>#${localRank}</span>
+                    ${diffHtml}
+                </div>
+                <div class="absolute top-0 right-0 bg-orange-600 text-white font-bold text-[11px] sm:text-xs px-2.5 py-1 z-10 rounded-bl tracking-wide">
+                    ${p.points || 0} PTS
+                </div>
+                <img src="${photoSrc}" alt="${p.nickname}" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" 
+                     onerror="this.src='images/default-profile.png';">
+            </div>
+            <div class="p-2.5 bg-white border-t border-gray-100 flex items-center min-w-0">
+                <div class="flex items-center gap-1.5 min-w-0 w-full">
+                    <img src="images/flags/${countryCode}.gif" class="w-5 h-3.5 object-cover border hltv-border flex-shrink-0" onerror="this.src='images/flags/WORLD.gif'">
+                    <span class="text-xs sm:text-sm font-bold text-gray-900 truncate grow-text group-hover:text-orange-600 transition-colors flex items-center min-w-0">
+                        <span class="truncate">${p.nickname}</span> ${globalBadge}
+                    </span>
+                </div>
+            </div>
+        `;
+        
+        grid.appendChild(card);
+    });
 
-            chunk.forEach((p, i) => {
-                const localRank = currentLoaded + i + 1;
-                const globalBadge = p.global_rank && p.global_rank !== '0' && parseInt(p.global_rank) !== localRank 
-                    ? `<span class="text-[10px] text-gray-400 ml-1">(Gl. #${p.global_rank})</span>` : '';
+    currentLoaded += nextChunk.length;
 
-                const card = document.createElement('a');
-                card.href = `player?id=${p.player_id}`;
-                card.className = "bg-white p-4 border card-hover";
-                card.innerHTML = `
-                    <div class="font-bold text-xl">#${localRank}</div>
-                    <div class="font-bold text-lg">${p.nickname} ${globalBadge}</div>
-                    <div class="text-sm text-orange-600">${p.points} PTS</div>
-                `;
-                grid.appendChild(card);
-            });
-
-            currentLoaded += chunk.length;
-            if (currentLoaded < DB.players.length) btn.classList.remove('hidden');
-        }
-        init();
-    </script>
-</body>
-</html>
+    if (currentLoaded >= DB.sortedPlayers.length) {
+        btnContainer.classList.add('hidden');
+        btnContainer.classList.remove('block');
+    } else {
+        btnContainer.classList.remove('hidden');
+        btnContainer.classList.add('block');
+    }
+}
