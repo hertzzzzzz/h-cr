@@ -284,37 +284,20 @@
     // 2. Бронебойная сборка стримов (вытаскивает URL при любых условиях)
    function getParsedStreams() {
         return DB.streams.map(stream => {
-            // ВАЖНО: берем все значения из строки в виде массива
-            const vals = Object.values(stream);
-
-            // Теперь достаем данные по индексам из таблицы (A=0, B=1, C=2, D=3, E=4, F=5)
-            // A (0): stream_id
-            // B (1): is_live
-            // C (2): player_id
-            // D (3): level_id
-            // E (4): progress
-            // F (5): link
-            
-            const pId = vals[2]; 
-            const lId = vals[3];
-            const status = vals[1] || 'LIVE';
-            const progress = vals[4] || '0';
-            const link = vals[5] || 'https://youtube.com'; // Ссылка лежит в 6-й колонке (индекс 5)
-
-            if (!pId || !lId) return null; // Если ID нет, пропускаем
-
-            const player = DB.players[String(pId).trim()] || { nickname: 'Unknown', country: 'WORLD' };
-            const level = DB.levels[String(lId).trim()] || { name: 'Unknown Level' };
-            
-            return { 
-                status: status, 
-                progress: progress, 
-                link: link, // Теперь ссылка берется правильно
-                player, 
-                level, 
-                rank: DB.rankings[String(lId).trim()] || 9999 
-            };
-        }).filter(s => s !== null);
+            const parts = String(stream.stream_id || '').split(',');
+            const pId = stream.player_id || parts[2]; 
+            const lId = stream.level_id || parts[3];
+            const status = stream.is_live || parts[1];
+            const progress = stream.progress || parts[4];
+            const link = stream.link || stream.url || '';
+            const player = DB.players[pId] || { nickname: pId ? `ID:${pId}` : 'Unknown', country: 'WORLD' };
+            const level = DB.levels[lId] || { name: 'Unknown Level' };
+            const builderName = String(getField(level, ['builder'])).trim() || 'Unknown';
+            let rank = 9999;
+            if (DB.rankings['PCR'] && DB.rankings['PCR'][lId]) rank = DB.rankings['PCR'][lId].pos;
+            else if (DB.rankings['HCR'] && DB.rankings['HCR'][lId]) rank = DB.rankings['HCR'][lId].pos;
+            return { status, progress, link, player, level, builderName, rank, pId, lId }; 
+        }).filter(s => s.pId !== undefined && s.pId !== '');
     }
 
     async function initApp() {
