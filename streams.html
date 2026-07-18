@@ -285,41 +285,37 @@
    // Улучшенная функция, которая не полагается только на поле "link"
 // Эта версия парсит данные "на ощупь", игнорируя названия колонок
 // Эта версия парсит данные максимально гибко, игнорируя названия колонок
-function getParsedStreams() {
-    return DB.streams.map(stream => {
-        const pId = stream.player_id; 
-        const lId = stream.level_id;
-        
-        if (!pId || !lId) return null; 
-
-        // ИЩЕМ ССЫЛКУ: Перебираем ВСЕ ключи в объекте.
-        // Если ключ содержит "link" или "url", или если значение содержит "http" — берем это.
-        const allKeys = Object.keys(stream);
-        let linkKey = allKeys.find(k => k.toLowerCase().includes('link') || k.toLowerCase().includes('url'));
-        
-        let link = '#';
-        if (linkKey && stream[linkKey]) {
-            link = stream[linkKey].replace(/[\r\n\s]+/g, '');
+// Эта функция «склеивает» строки, если ссылка оторвалась от основной записи
+function parseCSV(text) {
+    // 1. Предварительная обработка: склеиваем строки, начинающиеся с "http"
+    const lines = text.split(/\r?\n/);
+    let cleanedLines = [];
+    for (let line of lines) {
+        if (line.trim().startsWith('http')) {
+            // Если строка начинается с ссылки, значит это "оторванный" хвост предыдущей строки
+            cleanedLines[cleanedLines.length - 1] += line.trim();
         } else {
-            // Если ключ не нашелся по названию, ищем значение, которое начинается с http
-            const foundInValues = Object.values(stream).find(v => String(v).includes('http'));
-            if (foundInValues) {
-                link = foundInValues.replace(/[\r\n\s]+/g, '');
-            }
+            cleanedLines.push(line);
         }
+    }
+    
+    // 2. Теперь обычный парсинг уже "чистых" строк
+    const rows = [];
+    for (let line of cleanedLines) {
+        if (!line.trim()) continue;
+        // Разбиваем по запятой, но игнорируем запятые внутри кавычек
+        const cols = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || [];
+        rows.push(cols.map(c => c.replace(/^"|"$/g, '').trim()));
+    }
 
-        const player = DB.players[String(pId).trim()] || { nickname: 'Unknown', country: 'WORLD' };
-        const level = DB.levels[String(lId).trim()] || { name: 'Unknown Level' };
-        
-        return { 
-            status: stream.is_live || 'LIVE', 
-            progress: stream.progress || '0', 
-            link: link, 
-            player, 
-            level, 
-            rank: DB.rankings[String(lId).trim()] || 9999 
-        };
-    }).filter(s => s !== null);
+    if (rows.length < 2) return [];
+    
+    const headers = rows[0].map(h => h.trim().toLowerCase());
+    return rows.slice(1).map(row => {
+        const obj = {};
+        headers.forEach((h, idx) => { obj[h] = row[idx] || ''; });
+        return obj;
+    });
 }
     async function initApp() {
         try {
