@@ -148,22 +148,78 @@
 
     function clean(val) { return String(val || '').trim(); }
 
-    function parseCSV(csvText) {
-        const rows = csvText.split('\n').filter(r => r.trim());
-        if(rows.length < 2) return [];
-        const headers = rows[0].split(',').map(h => h.trim().toLowerCase());
-        return rows.slice(1).map(row => { const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/); let obj = {}; headers.forEach((h, i) => { let val = cols[i] ? cols[i].trim() : ''; if (val.startsWith('"') && val.endsWith('"')) val = val.slice(1, -1); obj[h] = val; }); return obj; });
+    // Тот самый надежный парсер, который мы сделали для остальных страниц
+    function parseCSV(text) {
+        const rows = [];
+        let currentRow = [];
+        let currentCell = '';
+        let insideQuotes = false;
+
+        for (let i = 0; i < text.length; i++) {
+            const char = text[i];
+            const nextChar = text[i + 1];
+
+            if (char === '"') {
+                if (insideQuotes && nextChar === '"') {
+                    currentCell += '"'; 
+                    i++; 
+                } else {
+                    insideQuotes = !insideQuotes;
+                }
+            } else if (char === ',' && !insideQuotes) {
+                currentRow.push(currentCell);
+                currentCell = '';
+            } else if ((char === '\n' || char === '\r') && !insideQuotes) {
+                if (char === '\r' && nextChar === '\n') i++;
+                currentRow.push(currentCell);
+                rows.push(currentRow);
+                currentRow = [];
+                currentCell = '';
+            } else {
+                currentCell += char;
+            }
+        }
+        if (currentCell !== '' || currentRow.length > 0) {
+            currentRow.push(currentCell);
+            rows.push(currentRow);
+        }
+        
+        if (rows.length && rows[rows.length - 1].length === 1 && rows[rows.length - 1][0] === '') {
+            rows.pop();
+        }
+
+        if (rows.length < 2) return [];
+        
+        const headers = rows[0].map(h => h.trim().toLowerCase());
+        return rows.slice(1).map(row => {
+            const obj = {};
+            headers.forEach((h, idx) => {
+                obj[h] = row[idx] ? row[idx].trim() : '';
+            });
+            return obj;
+        });
     }
 
+    // Обновленный сборщик стримов (специально для страницы уровней)
     function getParsedStreams() {
-        return DB.streams.map(stream => {
-            const parts = String(stream.stream_id || '').split(',');
-            const pId = stream.player_id || parts[2]; 
-            const lId = stream.level_id || parts[3];
-            const player = DB.players[pId] || { nickname: 'Unknown', country: 'WORLD' };
-            const level = DB.levels[lId] || { name: 'Unknown Level', builder: 'Unknown' };
-            return { status: stream.is_live || parts[1], progress: stream.progress || parts[4], link: stream.link, player, level, rank: DB.rankings[lId] || 9999, pId, lId };
-        });
+        return DB.streams.map(s => { 
+            const parts = String(s.stream_id || '').split(','); 
+            const pId = String(s.player_id || parts[2] || '').trim(); 
+            const lId = String(s.level_id || parts[3] || '').trim(); 
+            
+            if(!pId || !lId) return null;
+
+            return { 
+                status: s.is_live || parts[1] || 'LIVE', 
+                progress: s.progress || parts[4] || '0', 
+                link: s.link || '#', // Если ссылки нет, ставим решетку, чтобы не перезагружать страницу
+                player: DB.players[pId] || {nickname: 'Unknown', country: 'WORLD'}, 
+                level: DB.levels[lId] || {name: 'Unknown'}, 
+                rank: DB.rankings[lId] || 9999,
+                pId: pId, // Обязательно передаем ID для фильтрации на странице уровня
+                lId: lId  // Обязательно передаем ID для фильтрации на странице уровня
+            }; 
+        }).filter(s => s !== null);
     }
 
     async function initApp() {
