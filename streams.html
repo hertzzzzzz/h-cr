@@ -109,6 +109,12 @@
                         </a>
                         <div id="leaderboard-list" class="flex flex-col"></div>
                     </div>
+                    <div class="bg-white border border-gray-200 shadow-sm overflow-hidden mb-2 lg:mb-6">
+    <a href='top'>
+        <h3 class="font-bold text-gray-800 uppercase p-4 border-b border-orange-200 flex justify-between">ТОП УРОВНЕЙ</h3>
+    </a>
+    <div id="top-levels-list" class="flex flex-col"></div>
+</div>
                 </aside>
 
                 <!-- ЦЕНТРАЛЬНАЯ ЧАСТЬ -->
@@ -220,7 +226,7 @@
         </div>
         <p class="py-3 px-6 sm:px-12 text-gray-500 text-sm text-center md:text-left">© 2026 H&CR hertzogen</p>
     </footer>
-
+<script src="js/sidebar.js"></script>
 <!-- ВСЕ СКРИПТЫ ЛОГИКИ -->
 <script>
     const URLS = { 
@@ -275,27 +281,30 @@
     }
 
     // 2. Бронебойная сборка стримов (вытаскивает URL при любых условиях)
+    // 2. Бронебойная сборка стримов (вытаскивает URL при любых условиях)
     function getParsedStreams() {
         return DB.streams.map(stream => {
-            // 1. АБСОЛЮТНАЯ ЗАЩИТА ССЫЛКИ: Сканируем объект в поисках любой ссылки
-            let link = '';
-            const allValues = Object.values(stream);
-            const urlMatch = allValues.find(val => String(val).includes('http'));
-            if (urlMatch) {
-                link = urlMatch;
+            // Ищем ссылку в значении, где ключ содержит 'link' или 'url'
+            let link = 'https://youtube.com';
+            
+            // Пытаемся найти ключ, который содержит "link" или "url"
+            const linkKey = Object.keys(stream).find(k => k.includes('link') || k.includes('url'));
+            if (linkKey && stream[linkKey]) {
+                link = stream[linkKey].trim();
+            } else if (stream._rawStr) {
+                // Если ключ не нашли, пытаемся выдернуть из всей строки до конца
+                const linkMatch = stream._rawStr.match(/https?:\/\/[^\s"]+/);
+                if (linkMatch) link = linkMatch[0];
             }
 
-            // 2. Пытаемся достать ID игрока и уровня (если они тоже съехали, берем значения по порядку)
-            let pId = stream.player_id || allValues[2]; 
-            let lId = stream.level_id || allValues[3];
-            let status = stream.is_live || allValues[1] || 'LIVE';
-            let progress = stream.progress || allValues[4] || '0';
+            const parts = String(stream.stream_id || '').split(',');
+            let pId = stream.player_id || parts[2]; 
+            let lId = stream.level_id || parts[3];
+            let status = stream.is_live || parts[1] || 'LIVE';
+            let progress = stream.progress || parts[4] || '0';
 
-            if (!pId || !lId) return null; // Пропуск пустых строк
+            if (!pId || !lId) return null;
 
-            // Очистка ссылки
-            link = (link && link.length > 5) ? String(link).trim() : 'https://youtube.com';
-            
             const player = DB.players[String(pId).trim()] || { nickname: 'Unknown', country: 'WORLD' };
             const level = DB.levels[String(lId).trim()] || { name: 'Unknown Level' };
             
@@ -324,6 +333,7 @@
             
             renderSidebars(); 
             renderMainStreams();
+            renderTopLevels(lArr);
         } catch (err) { 
             console.error("Ошибка:", err); 
             const loader = document.getElementById('loader');

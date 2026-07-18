@@ -1,8 +1,8 @@
 // components.js
 const headerHTML = `
   <nav class="bg-white border-b ...">
-     <a href="index.html">LEVELS</a>
-     <a href="leaderboard.html">PLAYERS</a>
+     <a href="/">LEVELS</a>
+     <a href="leaderboard">PLAYERS</a>
   </nav>
 `;
 
