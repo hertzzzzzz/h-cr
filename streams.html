@@ -9,56 +9,22 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        html {
-            scroll-behavior: smooth;
-        }
-        * {
-            font-family: 'Montserrat', sans-serif !important;
-        }
-        html, body {
-            background-color: #000 !important;
-            margin: 0;
-            padding: 0;
-        }
-        #mini-logo {
-            transition: opacity 0.3s ease-in-out;
-            opacity: 0;
-            pointer-events: none;
-        }
-        #mini-logo.is-visible {
-            opacity: 1;
-            pointer-events: auto;
-        }
+        html { scroll-behavior: smooth; }
+        * { font-family: 'Montserrat', sans-serif !important; }
+        html, body { background-color: #000 !important; margin: 0; padding: 0; }
+        #mini-logo { transition: opacity 0.3s ease-in-out; opacity: 0; pointer-events: none; }
+        #mini-logo.is-visible { opacity: 1; pointer-events: auto; }
         
-        .card-hover { 
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease; 
-        }
-        .card-hover:hover { 
-            transform: scale(1.015); 
-        }
+        .card-hover { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease; }
+        .card-hover:hover { transform: scale(1.015); }
         
         .hltv-border { border: 1px solid #000; box-sizing: border-box; }
         #loader { transition: opacity 0.5s ease; }
 
-        .banner-container img {
-            position: static !important; 
-            margin: 0 auto !important;   
-            display: block !important;
-        }
-        .banner-container, .banner-container a, .banner-container img {
-            position: static !important; 
-            display: block !important;
-            margin: 0 auto !important;
-        }
-        .banner-container {
-            display: flex;
-            justify-content: center;
-            width: 100%;
-        }
-        img[alt="Left Banner"], 
-        img[alt="Right Banner"] {
-            filter: brightness(1.5) contrast(1.0) !important;
-        }
+        .banner-container img { position: static !important; margin: 0 auto !important; display: block !important; }
+        .banner-container, .banner-container a, .banner-container img { position: static !important; display: block !important; margin: 0 auto !important; }
+        .banner-container { display: flex; justify-content: center; width: 100%; }
+        img[alt="Left Banner"], img[alt="Right Banner"] { filter: brightness(1.5) contrast(1.0) !important; }
     </style>
 </head>
 <body class="bg-black min-h-screen">
@@ -67,7 +33,7 @@
     <div id="top-nav" class="w-full bg-white border-b border-gray-200 sticky top-0 z-50 h-20">
         <div class="h-full flex items-stretch justify-center max-w-[1350px] mx-auto w-full px-2 sm:px-4">
             
-            <!-- Верхнее лого с кнопкой плавного возврата наверх -->
+            <!-- Верхнее лого -->
             <div id="mini-logo-container" class="w-0 overflow-hidden opacity-0 transition-all duration-500 ease-in-out flex-none">
                 <a href="privacy-policy" id="scroll-to-top-btn" class="h-full flex items-center justify-center px-2 sm:px-4">
                     <img src="images/logo.png" alt="Logo" class="h-12 sm:h-16 w-auto block">
@@ -110,11 +76,11 @@
                         <div id="leaderboard-list" class="flex flex-col"></div>
                     </div>
                     <div class="bg-white border border-gray-200 shadow-sm overflow-hidden mb-2 lg:mb-6">
-    <a href='top'>
-        <h3 class="font-bold text-gray-800 uppercase p-4 border-b border-orange-200 flex justify-between">ТОП УРОВНЕЙ</h3>
-    </a>
-    <div id="top-levels-list" class="flex flex-col"></div>
-</div>
+                        <a href='top'>
+                            <h3 class="font-bold text-gray-800 uppercase p-4 border-b border-orange-200 flex justify-between">ТОП УРОВНЕЙ</h3>
+                        </a>
+                        <div id="top-levels-list" class="flex flex-col"></div>
+                    </div>
                 </aside>
 
                 <!-- ЦЕНТРАЛЬНАЯ ЧАСТЬ -->
@@ -207,7 +173,7 @@
 
     </div>
 
-    <!-- ПОДВАЛ (FOOTER) - ТЕПЕРЬ ВСЕГДА ВИДИМ ПО УМОЛЧАНИЮ -->
+    <!-- ПОДВАЛ (FOOTER) -->
     <footer id="footer" class="bg-[#1a1a1a] text-white py-12 border-t-2 border-black mt-0">
         <div class="max-w-6xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-8">
             <div class="flex flex-wrap justify-center md:justify-start items-center gap-4">
@@ -227,6 +193,7 @@
         <p class="py-3 px-6 sm:px-12 text-gray-500 text-sm text-center md:text-left">© 2026 H&CR hertzogen</p>
     </footer>
 <script src="js/sidebar.js"></script>
+
 <!-- ВСЕ СКРИПТЫ ЛОГИКИ -->
 <script>
     const URLS = { 
@@ -245,139 +212,81 @@
         document.head.appendChild(style);
     })();
 
-    // 1. Улучшенный парсер (теперь сохраняет сырую строку для надежности)
-    function parseCSV(str) {
-        const result = [];
-        const lines = str.split(/\r?\n/).filter(l => l.trim());
-        if (!lines.length) return result;
-        
-        let delim = ',';
-        if (lines[0].indexOf(',') === -1 && lines[0].indexOf(';') !== -1) delim = ';';
-        const headers = lines[0].split(delim).map(h => h.replace(/["\r\n\s\ufeff]/g, '').toLowerCase());
-        
-        for (let i = 1; i < lines.length; i++) {
-            const row = lines[i];
-            const cols = [];
-            let curr = '';
-            let inQuotes = false;
-            for (let j = 0; j < row.length; j++) {
-                const char = row[j];
-                if (char === '"') { inQuotes = !inQuotes; }
-                else if (char === delim && !inQuotes) { cols.push(curr); curr = ''; }
-                else { curr += char; }
-            }
-            cols.push(curr);
-            
-            // Запоминаем сырую строку, чтобы потом выдрать из нее ссылку напрямую
-            let obj = { _rawStr: row };
-            headers.forEach((h, idx) => {
-                let val = cols[idx] ? cols[idx].trim() : '';
-                if (val.startsWith('"') && val.endsWith('"')) val = val.slice(1, -1);
-                obj[h] = val;
-            });
-            result.push(obj);
-        }
-        return result;
-    }
+    // ТОТ ЖЕ ПАРСЕР, ЧТО РАБОТАЕТ В ВАШИХ ОСТАЛЬНЫХ ФАЙЛАХ
+    function parseCSV(text) {
+        const rows = [];
+        let currentRow = [];
+        let currentCell = '';
+        let insideQuotes = false;
 
-    // 2. Бронебойная сборка стримов (вытаскивает URL при любых условиях)
-    // 2. Бронебойная сборка стримов (вытаскивает URL при любых условиях)
-   // Улучшенная функция, которая не полагается только на поле "link"
-// Эта версия парсит данные максимально гибко, игнорируя названия колонок
-// 1. Используем ТОТ ЖЕ парсер, что в news.html
-function parseCSV(text) {
-    const rows = [];
-    let currentRow = [];
-    let currentCell = '';
-    let insideQuotes = false;
+        for (let i = 0; i < text.length; i++) {
+            const char = text[i];
+            const nextChar = text[i + 1];
 
-    for (let i = 0; i < text.length; i++) {
-        const char = text[i];
-        const nextChar = text[i + 1];
-
-        if (char === '"') {
-            if (insideQuotes && nextChar === '"') {
-                currentCell += '"'; 
-                i++; 
+            if (char === '"') {
+                if (insideQuotes && nextChar === '"') {
+                    currentCell += '"'; 
+                    i++; 
+                } else {
+                    insideQuotes = !insideQuotes;
+                }
+            } else if (char === ',' && !insideQuotes) {
+                currentRow.push(currentCell);
+                currentCell = '';
+            } else if ((char === '\n' || char === '\r') && !insideQuotes) {
+                if (char === '\r' && nextChar === '\n') i++;
+                currentRow.push(currentCell);
+                rows.push(currentRow);
+                currentRow = [];
+                currentCell = '';
             } else {
-                insideQuotes = !insideQuotes;
+                currentCell += char;
             }
-        } else if (char === ',' && !insideQuotes) {
-            currentRow.push(currentCell);
-            currentCell = '';
-        } else if ((char === '\n' || char === '\r') && !insideQuotes) {
-            if (char === '\r' && nextChar === '\n') i++;
+        }
+        if (currentCell !== '' || currentRow.length > 0) {
             currentRow.push(currentCell);
             rows.push(currentRow);
-            currentRow = [];
-            currentCell = '';
-        } else {
-            currentCell += char;
         }
-    }
-    if (currentCell !== '' || currentRow.length > 0) {
-        currentRow.push(currentCell);
-        rows.push(currentRow);
-    }
-    
-    if (rows.length && rows[rows.length - 1].length === 1 && rows[rows.length - 1][0] === '') {
-        rows.pop();
-    }
-
-    if (rows.length < 2) return [];
-    
-    const headers = rows[0].map(h => h.trim().toLowerCase());
-    return rows.slice(1).map(row => {
-        const obj = {};
-        headers.forEach((h, idx) => {
-            obj[h] = row[idx] ? row[idx].trim() : '';
-        });
-        return obj;
-    });
-}
-
-// 2. Используем ТОТ ЖЕ сборщик стримов, что в news.html
-function getParsedStreams() {
-    return DB.streams.map(s => { 
-        const parts = String(s.stream_id || '').split(','); 
-        const pId = String(s.player_id || parts[2] || '').trim(); 
-        const lId = String(s.level_id || parts[3] || '').trim(); 
         
-        // Берем данные, если ID есть
-        if(!pId || !lId) return null;
+        if (rows.length && rows[rows.length - 1].length === 1 && rows[rows.length - 1][0] === '') {
+            rows.pop();
+        }
 
-        return { 
-            status: s.is_live || parts[1] || 'LIVE', 
-            progress: s.progress || parts[4] || '0', 
-            link: s.link || '#', 
-            player: DB.players[pId] || {nickname: 'Unknown', country: 'WORLD'}, 
-            level: DB.levels[lId] || {name: 'Unknown'}, 
-            rank: DB.rankings[lId] || 9999 
-        }; 
-    }).filter(s => s !== null);
-}
-    
-    // 2. Теперь обычный парсинг уже "чистых" строк
-    const rows = [];
-    for (let line of cleanedLines) {
-        if (!line.trim()) continue;
-        // Разбиваем по запятой, но игнорируем запятые внутри кавычек
-        const cols = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || [];
-        rows.push(cols.map(c => c.replace(/^"|"$/g, '').trim()));
+        if (rows.length < 2) return [];
+        
+        const headers = rows[0].map(h => h.trim().toLowerCase());
+        return rows.slice(1).map(row => {
+            const obj = {};
+            headers.forEach((h, idx) => {
+                obj[h] = row[idx] ? row[idx].trim() : '';
+            });
+            return obj;
+        });
     }
 
-    if (rows.length < 2) return [];
-    
-    const headers = rows[0].map(h => h.trim().toLowerCase());
-    return rows.slice(1).map(row => {
-        const obj = {};
-        headers.forEach((h, idx) => { obj[h] = row[idx] || ''; });
-        return obj;
-    });
-}
+    // ТОТ ЖЕ СБОРЩИК, ЧТО РАБОТАЕТ В ВАШИХ ОСТАЛЬНЫХ ФАЙЛАХ
+    function getParsedStreams() {
+        return DB.streams.map(s => { 
+            const parts = String(s.stream_id || '').split(','); 
+            const pId = String(s.player_id || parts[2] || '').trim(); 
+            const lId = String(s.level_id || parts[3] || '').trim(); 
+            
+            // Берем данные, если ID есть
+            if(!pId || !lId) return null;
+
+            return { 
+                status: s.is_live || parts[1] || 'LIVE', 
+                progress: s.progress || parts[4] || '0', 
+                link: s.link || '#', 
+                player: DB.players[pId] || {nickname: 'Unknown', country: 'WORLD'}, 
+                level: DB.levels[lId] || {name: 'Unknown'}, 
+                rank: DB.rankings[lId] || 9999 
+            }; 
+        }).filter(s => s !== null);
+    }
+
     async function initApp() {
         try {
-            // Защита от кэша браузера
             const responses = await Promise.all(Object.values(URLS).map(url => {
                 const sep = url.includes('?') ? '&' : '?';
                 return fetch(url + sep + 't=' + new Date().getTime());
@@ -467,6 +376,16 @@ function getParsedStreams() {
         const newsContainer = document.getElementById('news-list');
         if (newsContainer) newsContainer.innerHTML = DB.news.slice(-5).reverse().map((n, i) => `<a href="news.html#news-${DB.news.length - 1 - i}" class="stream-card block mb-3 border border-gray-200 p-4 hover:border-gray-400 hover:bg-gray-50 transition-all"><div class="text-[12px] font-bold text-orange-500 uppercase tracking-wider mb-1">${n['хедлайнер'] || n['date'] || ''}</div><div class="text-sm font-bold text-gray-900 leading-tight">${n['заголовок'] || n['title'] || ''}</div></a>`).join(''), newsContainer.classList.add('animate-list-fade');
         if(document.getElementById('footer')) document.getElementById('footer').style.opacity = '1';
+    }
+
+    function renderTopLevels(levelsArray) {
+        const container = document.getElementById('top-levels-list');
+        if (!container) return;
+        const top5 = levelsArray.filter(l => (l.info || '').toLowerCase().includes('demonlist') && parseFloat(l.points) > 0).sort((a, b) => parseFloat(b.points) - parseFloat(a.points)).slice(0, 5);
+        container.innerHTML = top5.map((item, index) => {
+            return `<a href="top?level=${item.level_id}" class="block stream-card mb-1.5 border border-gray-200 p-2.5 hover:border-gray-500 hover:bg-gray-50 transition-all"><div class="flex items-center gap-2"><span class="text-sm font-bold text-gray-500 w-5">#${index + 1}</span><span class="text-sm font-bold text-gray-900 truncate">${item.name}</span></div></a>`;
+        }).join('') + `<a href="top" class="block w-full text-center border border-gray-200 py-2 text-xs font-bold text-orange-600 hover:bg-orange-600 hover:text-white transition-all uppercase">Полный Список</a>`;
+        container.classList.add('animate-list-fade');
     }
 
     function toggleDropdown(el) { const menu = el.closest('.stream-card').querySelector('.dropdown-menu'); menu.style.display = menu.style.display === 'block' ? 'none' : 'block'; }
