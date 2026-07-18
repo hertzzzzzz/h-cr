@@ -282,36 +282,34 @@
 
     // 2. Бронебойная сборка стримов (вытаскивает URL при любых условиях)
     // 2. Бронебойная сборка стримов (вытаскивает URL при любых условиях)
-    function getParsedStreams() {
+   function getParsedStreams() {
         return DB.streams.map(stream => {
-            // 1. ИЩЕМ ССЫЛКУ: 
-            // Сначала смотрим поле 'link', если пусто - берем 'stream_id' (если там ссылка)
-            let link = (stream.link && stream.link.length > 5) ? stream.link : 
-                       (stream.stream_id && stream.stream_id.startsWith('http')) ? stream.stream_id : 'https://youtube.com';
+            // ВАЖНО: берем все значения из строки в виде массива
+            const vals = Object.values(stream);
 
-            // 2. ИЩЕМ ID ИГРОКА И УРОВНЯ:
-            // Если в полях player_id/level_id пусто, значит данные сместились в другие колонки
-            // Судя по консоли, данные сейчас лежат в stream_id, is_live и т.д.
-            let pId = stream.player_id;
-            let lId = stream.level_id;
+            // Теперь достаем данные по индексам из таблицы (A=0, B=1, C=2, D=3, E=4, F=5)
+            // A (0): stream_id
+            // B (1): is_live
+            // C (2): player_id
+            // D (3): level_id
+            // E (4): progress
+            // F (5): link
+            
+            const pId = vals[2]; 
+            const lId = vals[3];
+            const status = vals[1] || 'LIVE';
+            const progress = vals[4] || '0';
+            const link = vals[5] || 'https://youtube.com'; // Ссылка лежит в 6-й колонке (индекс 5)
 
-            // Если pId и lId пустые, пробуем достать из parts, если они там есть
-            if (!pId || !lId) {
-                const parts = String(stream._rawStr || '').split(',');
-                // Пропускаем ID стрима (parts[0]), статус (parts[1]), ищем дальше
-                pId = parts[2];
-                lId = parts[3];
-            }
-
-            if (!pId || !lId) return null; // Если совсем не нашли ID, пропускаем строку
+            if (!pId || !lId) return null; // Если ID нет, пропускаем
 
             const player = DB.players[String(pId).trim()] || { nickname: 'Unknown', country: 'WORLD' };
             const level = DB.levels[String(lId).trim()] || { name: 'Unknown Level' };
             
             return { 
-                status: stream.is_live || 'LIVE', 
-                progress: stream.progress || '0', 
-                link: link, 
+                status: status, 
+                progress: progress, 
+                link: link, // Теперь ссылка берется правильно
                 player, 
                 level, 
                 rank: DB.rankings[String(lId).trim()] || 9999 
