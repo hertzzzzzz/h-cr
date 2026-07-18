@@ -282,37 +282,34 @@
 
     // 2. Бронебойная сборка стримов (вытаскивает URL при любых условиях)
     // 2. Бронебойная сборка стримов (вытаскивает URL при любых условиях)
-   function getParsedStreams() {
-        return DB.streams.map(stream => {
-            // Если поле link пустое (как в консоли), попытаемся найти ссылку в _rawStr
-            // Мы берем всё, что начинается с https://www.youtube.com и идет до конца строки
-            let link = (stream.link && stream.link.length > 5) ? stream.link : '';
-            
-            if (!link && stream._rawStr) {
-                const match = stream._rawStr.match(/(https?:\/\/www\.youtube\.com\/[^\s,]+)/);
-                link = match ? match[0] : 'https://youtube.com';
-            }
+   // Улучшенная функция, которая не полагается только на поле "link"
+function getParsedStreams() {
+    return DB.streams.map(stream => {
+        // 1. Ищем ID
+        const pId = String(stream.player_id || '').trim();
+        const lId = String(stream.level_id || '').trim();
+        if (!pId || !lId) return null;
 
-            // ID берем из тех полей, которые точно есть (player_id, level_id)
-            // Добавляем .trim() для чистоты
-            const pId = String(stream.player_id || '').trim();
-            const lId = String(stream.level_id || '').trim();
+        // 2. Ищем ссылку. Если поле stream.link пустое, ищем любой URL в объекте
+        let link = (stream.link && stream.link.length > 5) ? stream.link : '';
+        if (!link) {
+            const values = Object.values(stream);
+            link = values.find(v => String(v).includes('http')) || '#';
+        }
 
-            if (!pId || !lId) return null;
-
-            const player = DB.players[pId] || { nickname: 'Unknown', country: 'WORLD' };
-            const level = DB.levels[lId] || { name: 'Unknown Level' };
-            
-            return { 
-                status: stream.is_live || 'LIVE', 
-                progress: stream.progress || '0', 
-                link: link, 
-                player, 
-                level, 
-                rank: DB.rankings[lId] || 9999 
-            };
-        }).filter(s => s !== null);
-    }
+        const player = DB.players[pId] || { nickname: 'Unknown', country: 'WORLD' };
+        const level = DB.levels[lId] || { name: 'Unknown Level' };
+        
+        return { 
+            status: stream.is_live || 'LIVE', 
+            progress: stream.progress || '0', 
+            link: link.trim(), 
+            player, 
+            level, 
+            rank: DB.rankings[lId] || 9999 
+        };
+    }).filter(s => s !== null);
+}
     async function initApp() {
         try {
             // Защита от кэша браузера
