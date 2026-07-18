@@ -284,20 +284,35 @@
     // 2. Бронебойная сборка стримов (вытаскивает URL при любых условиях)
    function getParsedStreams() {
         return DB.streams.map(stream => {
-            const parts = String(stream.stream_id || '').split(',');
-            const pId = stream.player_id || parts[2]; 
-            const lId = stream.level_id || parts[3];
-            const status = stream.is_live || parts[1];
-            const progress = stream.progress || parts[4];
-            const link = stream.link || stream.url || '';
-            const player = DB.players[pId] || { nickname: pId ? `ID:${pId}` : 'Unknown', country: 'WORLD' };
-            const level = DB.levels[lId] || { name: 'Unknown Level' };
-            const builderName = String(getField(level, ['builder'])).trim() || 'Unknown';
-            let rank = 9999;
-            if (DB.rankings['PCR'] && DB.rankings['PCR'][lId]) rank = DB.rankings['PCR'][lId].pos;
-            else if (DB.rankings['HCR'] && DB.rankings['HCR'][lId]) rank = DB.rankings['HCR'][lId].pos;
-            return { status, progress, link, player, level, builderName, rank, pId, lId }; 
-        }).filter(s => s.pId !== undefined && s.pId !== '');
+            // Превращаем объект строки в массив значений [A, B, C, D, E, F...]
+            const vals = Object.values(stream);
+
+            // 1. ССЫЛКА (Колонка F - индекс 5)
+            // Если в 6-й колонке нет ссылки, ищем её в остальных по содержанию "http"
+            let link = vals[5]; 
+            if (!link || !String(link).includes('http')) {
+                link = vals.find(v => String(v).includes('http')) || 'https://youtube.com';
+            }
+
+            // 2. ID ИГРОКА И УРОВНЯ (Колонки C и D - индексы 2 и 3)
+            const pId = vals[2]; 
+            const lId = vals[3];
+            
+            // Если ID не нашлись, пропускаем эту строку
+            if (!pId || !lId) return null;
+
+            const player = DB.players[String(pId).trim()] || { nickname: 'Unknown', country: 'WORLD' };
+            const level = DB.levels[String(lId).trim()] || { name: 'Unknown Level', builder: 'Unknown' };
+            
+            return { 
+                status: vals[1] || 'LIVE', 
+                progress: vals[4] || '0', 
+                link: link, 
+                player, 
+                level, 
+                rank: DB.rankings[String(lId).trim()] || 9999 
+            };
+        }).filter(s => s !== null);
     }
 
     async function initApp() {
