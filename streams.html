@@ -285,7 +285,7 @@
     function getParsedStreams() {
         return DB.streams.map(stream => {
             // ДЕБАГ: выведи в консоль (F12 -> Console), чтобы увидеть, как называются твои колонки
-            // console.log("DEBUG stream data:", stream); 
+            console.log("DEBUG stream data:", stream);
 
             // 1. АГРЕССИВНЫЙ ПОИСК ССЫЛКИ
             // Перебираем все ключи в объекте stream
