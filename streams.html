@@ -284,57 +284,78 @@
     // 2. Бронебойная сборка стримов (вытаскивает URL при любых условиях)
    // Улучшенная функция, которая не полагается только на поле "link"
 // Эта версия парсит данные максимально гибко, игнорируя названия колонок
-function getParsedStreams() {
-    return DB.streams.map(stream => {
-        const pId = stream.player_id; 
-        const lId = stream.level_id;
-        
-        if (!pId || !lId) return null; 
-
-        // ИЩЕМ ССЫЛКУ: Перебираем ВСЕ ключи в объекте.
-        // Если ключ содержит "link" или "url", или если значение содержит "http" — берем это.
-        const allKeys = Object.keys(stream);
-        let linkKey = allKeys.find(k => k.toLowerCase().includes('link') || k.toLowerCase().includes('url'));
-        
-        let link = '#';
-        if (linkKey && stream[linkKey]) {
-            link = stream[linkKey].replace(/[\r\n\s]+/g, '');
-        } else {
-            // Если ключ не нашелся по названию, ищем значение, которое начинается с http
-            const foundInValues = Object.values(stream).find(v => String(v).includes('http'));
-            if (foundInValues) {
-                link = foundInValues.replace(/[\r\n\s]+/g, '');
-            }
-        }
-
-        const player = DB.players[String(pId).trim()] || { nickname: 'Unknown', country: 'WORLD' };
-        const level = DB.levels[String(lId).trim()] || { name: 'Unknown Level' };
-        
-        return { 
-            status: stream.is_live || 'LIVE', 
-            progress: stream.progress || '0', 
-            link: link, 
-            player, 
-            level, 
-            rank: DB.rankings[String(lId).trim()] || 9999 
-        };
-    }).filter(s => s !== null);
-}
-// Эта версия парсит данные максимально гибко, игнорируя названия колонок
-// Эта функция «склеивает» строки, если ссылка оторвалась от основной записи
-// Эта функция «склеивает» строки, если ссылка оторвалась от основной записи
+// 1. Используем ТОТ ЖЕ парсер, что в news.html
 function parseCSV(text) {
-    // 1. Предварительная обработка: склеиваем строки, начинающиеся с "http"
-    const lines = text.split(/\r?\n/);
-    let cleanedLines = [];
-    for (let line of lines) {
-        if (line.trim().startsWith('http')) {
-            // Если строка начинается с ссылки, значит это "оторванный" хвост предыдущей строки
-            cleanedLines[cleanedLines.length - 1] += line.trim();
+    const rows = [];
+    let currentRow = [];
+    let currentCell = '';
+    let insideQuotes = false;
+
+    for (let i = 0; i < text.length; i++) {
+        const char = text[i];
+        const nextChar = text[i + 1];
+
+        if (char === '"') {
+            if (insideQuotes && nextChar === '"') {
+                currentCell += '"'; 
+                i++; 
+            } else {
+                insideQuotes = !insideQuotes;
+            }
+        } else if (char === ',' && !insideQuotes) {
+            currentRow.push(currentCell);
+            currentCell = '';
+        } else if ((char === '\n' || char === '\r') && !insideQuotes) {
+            if (char === '\r' && nextChar === '\n') i++;
+            currentRow.push(currentCell);
+            rows.push(currentRow);
+            currentRow = [];
+            currentCell = '';
         } else {
-            cleanedLines.push(line);
+            currentCell += char;
         }
     }
+    if (currentCell !== '' || currentRow.length > 0) {
+        currentRow.push(currentCell);
+        rows.push(currentRow);
+    }
+    
+    if (rows.length && rows[rows.length - 1].length === 1 && rows[rows.length - 1][0] === '') {
+        rows.pop();
+    }
+
+    if (rows.length < 2) return [];
+    
+    const headers = rows[0].map(h => h.trim().toLowerCase());
+    return rows.slice(1).map(row => {
+        const obj = {};
+        headers.forEach((h, idx) => {
+            obj[h] = row[idx] ? row[idx].trim() : '';
+        });
+        return obj;
+    });
+}
+
+// 2. Используем ТОТ ЖЕ сборщик стримов, что в news.html
+function getParsedStreams() {
+    return DB.streams.map(s => { 
+        const parts = String(s.stream_id || '').split(','); 
+        const pId = String(s.player_id || parts[2] || '').trim(); 
+        const lId = String(s.level_id || parts[3] || '').trim(); 
+        
+        // Берем данные, если ID есть
+        if(!pId || !lId) return null;
+
+        return { 
+            status: s.is_live || parts[1] || 'LIVE', 
+            progress: s.progress || parts[4] || '0', 
+            link: s.link || '#', 
+            player: DB.players[pId] || {nickname: 'Unknown', country: 'WORLD'}, 
+            level: DB.levels[lId] || {name: 'Unknown'}, 
+            rank: DB.rankings[lId] || 9999 
+        }; 
+    }).filter(s => s !== null);
+}
     
     // 2. Теперь обычный парсинг уже "чистых" строк
     const rows = [];
