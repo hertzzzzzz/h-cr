@@ -284,33 +284,39 @@
     // 2. Бронебойная сборка стримов (вытаскивает URL при любых условиях)
    function getParsedStreams() {
         return DB.streams.map(stream => {
-            // Превращаем объект строки в массив значений [A, B, C, D, E, F...]
-            const vals = Object.values(stream);
-
-            // 1. ССЫЛКА (Колонка F - индекс 5)
-            // Если в 6-й колонке нет ссылки, ищем её в остальных по содержанию "http"
-            let link = vals[5]; 
-            if (!link || !String(link).includes('http')) {
-                link = vals.find(v => String(v).includes('http')) || 'https://youtube.com';
+            // Берем ID напрямую по ключу
+            const pId = String(stream.player_id || '').trim();
+            const lId = String(stream.level_id || '').trim();
+            
+            // Если ID пустые, значит парсер ошибся с заголовками, ищем их в сырой строке
+            let finalPId = pId;
+            let finalLId = lId;
+            if (!finalPId || !finalLId) {
+                const parts = String(stream._rawStr || '').split(',');
+                finalPId = parts[2] ? parts[2].trim() : '';
+                finalLId = parts[3] ? parts[3].trim() : '';
             }
 
-            // 2. ID ИГРОКА И УРОВНЯ (Колонки C и D - индексы 2 и 3)
-            const pId = vals[2]; 
-            const lId = vals[3];
-            
-            // Если ID не нашлись, пропускаем эту строку
-            if (!pId || !lId) return null;
+            if (!finalPId || !finalLId) return null;
 
-            const player = DB.players[String(pId).trim()] || { nickname: 'Unknown', country: 'WORLD' };
-            const level = DB.levels[String(lId).trim()] || { name: 'Unknown Level', builder: 'Unknown' };
+            // Ищем игрока в базе (теперь точно найдет)
+            const player = DB.players[finalPId] || { nickname: 'Unknown', country: 'WORLD' };
+            const level = DB.levels[finalLId] || { name: 'Unknown Level' };
             
+            // Ссылка: берем из поля link, если нет - ищем в _rawStr
+            let link = stream.link ? stream.link.trim() : '';
+            if (!link || link === "") {
+                const urlMatch = String(stream._rawStr).match(/https?:\/\/[^\s,]+/);
+                link = urlMatch ? urlMatch[0] : 'https://youtube.com';
+            }
+
             return { 
-                status: vals[1] || 'LIVE', 
-                progress: vals[4] || '0', 
+                status: stream.is_live || 'LIVE', 
+                progress: stream.progress || '0', 
                 link: link, 
                 player, 
                 level, 
-                rank: DB.rankings[String(lId).trim()] || 9999 
+                rank: DB.rankings[finalLId] || 9999 
             };
         }).filter(s => s !== null);
     }
