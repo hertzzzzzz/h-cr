@@ -284,30 +284,37 @@
     // 2. Бронебойная сборка стримов (вытаскивает URL при любых условиях)
     function getParsedStreams() {
         return DB.streams.map(stream => {
-            // Ищем ссылку в значении, где ключ содержит 'link' или 'url'
-            let link = 'https://youtube.com';
-            
-            // Пытаемся найти ключ, который содержит "link" или "url"
-            const linkKey = Object.keys(stream).find(k => k.includes('link') || k.includes('url'));
-            if (linkKey && stream[linkKey]) {
-                link = stream[linkKey].trim();
-            } else if (stream._rawStr) {
-                // Если ключ не нашли, пытаемся выдернуть из всей строки до конца
-                const linkMatch = stream._rawStr.match(/https?:\/\/[^\s"]+/);
-                if (linkMatch) link = linkMatch[0];
+            // ДЕБАГ: выведи в консоль (F12 -> Console), чтобы увидеть, как называются твои колонки
+            // console.log("DEBUG stream data:", stream); 
+
+            // 1. АГРЕССИВНЫЙ ПОИСК ССЫЛКИ
+            // Перебираем все ключи в объекте stream
+            let link = '';
+            for (let key in stream) {
+                const val = String(stream[key]).trim();
+                // Если значение начинается с http — считаем это ссылкой
+                if (val.startsWith('http')) {
+                    link = val;
+                    break; 
+                }
             }
 
-            const parts = String(stream.stream_id || '').split(',');
-            let pId = stream.player_id || parts[2]; 
-            let lId = stream.level_id || parts[3];
-            let status = stream.is_live || parts[1] || 'LIVE';
-            let progress = stream.progress || parts[4] || '0';
+            // Если ничего не нашли, ставим заглушку
+            if (!link) link = 'https://youtube.com';
 
+            // 2. Достаем ID игрока и уровня
+            // (Проверяем разные варианты названия колонок)
+            const pId = stream.player_id || stream.pid || Object.values(stream)[2]; 
+            const lId = stream.level_id || stream.lid || Object.values(stream)[3];
+            
+            // Если ID не нашлись, пропускаем строку
             if (!pId || !lId) return null;
 
             const player = DB.players[String(pId).trim()] || { nickname: 'Unknown', country: 'WORLD' };
             const level = DB.levels[String(lId).trim()] || { name: 'Unknown Level' };
-            
+            const status = stream.is_live || 'LIVE';
+            const progress = stream.progress || '0';
+
             return { status, progress, link, player, level, rank: DB.rankings[String(lId).trim()] || 9999 };
         }).filter(s => s !== null);
     }
