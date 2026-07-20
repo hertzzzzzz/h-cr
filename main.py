@@ -4,7 +4,6 @@ import concurrent.futures
 import time
 import os
 import io
-import sys
 
 # --- НАСТРОЙКИ ---
 API_LEVEL_LIST = "https://api.demonlist.org/level/classic/list"
@@ -32,37 +31,49 @@ def get_country_code(name):
 
 def fetch_csv_data(url):
     try:
-        r = requests.get(url, timeout=20)
+        # Добавлен параметр &t=... для обхода кэширования таблиц Google
+        safe_url = url + f"&t={int(time.time())}"
+        r = requests.get(safe_url, timeout=20)
         return list(csv.DictReader(io.StringIO(r.content.decode('utf-8-sig'))))
-    except: return []
+    except Exception as e: 
+        print(f"Ошибка загрузки CSV: {e}")
+        return []
 
 def fetch_player_data(p_id, nickname, custom_data):
-    time.sleep(0.1)
+    # Увеличен слип, чтобы сервер не выдал блокировку 429 Too Many Requests
+    time.sleep(0.3) 
     csv_country = custom_data.get('country', 'world')
     player_info = {'player_id': p_id, 'nickname': nickname, 'country': csv_country, 'is_banned': 'false', 'points': '0', 'photo': custom_data.get('photo', f'images/profiles/Bez{p_id}.png'), 'social_yt': '', 'social_tiwtch': '', 'info': '-', 'global_rank': custom_data.get('global_rank', '999')}
     player_info.update(custom_data)
     player_records = []
+    
     try:
         resp = requests.get(f"{API_USER_GET}{p_id}", headers=HEADERS, timeout=10)
         if resp.status_code == 200:
-            data = resp.json().get('data', {})
+            data = resp.json().get('data') or {}
             if data.get('points'): player_info['points'] = str(int(float(data.get('points', 0))))
             if data.get('placement'): player_info['global_rank'] = str(data.get('placement'))
+            
             if (not csv_country or csv_country == 'world') and data.get('country'):
                 api_code = get_country_code(data.get('country'))
                 if api_code != "world": player_info['country'] = api_code
-            levels_data = data.get('levels', {})
+                
+            levels_data = data.get('levels') or {}
             for cat in ['hardest', 'main', 'extended', 'verified']:
                 cat_data = levels_data.get(cat, [])
                 if isinstance(cat_data, dict): cat_data = [cat_data]
                 for lvl in cat_data:
                     if isinstance(lvl, dict) and lvl.get('id'):
                         player_records.append({'player_id': p_id, 'level_id': str(lvl['id']), 'progress': 100, 'video_url': lvl.get('video_url', '')})
-    except: pass
+        else:
+            print(f"ВНИМАНИЕ! API отказало в доступе для {nickname} (Код: {resp.status_code}). Возможно сработал Rate Limit.")
+    except Exception as e: 
+        print(f"Ошибка при запросе данных игрока {nickname}: {e}")
+        
     return player_info, player_records
 
 def main():
-    print("--- ЗАПУСК ПОЛНОЙ СИНХРОНИЗАЦИИ С THUMBNAILS ---")
+    print("--- ЗАПУСК ПОЛНОЙ СИНХРОНИЗАЦИИ ---")
     
     # 1. Загрузка уровней из CSV
     hcr_levels = fetch_csv_data(URL_LEVELS_CSV)
@@ -86,36 +97,51 @@ def main():
 
     offset = 0
     while True:
-        resp = requests.get(f"{BASE_API_LEADERBOARD}?limit=50&offset={offset}", headers=HEADERS).json()
-        users = resp.get('data', {}).get('users', [])
-        if not users: break
-        for u in users: unique_player_map[str(u['id'])] = u['username']
-        offset += 50
-        if offset >= 500: break
+        try:
+            resp = requests.get(f"{BASE_API_LEADERBOARD}?limit=50&offset={offset}", headers=HEADERS).json()
+            users = resp.get('data', {}).get('users', [])
+            if not users: break
+            for u in users: unique_player_map[str(u['id'])] = u['username']
+            offset += 50
+            if offset >= 500: break
+        except Exception as e:
+            print(f"Ошибка получения глобального лидерборда (offset {offset}): {e}")
+            break
 
-    # 3. Уровни из API (с генерацией thumbnail)
+    # 3. Уровни из API (с ГЛОБАЛЬНЫМ ОБНОВЛЕНИЕМ существующих)
     try:
         api_levels = requests.get(API_LEVEL_LIST, headers=HEADERS).json()['data']['levels']
         for lvl in api_levels:
             l_id = str(lvl['id'])
+            v_url = lvl.get('verification_url', '')
+            
+            # Если уровня нет - добавляем
             if l_id not in all_levels_dict:
-                v_url = lvl.get('verification_url', '')
                 all_levels_dict[l_id] = {
                     'level_id': l_id, 'name': lvl['name'], 'publisher_id': '', 
                     'builder': lvl.get('holder', 'Unknown'), 
                     'verifier_id': str(lvl['verifier']['user_id']) if lvl.get('verifier') else '', 
                     'video_url': v_url, 
-                    'thumbnail': get_thumbnail(v_url), # <-- ВОТ ОНА!
+                    'thumbnail': get_thumbnail(v_url),
                     'info': 'уровень из global demonlist', 'points': lvl.get('points', 0)
                 }
+            # Если уровень ЕСТЬ - обновляем ему очки и превью (если их не было)
+            else:
+                all_levels_dict[l_id]['points'] = lvl.get('points', all_levels_dict[l_id].get('points', 0))
+                if not all_levels_dict[l_id].get('thumbnail') or all_levels_dict[l_id].get('thumbnail') == 'images/default.jpg':
+                    all_levels_dict[l_id]['thumbnail'] = get_thumbnail(v_url)
+                    
             if lvl.get('verifier'): 
                 uid = str(lvl['verifier']['user_id'])
                 if uid not in unique_player_map: unique_player_map[uid] = lvl['verifier']['username']
-    except: pass
+    except Exception as e: 
+        print(f"Ошибка загрузки списка уровней с сервера: {e}")
 
-    # 4. Парсинг игроков
+    # 4. Парсинг игроков (Количество потоков уменьшено до 3, чтобы не получить бан по IP)
     final_players = []
-    with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+    print(f"Начинается парсинг {len(unique_player_map)} игроков. Это может занять некоторое время...")
+    
+    with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
         futures = {executor.submit(fetch_player_data, pid, unique_player_map[pid], custom_player_data.get(pid, {})): pid for pid in unique_player_map}
         for f in concurrent.futures.as_completed(futures):
             p, r = f.result()
@@ -130,13 +156,16 @@ def main():
     with open('Players.csv', 'w', newline='', encoding='utf-8-sig') as f:
         writer = csv.DictWriter(f, fieldnames=['player_id', 'nickname', 'country', 'is_banned', 'points', 'photo', 'social_yt', 'social_tiwtch', 'info', 'global_rank'], extrasaction='ignore')
         writer.writeheader(); writer.writerows(final_players)
+        
     with open('Levels.csv', 'w', newline='', encoding='utf-8-sig') as f:
         writer = csv.DictWriter(f, fieldnames=['level_id', 'name', 'publisher_id', 'builder', 'verifier_id', 'video_url', 'thumbnail', 'info', 'points'], extrasaction='ignore')
         writer.writeheader(); writer.writerows(all_levels_dict.values())
+        
     with open('Records.csv', 'w', newline='', encoding='utf-8-sig') as f:
         writer = csv.DictWriter(f, fieldnames=['player_id', 'level_id', 'progress', 'video_url'], extrasaction='ignore')
         writer.writeheader(); writer.writerows(all_records)
-    print("--- УСПЕШНО ---")
+        
+    print("--- УСПЕШНО ЗАВЕРШЕНО ---")
 
 if __name__ == "__main__":
     main()
