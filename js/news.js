@@ -1,7 +1,7 @@
 const MY_NEWS_DATABASE = [
     {
         id: "news-3",
-        date: "14.07.2026",
+        date: "24.07.2026",
         title: "Добро пожаловать на H&CR!",
         category: "САЙТ",
         image: "images/news/news4.png",
@@ -25,9 +25,9 @@ const MY_NEWS_DATABASE = [
         image: "images/news/news2.png",
         featured: false,
         text: `
-            Это случилось! После 40 000 попыток и 3 месяцев стримов, <a class="text-orange-500 inline-block transition-transform duration-300 hover:scale-110" href="player?id=51613">
+            Это случилось! После 40 000 попыток и 3 месяцев стримов, <a class="text-orange-500 inline-block transition-transform duration-300 hover:scale-110" href="player?id=13502">
     wPopoff
-</a> наконец-то смог пройти новый топ-1 демон <a class="text-orange-500 inline-block transition-transform duration-300 hover:scale-110" href="level?id=127323087">Society</a>. Уровень официально занимает первую строчку листа на поинтеркрейте, сдвинув с трона <a class="text-orange-500 inline-block transition-transform duration-300 hover:scale-110" href="level?id=119544028">Thinking Space II</a>.
+</a> наконец-то смог пройти новый топ-1 демон <a class="text-orange-500 inline-block transition-transform duration-300 hover:scale-110" href="level?id=3393">Society</a>. Уровень официально занимает первую строчку листа на поинтеркрейте, сдвинув с трона <a class="text-orange-500 inline-block transition-transform duration-300 hover:scale-110" href="level?id=3226">Thinking Space II</a>.
 
             Разработчики уже подтвердили, что геймплей получился максимально сбалансированным, несмотря на безумную сложность таймингов. Видео верификации уже доступно на официальном канале.
         `
