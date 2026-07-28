@@ -157,9 +157,24 @@ def main():
         writer = csv.DictWriter(f, fieldnames=['player_id', 'nickname', 'country', 'is_banned', 'points', 'photo', 'social_yt', 'social_tiwtch', 'info', 'global_rank'], extrasaction='ignore')
         writer.writeheader(); writer.writerows(final_players)
         
+    # --- СОРТИРОВКА И СОХРАНЕНИЕ УРОВНЕЙ ---
+    final_levels = list(all_levels_dict.values())
+    
+    # Безопасная функция для сортировки: вытаскиваем очки и превращаем в число
+    def get_level_points(lvl):
+        try:
+            return float(lvl.get('points', 0))
+        except (ValueError, TypeError):
+            return 0.0
+            
+    # Сортируем уровни от самых сложных (много очков) к более простым (по убыванию)
+    final_levels.sort(key=get_level_points, reverse=True)
+    
     with open('Levels.csv', 'w', newline='', encoding='utf-8-sig') as f:
         writer = csv.DictWriter(f, fieldnames=['level_id', 'name', 'publisher_id', 'builder', 'verifier_id', 'video_url', 'thumbnail', 'info', 'points'], extrasaction='ignore')
-        writer.writeheader(); writer.writerows(all_levels_dict.values())
+        writer.writeheader()
+        # Записываем уже отсортированный список, а не просто .values()!
+        writer.writerows(final_levels)
         
     with open('Records.csv', 'w', newline='', encoding='utf-8-sig') as f:
         writer = csv.DictWriter(f, fieldnames=['player_id', 'level_id', 'progress', 'video_url'], extrasaction='ignore')
